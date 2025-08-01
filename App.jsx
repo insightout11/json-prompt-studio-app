@@ -344,20 +344,23 @@ const App = () => {
   // PHASE 3: Test header components
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-cinema-black transition-colors duration-300">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 lg:px-4 py-3 lg:py-6">
         {/* Header with logo and theme toggle */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-6">
+        <div className="flex items-center justify-between mb-4 lg:mb-6">
+          <div className="flex items-center space-x-3 lg:space-x-6">
             <Logo size="small" className="hidden sm:block" />
-            <Logo size="small" width={150} height={60} className="sm:hidden" />
+            <Logo size="small" width={120} height={48} className="sm:hidden" />
           </div>
-          <div className="flex items-center space-x-4">
-            <ProjectSelector />
+          <div className="flex items-center space-x-2 lg:space-x-4">
+            {/* Mobile: Hide project selector on small screens */}
+            <div className="hidden sm:block lg:block">
+              <ProjectSelector />
+            </div>
             <ProBadge />
             <UpgradeButton variant="compact" />
             
-            {/* Development Controls */}
-            <div className="flex items-center space-x-2 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
+            {/* Development Controls - Hide on mobile */}
+            <div className="hidden lg:flex items-center space-x-2 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
               <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">DEV:</span>
               <button
                 onClick={() => {
@@ -421,9 +424,9 @@ const App = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
           {/* Left Panel - Form with Compact Scene Builder */}
-          <div className="space-y-6">
+          <div className="space-y-4 lg:space-y-6">
             {/* Ultra-Compact Scene Builder */}
             <SceneBuilderChecklist 
               compact={true}
@@ -447,12 +450,12 @@ const App = () => {
               }}
             />
             
-            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
-              <div className="mb-6">
-                <div className="mb-4">
+            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+              <div className="mb-4 lg:mb-6">
+                <div className="mb-3 lg:mb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-800 dark:text-cinema-text">
+                      <h2 className="text-lg lg:text-xl font-semibold text-gray-800 dark:text-cinema-text">
                         Configure Your Prompt
                       </h2>
                       {isAdvancedMode && (
@@ -615,7 +618,7 @@ const App = () => {
           
           {/* Right Panel - JSON Preview & Management */}
           <FullScreenToggle isFullScreen={isFullScreen} onToggle={toggleFullScreen}>
-            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-6 space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
             {/* JSON Output Section */}
             <div className="json-output-section">
               {/* Success Notification */}
@@ -634,8 +637,8 @@ const App = () => {
               
               {/* Compact JSON Output Header */}
               <div className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
-                <div className="flex items-center space-x-4">
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-cinema-text">
+                <div className="flex items-center space-x-2 lg:space-x-4">
+                  <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
                     JSON Output
                   </h2>
                   <div className="flex items-center space-x-1">

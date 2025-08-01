@@ -78,14 +78,14 @@ const InstantUpgradeModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 lg:p-4">
+      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] lg:max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className={`bg-gradient-to-r ${currentPlan.color} text-white p-6 rounded-t-lg`}>
+        <div className={`bg-gradient-to-r ${currentPlan.color} text-white p-4 lg:p-6 rounded-t-lg`}>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-2">
+              <h2 className="text-xl lg:text-2xl font-bold mb-2">
                 {trigger === 'limit_reached' 
                   ? "You've hit your limit!" 
                   : trigger === 'feature_locked'

@@ -126,7 +126,7 @@ const FieldRenderer = ({ field }) => {
   const renderInput = () => {
     if (!isEnabled) return null;
 
-    const baseClasses = "w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300";
+    const baseClasses = "w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-base lg:text-sm";
 
     switch (field.type) {
       case 'textarea':
@@ -272,18 +272,18 @@ const FieldRenderer = ({ field }) => {
   };
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center space-x-3 mb-2">
+    <div className="mb-3 lg:mb-4">
+      <div className="flex items-center space-x-3 mb-2 py-1">
         <input
           type="checkbox"
           id={field.key}
           checked={isEnabled}
           onChange={handleToggle}
-          className="h-4 w-4 text-blue-600 dark:text-cinema-teal focus:ring-blue-500 dark:focus:ring-cinema-teal border-gray-300 dark:border-cinema-border rounded bg-white dark:bg-cinema-card transition-colors duration-300"
+          className="h-5 w-5 lg:h-4 lg:w-4 text-blue-600 dark:text-cinema-teal focus:ring-blue-500 dark:focus:ring-cinema-teal border-gray-300 dark:border-cinema-border rounded bg-white dark:bg-cinema-card transition-colors duration-300"
         />
         <label 
           htmlFor={field.key}
-          className="text-sm font-medium text-gray-700 dark:text-cinema-text cursor-pointer transition-colors duration-300 flex items-center space-x-2"
+          className="text-sm lg:text-sm font-medium text-gray-700 dark:text-cinema-text cursor-pointer transition-colors duration-300 flex items-center space-x-2 py-2 lg:py-0"
         >
           <span>{field.label}</span>
           {field.dependency && (
