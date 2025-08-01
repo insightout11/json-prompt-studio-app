@@ -661,7 +661,7 @@ const App = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={copyToClipboard}
-                    className={`px-3 py-1 text-xs rounded transition-all duration-300 ${
+                    className={`px-3 py-2 lg:py-1 text-xs rounded transition-all duration-300 min-h-[36px] lg:min-h-0 flex items-center ${
                       copySuccess 
                         ? 'bg-green-500 text-white' 
                         : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'

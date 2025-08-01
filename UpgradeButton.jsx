@@ -43,7 +43,7 @@ const UpgradeButton = ({
       <>
         <button
           onClick={() => setShowUpgradeModal(true)}
-          className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm flex items-center space-x-2 ${className}`}
+          className={`px-4 py-3 lg:py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm flex items-center space-x-2 min-h-[44px] lg:min-h-0 ${className}`}
         >
           <span>✨</span>
           <span>
@@ -93,7 +93,7 @@ const UpgradeButton = ({
           </div>
           <button
             onClick={() => setShowUpgradeModal(true)}
-            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm"
+            className="px-4 py-3 lg:py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm min-h-[44px] lg:min-h-0"
           >
             Upgrade to Pro
           </button>
@@ -113,7 +113,7 @@ const UpgradeButton = ({
       <>
         <button
           onClick={() => setShowUpgradeModal(true)}
-          className={`px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm flex items-center space-x-2 ${className}`}
+          className={`px-4 py-3 lg:py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 text-sm flex items-center space-x-2 min-h-[44px] lg:min-h-0 ${className}`}
         >
           <span>✨</span>
           <span>Upgrade to Pro</span>
