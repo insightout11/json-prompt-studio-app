@@ -334,7 +334,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
           {/* Template Grid */}
           <div className="p-4 overflow-y-auto max-h-[60vh]">
             {categorizedTemplates.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-3">
                 {categorizedTemplates.map((template, index) => {
                   // Handle both template objects and template key strings
                   const templateKey = template.id || Object.keys(category.templates).find(key => category.templates[key] === template);
@@ -474,7 +474,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                        className="px-3 py-3 lg:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                       >
                         Load
                       </button>
@@ -484,13 +484,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                        className="px-3 py-3 lg:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                       >
                         Template
                       </button>
                       <button
                         onClick={() => handleAdvancedCreate(categoryKey)}
-                        className="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors"
+                        className="px-3 py-3 lg:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                       >
                         Create
                       </button>
@@ -560,7 +560,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       (categoryKey === 'style' && savedStyles.length === 0) ||
                       (categoryKey === 'audio' && savedAudio.length === 0)
                     }
-                    className="flex-1 px-2 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                    className="flex-1 px-2 py-3 lg:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                   >
                     Load
                   </button>
@@ -570,13 +570,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       setShowTemplateModal(true);
                     }}
                     disabled={Object.keys(category.templates).length === 0}
-                    className="flex-1 px-2 py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                    className="flex-1 px-2 py-3 lg:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                   >
                     Template
                   </button>
                   <button
                     onClick={() => handleCreate(categoryKey)}
-                    className="flex-1 px-2 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors"
+                    className="flex-1 px-2 py-3 lg:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
                   >
                     Create
                   </button>

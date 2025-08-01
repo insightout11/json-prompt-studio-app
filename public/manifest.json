@@ -1,5 +1,11 @@
 {
- "name": "App",
+ "name": "JSON Prompt Studio",
+ "short_name": "Prompt Studio",
+ "description": "Professional AI video prompt generator for creating structured JSON prompts",
+ "start_url": "/",
+ "display": "browser",
+ "background_color": "#ffffff",
+ "theme_color": "#667eea",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",

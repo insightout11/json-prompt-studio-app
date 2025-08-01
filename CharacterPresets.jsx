@@ -96,13 +96,13 @@ const CharacterPresets = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search presets by name, description, or tags..."
-            className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-sm"
+            className="w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-base lg:text-sm"
           />
         </div>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-sm min-w-[180px]"
+          className="w-full sm:w-auto px-3 py-3 lg:py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-base lg:text-sm lg:min-w-[180px]"
         >
           {Object.entries(categories).map(([key, label]) => (
             <option key={key} value={key}>{label}</option>
@@ -116,11 +116,11 @@ const CharacterPresets = () => {
       </div>
 
       {/* Preset Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-3 max-h-96 overflow-y-auto">
         {filteredPresets.map(([presetKey, preset]) => (
           <div
             key={presetKey}
-            className="relative group bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg p-3 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md transition-all duration-300 cursor-pointer"
+            className="relative group bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg p-4 lg:p-3 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md transition-all duration-300 cursor-pointer"
             onMouseEnter={() => setPreviewPreset(preset)}
             onMouseLeave={() => setPreviewPreset(null)}
           >
@@ -157,7 +157,7 @@ const CharacterPresets = () => {
             
             <button
               onClick={() => handleApplyPreset(presetKey)}
-              className="w-full px-3 py-1.5 text-xs font-medium bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 rounded-md transition-all duration-300"
+              className="w-full px-3 py-3 lg:py-1.5 text-sm lg:text-xs font-medium bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 rounded-md transition-all duration-300 min-h-[44px] lg:min-h-0 flex items-center justify-center"
             >
               Apply Character
             </button>
