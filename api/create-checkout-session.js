@@ -37,8 +37,7 @@ export default async function handler(req, res) {
       // Allow promotion codes
       allow_promotion_codes: true,
       
-      // Collect customer information
-      customer_creation: 'always',
+      // Collect customer information for subscriptions
       billing_address_collection: 'auto',
     };
 
