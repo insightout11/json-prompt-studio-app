@@ -29,11 +29,6 @@ export default async function handler(req, res) {
       success_url: `https://jsonpromptstudio.com/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `https://jsonpromptstudio.com/cancel.html`,
       
-      // Enable automatic tax calculation if configured
-      automatic_tax: {
-        enabled: true,
-      },
-      
       // Allow promotion codes
       allow_promotion_codes: true,
       
