@@ -767,6 +767,35 @@ const App = () => {
         )}
 
       </div>
+      
+      {/* Footer */}
+      <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex justify-center space-x-6 mb-4">
+          <a 
+            href="/privacy-policy.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-purple-500 transition-colors"
+          >
+            Privacy Policy
+          </a>
+          <a 
+            href="/terms-of-service.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:text-purple-500 transition-colors"
+          >
+            Terms of Service
+          </a>
+          <a 
+            href="mailto:insightout11@gmail.com"
+            className="hover:text-purple-500 transition-colors"
+          >
+            Contact
+          </a>
+        </div>
+        <p>&copy; 2025 JSON Prompt Studio. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
