@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .success {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">🎉</div>
+        <h1>Server Connection Test</h1>
+        <p>If you can see this page, the development server is working correctly!</p>
+        
+        <h3>✅ What's Working:</h3>
+        <ul style="text-align: left;">
+            <li>✓ Server is running</li>
+            <li>✓ HTML is loading</li>
+            <li>✓ CSS styles are applied</li>
+            <li>✓ Network connection is active</li>
+        </ul>
+        
+        <button onclick="testJS()">Test JavaScript</button>
+        <button onclick="window.location.reload()">Refresh Page</button>
+        
+        <div id="js-test" style="margin-top: 20px;"></div>
+        
+        <p style="margin-top: 30px;">
+            <strong>Next Step:</strong> If this works, we can proceed to fix the React app!
+        </p>
+    </div>
+    
+    <script>
+        function testJS() {
+            document.getElementById('js-test').innerHTML = 
+                '<div style="background: rgba(0,255,0,0.2); padding: 15px; border-radius: 5px; margin-top: 10px;">' +
+                '✅ JavaScript is working correctly!' +
+                '</div>';
+        }
+        
+        // Auto-test on load
+        setTimeout(() => {
+            console.log('Page loaded successfully at:', new Date().toLocaleTimeString());
+        }, 1000);
+    </script>
+</body>
+</html>

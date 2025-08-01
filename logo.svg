@@ -1,0 +1,71 @@
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Neon glow filter -->
+    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Inner glow filter -->
+    <filter id="inner-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1" result="innerBlur"/>
+      <feMerge> 
+        <feMergeNode in="innerBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Gradient for neon effect -->
+    <linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#00bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0080ff;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Background gradient -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="200" fill="url(#bg-gradient)"/>
+  
+  <!-- JSON text with neon effect -->
+  <text x="200" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#neon-glow)">
+    JSON
+  </text>
+  
+  <!-- PROMPT STUDIO text with neon effect -->
+  <text x="200" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#neon-glow)">
+    PROMPT STUDIO
+  </text>
+  
+  <!-- Curly brace with neon effect -->
+  <text x="200" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#neon-glow)">
+    {
+  </text>
+  
+  <!-- Additional inner glow for depth -->
+  <text x="200" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#inner-glow)" opacity="0.7">
+    JSON
+  </text>
+  
+  <text x="200" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#inner-glow)" opacity="0.7">
+    PROMPT STUDIO
+  </text>
+  
+  <text x="200" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" 
+        text-anchor="middle" fill="url(#neon-gradient)" filter="url(#inner-glow)" opacity="0.7">
+    {
+  </text>
+</svg> 
