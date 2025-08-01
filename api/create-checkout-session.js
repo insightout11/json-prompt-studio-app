@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     // Add subscription data with customizations
     sessionConfig.subscription_data = {
       metadata: {
-        plan: lookup_key.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
+        plan: lookup_key, // Use the actual lookup_key (e.g., 'team_monthly', 'pro_yearly')
         source: 'json_prompt_studio'
       }
     };
