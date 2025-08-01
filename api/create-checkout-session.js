@@ -26,8 +26,8 @@ export default async function handler(req, res) {
         quantity: 1,
         price: prices.data[0].id
       }],
-      success_url: `${process.env.VITE_APP_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.VITE_APP_URL}/cancel.html`,
+      success_url: `https://jsonpromptstudio.com/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://jsonpromptstudio.com/cancel.html`,
       
       // Enable automatic tax calculation if configured
       automatic_tax: {

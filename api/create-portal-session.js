@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     // Create portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: checkoutSession.customer,
-      return_url: process.env.VITE_APP_URL,
+      return_url: 'https://jsonpromptstudio.com',
     });
 
     res.json({ url: portalSession.url });
