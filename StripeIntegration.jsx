@@ -33,21 +33,30 @@ const StripeIntegration = ({
     setError(null);
 
     try {
-      // In a real implementation, this would call your backend
-      const response = await createCheckoutSession({
-        priceId: currentPriceId,
-        mode: 'subscription',
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: window.location.href,
-        billingCycle,
-        customerEmail: null // Could be pre-filled if user is logged in
+      // Use lookup_key to create checkout session
+      const lookupKey = `${plan}_${billingCycle}`; // e.g., "pro_monthly"
+      
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lookup_key: lookupKey
+        })
       });
 
-      if (response.url) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || 'Failed to create checkout session');
+      }
+
+      if (data.url) {
         // Redirect to Stripe Checkout
-        window.location.href = response.url;
+        window.location.href = data.url;
       } else {
-        throw new Error('Failed to create checkout session');
+        throw new Error('No checkout URL received');
       }
     } catch (err) {
       setError(err.message || 'Payment failed. Please try again.');
@@ -57,30 +66,6 @@ const StripeIntegration = ({
     }
   };
 
-  // Mock function - replace with actual API call to your backend
-  const createCheckoutSession = async (checkoutData) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock response - in reality, this would call your backend endpoint
-    // POST /api/create-checkout-session with checkoutData
-    
-    // For development/demo, show success without actual payment
-    if (import.meta?.env?.DEV) {
-      // Simulate successful upgrade in development
-      onSuccess && onSuccess({
-        plan: 'pro',
-        billingCycle,
-        subscriptionId: 'sub_demo_' + Date.now(),
-        customerId: 'cus_demo_' + Date.now()
-      });
-      return { url: null }; // Don't redirect in demo mode
-    }
-    
-    return {
-      url: `https://checkout.stripe.com/c/pay/cs_test_example#fidkdWxOYHwnPyd1blpxYHZxWjA0VGlqVktgT2FnTXxIVTJsVjF8akp2SnVQNk1BTDVhSjEwZGp3REg0UDJ1Y2NsR0h2Y21wdFhQdFQ1Pz0zOWN0MltCXXR3aVNzPz1ha0tqPz0%3D`
-    };
-  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
