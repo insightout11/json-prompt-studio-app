@@ -192,7 +192,7 @@ const TemplateSelector = () => {
       {/* Template Trigger Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-2 h-10 shadow-lg hover:shadow-xl"
+        className="w-full md:w-auto px-2 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center md:justify-start space-x-2 h-10 shadow-lg hover:shadow-xl"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5M3 7h18M3 17h18" />

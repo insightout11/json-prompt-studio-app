@@ -143,7 +143,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
             Upgrade for unlimited access to these features:
           </h4>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {proFeatures.map((feature) => (
               <div 
                 key={feature.id} 
@@ -215,7 +215,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
         </div>
         
         {/* Feature Selection Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
           {proFeatures.map((feature) => {
             const isActive = activeFeature === feature.id;
             const isAvailable = canUseAI || usageStats.tier === 'pro' || usageStats.tier === 'team';
@@ -246,8 +246,8 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
                 )}
                 
                 <div className="text-center">
-                  <div className="text-lg mb-1">{feature.icon}</div>
-                  <h4 className="font-medium text-gray-800 dark:text-cinema-text text-xs leading-tight">
+                  <div className="text-base md:text-lg mb-1">{feature.icon}</div>
+                  <h4 className="font-medium text-gray-800 dark:text-cinema-text text-xs md:text-xs leading-tight">
                     {feature.name}
                   </h4>
                   

@@ -264,7 +264,7 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
   return (
     <div className={`bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-cinema-border ${className}`}>
       <div className="p-4">
-        <div className="flex items-start space-x-3">
+        <div className="flex flex-col md:flex-row md:items-start space-y-3 md:space-y-0 md:space-x-3">
           {/* Input area - changes based on mode */}
           <div className="flex-1">
             {inputMode === 'image-to-json' ? (
@@ -347,8 +347,8 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
             )}
           </div>
 
-          {/* Mode dropdown */}
-          <div className="flex-shrink-0">
+          {/* Mode dropdown and Convert button - stack on mobile */}
+          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 md:flex-shrink-0">
             <select
               value={inputMode}
               onChange={(e) => setInputMode(e.target.value)}
@@ -361,33 +361,32 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Convert button */}
-          <button
-            onClick={handleConvert}
-            disabled={isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center space-x-2 flex-shrink-0 ${
-              isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)
-                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg'
-            }`}
-          >
-            {isConverting ? (
-              <>
-                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Converting...</span>
-              </>
-            ) : (
-              <>
-                <span>{currentMode?.icon}</span>
-                <span>Convert</span>
-              </>
-            )}
-          </button>
+            <button
+              onClick={handleConvert}
+              disabled={isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${
+                isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)
+                  ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg'
+              }`}
+            >
+              {isConverting ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Converting...</span>
+                </>
+              ) : (
+                <>
+                  <span>{currentMode?.icon}</span>
+                  <span>Convert</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Error display */}

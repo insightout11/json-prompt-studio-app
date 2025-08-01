@@ -346,18 +346,18 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-cinema-black transition-colors duration-300">
       <div className="container mx-auto px-4 lg:px-4 py-3 lg:py-6">
         {/* Header with logo and theme toggle */}
-        <div className="flex items-center justify-between mb-4 lg:mb-6">
-          <div className="flex items-center space-x-3 lg:space-x-6">
+        <div className="flex items-center justify-between mb-2 md:mb-4 lg:mb-6 py-1 md:py-2">
+          <div className="flex items-center space-x-2 md:space-x-3 lg:space-x-6">
             <Logo size="small" className="hidden sm:block" />
-            <Logo size="small" width={120} height={48} className="sm:hidden" />
+            <Logo size="small" width={100} height={40} className="sm:hidden" />
           </div>
-          <div className="flex items-center space-x-2 lg:space-x-4">
+          <div className="flex items-center space-x-1 md:space-x-2 lg:space-x-4">
             {/* Mobile: Hide project selector on small screens */}
             <div className="hidden sm:block lg:block">
               <ProjectSelector />
             </div>
             <ProBadge />
-            <UpgradeButton variant="compact" />
+            <UpgradeButton variant="compact" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2" />
             
             {/* Development Controls - Hide on mobile */}
             <div className="hidden lg:flex items-center space-x-2 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
@@ -480,25 +480,25 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-              {/* Single horizontal row layout with all buttons */}
-              <div className="flex justify-center space-x-2 flex-wrap">
+              {/* Responsive button layout - stacks on mobile, rows on desktop */}
+              <div className="flex flex-col md:flex-row md:justify-center space-y-2 md:space-y-0 md:space-x-2 flex-wrap md:gap-y-2">
                 <LibrarySystem />
                 <TemplateSelector />
                 
                 {/* Viral Video Generator Button */}
                 <button
                   onClick={() => setShowViralGenerator(true)}
-                  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-2 h-10 shadow-lg hover:shadow-xl"
+                  className="w-full md:w-auto px-2 md:px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center md:justify-start space-x-2 h-10 shadow-lg hover:shadow-xl"
                 >
                   <span className="text-base">🎬</span>
                   <span>Viral Generator</span>
                 </button>
                 
                 {/* Enhanced Randomize Button with Dropdown */}
-                <div className="relative" ref={randomizeDropdownRef}>
+                <div className="relative w-full md:w-auto" ref={randomizeDropdownRef}>
                   <button
                     onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                    className="px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 dark:from-purple-600 dark:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-800 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-2 h-10 shadow-lg hover:shadow-xl"
+                    className="w-full md:w-auto px-2 md:px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 dark:from-purple-600 dark:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-800 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center md:justify-start space-x-2 h-10 shadow-lg hover:shadow-xl"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -658,10 +658,10 @@ const App = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2">
                   <button
                     onClick={copyToClipboard}
-                    className={`px-3 py-2 lg:py-1 text-xs rounded transition-all duration-300 min-h-[36px] lg:min-h-0 flex items-center ${
+                    className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center ${
                       copySuccess 
                         ? 'bg-green-500 text-white' 
                         : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
@@ -672,7 +672,7 @@ const App = () => {
                   
                   <button
                     onClick={clearAll}
-                    className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs"
+                    className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center"
                   >
                     Clear All
                   </button>
@@ -680,7 +680,7 @@ const App = () => {
               </div>
               
               {/* JSON Container - directly below controls */}
-              <div className="bg-gray-900 dark:bg-cinema-black rounded-lg p-4 h-64 overflow-auto border border-gray-700 dark:border-cinema-border relative">
+              <div className="bg-gray-900 dark:bg-cinema-black rounded-lg p-4 h-40 md:h-64 max-h-[50vh] overflow-auto border border-gray-700 dark:border-cinema-border relative">
                 <pre className="text-green-400 dark:text-cinema-teal text-sm font-mono whitespace-pre-wrap">
                   {getJsonOutput() || '{}'}
                   <span className="animate-cursor-blink text-cinema-teal">▊</span>
@@ -772,13 +772,13 @@ const App = () => {
       </div>
       
       {/* Footer */}
-      <footer className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
-        <div className="flex justify-center space-x-6 mb-4">
+      <footer className="mt-8 pt-6 pb-4 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-4">
           <a 
             href="/privacy-policy.html" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-purple-500 transition-colors"
+            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
           >
             Privacy Policy
           </a>
@@ -786,18 +786,18 @@ const App = () => {
             href="/terms-of-service.html" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-purple-500 transition-colors"
+            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
           >
             Terms of Service
           </a>
           <a 
             href="mailto:insightout11@gmail.com"
-            className="hover:text-purple-500 transition-colors"
+            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
           >
             Contact
           </a>
         </div>
-        <p>&copy; 2025 JSON Prompt Studio. All rights reserved.</p>
+        <p className="text-xs sm:text-sm">&copy; 2025 JSON Prompt Studio. All rights reserved.</p>
       </footer>
     </div>
   );

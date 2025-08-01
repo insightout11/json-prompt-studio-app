@@ -463,8 +463,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       </div>
                     </div>
                     
-                    {/* Action Buttons */}
-                    <div className="flex space-x-1">
+                    {/* Action Buttons - Stack vertically on mobile */}
+                    <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-1">
                       <button
                         onClick={() => handleLoad(categoryKey)}
                         disabled={
@@ -474,7 +474,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className="px-3 py-3 lg:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                        className="px-2 py-2 md:px-3 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                       >
                         Load
                       </button>
@@ -484,13 +484,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-3 py-3 lg:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                        className="px-2 py-2 md:px-3 md:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                       >
                         Template
                       </button>
                       <button
                         onClick={() => handleAdvancedCreate(categoryKey)}
-                        className="px-3 py-3 lg:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                        className="px-2 py-2 md:px-3 md:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors flex items-center justify-center"
                       >
                         Create
                       </button>
@@ -549,8 +549,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                   </div>
                 </div>
                 
-                {/* Three Action Buttons */}
-                <div className="flex space-x-2">
+                {/* Three Action Buttons - Stack vertically on mobile */}
+                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
                   <button
                     onClick={() => handleLoad(categoryKey)}
                     disabled={
@@ -560,7 +560,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       (categoryKey === 'style' && savedStyles.length === 0) ||
                       (categoryKey === 'audio' && savedAudio.length === 0)
                     }
-                    className="flex-1 px-2 py-3 lg:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                    className="flex-1 px-2 py-2 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Load
                   </button>
@@ -570,13 +570,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       setShowTemplateModal(true);
                     }}
                     disabled={Object.keys(category.templates).length === 0}
-                    className="flex-1 px-2 py-3 lg:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                    className="flex-1 px-2 py-2 md:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Template
                   </button>
                   <button
                     onClick={() => handleCreate(categoryKey)}
-                    className="flex-1 px-2 py-3 lg:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm lg:text-xs rounded transition-colors min-h-[44px] lg:min-h-0 flex items-center justify-center"
+                    className="flex-1 px-2 py-2 md:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Create
                   </button>
