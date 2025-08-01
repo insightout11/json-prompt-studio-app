@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { lookup_key } = req.body;
+    const { lookup_key, trial_days, billing_cycle_anchor, customer_email } = req.body;
 
     // Get price by lookup key
     const prices = await stripe.prices.list({
@@ -18,8 +18,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Price not found' });
     }
 
-    // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    // Build checkout session configuration
+    const sessionConfig = {
       mode: 'subscription',
       line_items: [{
         quantity: 1,
@@ -27,9 +27,57 @@ export default async function handler(req, res) {
       }],
       success_url: `${process.env.VITE_APP_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.VITE_APP_URL}/cancel.html`,
-    });
+      
+      // Enable automatic tax calculation if configured
+      automatic_tax: {
+        enabled: true,
+      },
+      
+      // Allow promotion codes
+      allow_promotion_codes: true,
+      
+      // Collect customer information
+      customer_creation: 'always',
+      billing_address_collection: 'auto',
+    };
 
-    res.json({ url: session.url });
+    // Add customer email if provided
+    if (customer_email) {
+      sessionConfig.customer_email = customer_email;
+    }
+
+    // Add subscription data with customizations
+    sessionConfig.subscription_data = {
+      metadata: {
+        plan: lookup_key.includes('yearly') ? 'pro_yearly' : 'pro_monthly',
+        source: 'json_prompt_studio'
+      }
+    };
+
+    // Add trial period if specified
+    if (trial_days && trial_days > 0) {
+      sessionConfig.subscription_data.trial_period_days = parseInt(trial_days);
+      
+      // Add trial metadata
+      sessionConfig.subscription_data.metadata.trial_days = trial_days;
+      sessionConfig.subscription_data.metadata.has_trial = 'true';
+    }
+
+    // Add billing cycle anchor if specified
+    if (billing_cycle_anchor) {
+      const anchorDate = new Date(billing_cycle_anchor);
+      if (anchorDate > new Date()) {
+        sessionConfig.subscription_data.billing_cycle_anchor = Math.floor(anchorDate.getTime() / 1000);
+      }
+    }
+
+    // Create Checkout Session
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    res.json({ 
+      url: session.url,
+      session_id: session.id 
+    });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     res.status(400).json({ error: { message: error.message } });

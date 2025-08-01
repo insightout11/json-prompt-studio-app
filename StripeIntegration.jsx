@@ -4,6 +4,9 @@ import { userService } from './userService';
 const StripeIntegration = ({ 
   plan = 'pro', 
   billingCycle = 'monthly', 
+  trialDays = 0,
+  billingCycleAnchor = null,
+  customerEmail = null,
   onSuccess, 
   onError,
   className = "" 
@@ -42,7 +45,10 @@ const StripeIntegration = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          lookup_key: lookupKey
+          lookup_key: lookupKey,
+          trial_days: trialDays,
+          billing_cycle_anchor: billingCycleAnchor,
+          customer_email: customerEmail
         })
       });
 
