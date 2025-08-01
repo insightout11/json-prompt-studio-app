@@ -247,15 +247,15 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div 
         ref={modalRef}
-        className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-7xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border"
+        className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-7xl w-full max-h-[90vh] lg:max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <div className="flex items-center space-x-3">
-            <span className="text-3xl">🔥</span>
+        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          <div className="flex items-center space-x-2 lg:space-x-3">
+            <span className="text-2xl lg:text-3xl">🔥</span>
             <div>
-              <h2 className="text-2xl font-bold">Viral Video Generator</h2>
-              <p className="text-purple-100">Trend-focused templates with real-time JSON updates</p>
+              <h2 className="text-lg lg:text-2xl font-bold">Viral Video Generator</h2>
+              <p className="text-xs lg:text-sm text-purple-100 hidden sm:block">Trend-focused templates with real-time JSON updates</p>
             </div>
           </div>
           <button
@@ -268,9 +268,9 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="flex h-[75vh]">
+        <div className="flex flex-col lg:flex-row h-[75vh]">
           {/* Left Panel - Category & Template Selection */}
-          <div className="w-1/4 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
+          <div className="w-full lg:w-1/4 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto max-h-[25vh] lg:max-h-none">
             {/* Category Selection */}
             <div className="p-4 border-b border-gray-200 dark:border-cinema-border">
               <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-3">🎬 Categories</h3>
@@ -330,7 +330,7 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </div>
 
           {/* Middle Panel - Customization */}
-          <div className="w-1/2 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
+          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto flex-1">
             {selectedTemplate ? (
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -531,7 +531,7 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </div>
 
           {/* Right Panel - Live JSON Preview */}
-          <div className="w-1/4 overflow-y-auto bg-gray-50 dark:bg-cinema-card">
+          <div className="w-full lg:w-1/4 overflow-y-auto bg-gray-50 dark:bg-cinema-card max-h-[25vh] lg:max-h-none">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 dark:text-cinema-text">

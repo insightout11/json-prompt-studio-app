@@ -216,7 +216,7 @@ const WorldBuilder = ({ currentJson, onResult }) => {
             {worldData.locations && worldData.locations.length > 0 && (
               <div>
                 <strong className="text-green-700 dark:text-green-400">Related Locations:</strong>
-                <div className="grid grid-cols-1 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 mt-2">
                   {worldData.locations.map((location, index) => (
                     <div key={index} className="bg-white dark:bg-cinema-card p-3 rounded border border-green-200 dark:border-green-700/30">
                       <div className="flex items-center justify-between mb-2">
@@ -272,7 +272,7 @@ const WorldBuilder = ({ currentJson, onResult }) => {
             )}
           </div>
 
-          <div className="flex space-x-2 mt-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
             <button
               onClick={applyFullWorldToScene}
               className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"

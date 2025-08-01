@@ -278,7 +278,7 @@ const InstantUpgradeModal = ({
 
           {/* Stripe Payment */}
           <StripeIntegration
-            plan="pro"
+            plan={selectedPlan}
             billingCycle={billingCycle}
             onSuccess={handleUpgradeSuccess}
             onError={handleUpgradeError}

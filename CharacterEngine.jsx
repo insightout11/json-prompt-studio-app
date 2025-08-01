@@ -211,7 +211,7 @@ const CharacterEngine = ({ currentJson, onResult }) => {
             )}
           </div>
 
-          <div className="flex space-x-2 mt-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
             <button
               onClick={applyCharacterToScene}
               className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"

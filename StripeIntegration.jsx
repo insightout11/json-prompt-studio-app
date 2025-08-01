@@ -19,13 +19,17 @@ const StripeIntegration = ({
     publishableKey: import.meta?.env?.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...',
     priceIds: {
       pro_monthly: import.meta?.env?.VITE_STRIPE_PRICE_PRO_MONTHLY || 'price_1234567890',
-      pro_yearly: import.meta?.env?.VITE_STRIPE_PRICE_PRO_YEARLY || 'price_0987654321'
+      pro_yearly: import.meta?.env?.VITE_STRIPE_PRICE_PRO_YEARLY || 'price_0987654321',
+      team_monthly: import.meta?.env?.VITE_STRIPE_PRICE_TEAM_MONTHLY || 'price_team_monthly',
+      team_yearly: import.meta?.env?.VITE_STRIPE_PRICE_TEAM_YEARLY || 'price_team_yearly'
     }
   };
 
   const prices = {
     pro_monthly: 15,
-    pro_yearly: 150  // 10 months for the price of 12 if yearly is offered
+    pro_yearly: 150,  // 10 months for the price of 12 if yearly is offered
+    team_monthly: 30,
+    team_yearly: 300
   };
 
   const currentPriceId = STRIPE_CONFIG.priceIds[`${plan}_${billingCycle}`];
