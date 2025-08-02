@@ -88,7 +88,7 @@ class AIApiService {
     
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        console.log(`AI API Request attempt ${attempt}/${this.maxRetries}`);
+        if (import.meta?.env?.DEV) console.log(`AI API Request attempt ${attempt}/${this.maxRetries}`);
         
         const response = await fetch(this.baseURL, requestOptions);
         

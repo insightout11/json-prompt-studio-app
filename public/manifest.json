@@ -3,8 +3,8 @@
  "short_name": "Prompt Studio",
  "description": "Professional AI video prompt generator for creating structured JSON prompts",
  "start_url": "/",
- "display": "browser",
- "background_color": "#ffffff",
+ "display": "standalone",
+ "background_color": "#1f2937",
  "theme_color": "#667eea",
  "icons": [
   {

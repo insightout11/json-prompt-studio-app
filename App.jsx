@@ -72,9 +72,9 @@ const App = () => {
   const { subscription, toggleProStatus, forceProStatus, resetUser, refreshUser } = subscriptionHook;
   const randomizeDropdownRef = useRef(null);
 
-  // Expose developer functions to window for console access
+  // Expose developer functions to window for console access (development only)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && import.meta.env.DEV) {
       window.devTogglePro = () => {
         console.log('🔧 DEV: Console command - toggling Pro status');
         return toggleProStatus();
@@ -334,12 +334,14 @@ const App = () => {
 
   // Show loading screen first
   if (isLoading) {
-    console.log('App: Showing loading screen');
+    if (import.meta.env.DEV) console.log('App: Showing loading screen');
     return <LoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
-  console.log('App: Loading complete, rendering main app');
-  console.log('App: isPro =', isPro);
+  if (import.meta.env.DEV) {
+    console.log('App: Loading complete, rendering main app');
+    console.log('App: isPro =', isPro);
+  }
   
   // PHASE 3: Test header components
   return (
