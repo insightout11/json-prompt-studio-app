@@ -40,9 +40,8 @@ const StripeIntegration = ({
     setError(null);
 
     try {
-      // Temporarily map team plans to pro plans until Stripe is configured
-      const actualPlan = plan === 'team' ? 'pro' : plan;
-      const lookupKey = `${actualPlan}_${billingCycle}`; // e.g., "pro_monthly"
+      // Use the plan directly (only 'pro' plan available)
+      const lookupKey = `${plan}_${billingCycle}`; // e.g., "pro_monthly"
       
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',

@@ -11,7 +11,7 @@ const InstantUpgradeModal = ({
 }) => {
   const { user, isAuthenticated } = useAuth();
   const { upgradeSubscription } = useSubscription();
-  const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [selectedPlan, setSelectedPlan] = useState('pro'); // Only pro plan available
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [expandedPlans, setExpandedPlans] = useState({}); // Track which plan cards are expanded
   
@@ -41,26 +41,13 @@ const InstantUpgradeModal = ({
         'All AI features unlocked',
         'Priority processing',
         'Email support',
-        'Advanced templates'
+        'Advanced templates',
+        'Character Engine & World Builder',
+        'Storyboard Generator',
+        'Viral Video Templates'
       ],
-      highlight: 'Most Popular',
+      highlight: 'Everything You Need',
       color: 'from-purple-500 to-indigo-600'
-    },
-    team: {
-      name: 'Team',
-      monthlyPrice: 30,
-      yearlyPrice: 300,
-      features: [
-        '1,000 AI generations per month',
-        'Team workspace & sharing',
-        'User management (2+ seats)',
-        'Admin controls',
-        'Priority support',
-        'Custom templates',
-        'Usage analytics'
-      ],
-      highlight: 'Best for Teams',
-      color: 'from-blue-500 to-cyan-600'
     }
   };
 
@@ -131,11 +118,11 @@ const InstantUpgradeModal = ({
         </div>
 
         <div className="p-6">
-          {/* Plan Selection */}
+          {/* Pro Plan Details */}
           <div className="mb-6">
             <div className="flex items-center justify-center space-x-1 mb-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-cinema-text">
-                Choose Your Plan
+                Pro Plan Features
               </h3>
             </div>
             
