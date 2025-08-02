@@ -126,36 +126,36 @@ const InstantUpgradeModal = ({
               </h3>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {Object.entries(plans).map(([planKey, plan]) => (
-                <div
-                  key={planKey}
-                  onClick={() => setSelectedPlan(planKey)}
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-300 ${
-                    selectedPlan === planKey
-                      ? `border-purple-500 bg-purple-50 dark:bg-purple-900/20`
-                      : 'border-gray-200 dark:border-cinema-border hover:border-purple-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-lg font-semibold text-gray-800 dark:text-cinema-text">
-                      {plan.name}
-                    </h4>
-                    {plan.highlight && (
-                      <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded text-xs font-medium">
-                        {plan.highlight}
+            <div className="flex justify-center mb-4">
+              <div className="max-w-md w-full">
+                {Object.entries(plans).map(([planKey, plan]) => (
+                  <div
+                    key={planKey}
+                    className="border-2 border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-6 shadow-lg"
+                  >
+                  <div className="text-center mb-4">
+                    <div className="flex items-center justify-center mb-2">
+                      <h4 className="text-xl font-bold text-gray-800 dark:text-cinema-text mr-3">
+                        {plan.name}
+                      </h4>
+                      {plan.highlight && (
+                        <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {plan.highlight}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="text-3xl font-bold text-gray-800 dark:text-cinema-text">
+                      ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                      <span className="text-lg font-normal text-gray-500 ml-1">
+                        /{isYearly ? 'year' : 'month'}
                       </span>
-                    )}
+                    </div>
                   </div>
                   
-                  <div className="text-2xl font-bold text-gray-800 dark:text-cinema-text mb-3">
-                    ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                    <span className="text-sm font-normal text-gray-500">
-                      /{isYearly ? 'year' : 'month'}
-                    </span>
-                  </div>
-                  
-                  <ul className="space-y-1 text-sm text-gray-600 dark:text-cinema-text-muted">
+                  <div className="space-y-2">
+                    <h5 className="text-center font-semibold text-gray-800 dark:text-cinema-text mb-3">What's Included:</h5>
+                    <ul className="space-y-2 text-sm text-gray-700 dark:text-cinema-text">
                     {/* Always show first 3 features */}
                     {plan.features.slice(0, 3).map((feature, index) => (
                       <li key={index} className="flex items-start space-x-2">
@@ -201,8 +201,10 @@ const InstantUpgradeModal = ({
                       </li>
                     )}
                   </ul>
+                  </div>
                 </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* Billing Cycle Toggle */}
