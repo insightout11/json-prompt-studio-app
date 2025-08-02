@@ -133,7 +133,21 @@ const SceneExtender = ({
 
     } catch (err) {
       console.error('Scene extension error:', err);
-      setError(err.message || 'Unknown error occurred during scene extension');
+      
+      // Provide specific error messages for common issues
+      let errorMessage = err.message || 'Unknown error occurred during scene extension';
+      
+      if (err.name === 'TimeoutError' || err.message.includes('timed out') || err.message.includes('aborted')) {
+        errorMessage = 'Scene extension timed out. The AI is taking longer than expected. Please try again or try with a simpler scene.';
+      } else if (err.message.includes('API key')) {
+        errorMessage = 'OpenAI API key required. Please set your API key in settings.';
+      } else if (err.message.includes('rate limit') || err.message.includes('quota')) {
+        errorMessage = 'API rate limit exceeded. Please wait a moment and try again.';
+      } else if (err.message.includes('network') || err.message.includes('connection')) {
+        errorMessage = 'Network connection issue. Please check your internet connection and try again.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsExtending(false);
       setExtendingType(null);

@@ -159,7 +159,8 @@ class AIApiService {
 
       const response = await this.makeRequest(messages, {
         temperature: this.getTemperatureForContinuationType(continuationType),
-        maxTokens: 2500
+        maxTokens: 2500,
+        timeout: 90000 // 90 seconds for complex scene extensions
       });
 
       return {
@@ -201,7 +202,8 @@ class AIApiService {
 
       const response = await this.makeRequest(messages, {
         temperature: 0.7,
-        maxTokens: 1500
+        maxTokens: 1500,
+        timeout: 90000 // 90 seconds for scene extensions
       });
 
       const result = JSON.parse(response.content);
@@ -246,7 +248,8 @@ class AIApiService {
 
       const response = await this.makeRequest(messages, {
         temperature: 0.8,
-        maxTokens: 2500
+        maxTokens: 2500,
+        timeout: 90000 // 90 seconds for generating multiple scene options
       });
 
       const result = JSON.parse(response.content);
