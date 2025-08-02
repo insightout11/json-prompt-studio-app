@@ -268,9 +268,9 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row h-[75vh]">
+        <div className="flex flex-col lg:flex-row h-auto lg:h-[75vh]">
           {/* Left Panel - Category & Template Selection */}
-          <div className="w-full lg:w-1/4 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto max-h-[25vh] lg:max-h-none">
+          <div className="w-full lg:w-1/4 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto max-h-[40vh] lg:max-h-none">
             {/* Category Selection */}
             <div className="p-4 border-b border-gray-200 dark:border-cinema-border">
               <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-3">🎬 Categories</h3>
@@ -308,7 +308,7 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
                   <button
                     key={template.id}
                     onClick={() => handleTemplateSelect(template.id)}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                    className={`w-full text-left p-4 lg:p-3 rounded-lg border-2 transition-all min-h-[60px] lg:min-h-0 ${
                       selectedTemplate === template.id
                         ? 'border-purple-500 bg-purple-50 dark:border-purple-500 dark:bg-purple-900/20'
                         : 'border-gray-200 dark:border-cinema-border hover:border-purple-300 dark:hover:border-purple-500/50 bg-white dark:bg-cinema-card'
@@ -330,9 +330,9 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </div>
 
           {/* Middle Panel - Customization */}
-          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto flex-1">
+          <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto flex-1 min-h-[300px] lg:min-h-0">
             {selectedTemplate ? (
-              <div className="p-6">
+              <div className="p-4 lg:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-cinema-text">
                     ✨ Customize Your Scene
@@ -531,7 +531,7 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
           </div>
 
           {/* Right Panel - Live JSON Preview */}
-          <div className="w-full lg:w-1/4 overflow-y-auto bg-gray-50 dark:bg-cinema-card max-h-[25vh] lg:max-h-none">
+          <div className="w-full lg:w-1/4 overflow-y-auto bg-gray-50 dark:bg-cinema-card max-h-[40vh] lg:max-h-none">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 dark:text-cinema-text">

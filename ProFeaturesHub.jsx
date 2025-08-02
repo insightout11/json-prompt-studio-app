@@ -323,14 +323,14 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
       
       {/* Full-Width Active Feature Component */}
       {activeFeature && (
-        <div className="border-t border-blue-200 dark:border-blue-700/50 pt-6 animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-white dark:bg-cinema-card rounded-lg p-6 border border-blue-200 dark:border-blue-700/30 shadow-lg">
+        <div className="border-t border-blue-200 dark:border-blue-700/50 pt-4 lg:pt-6 animate-in slide-in-from-top-4 duration-300">
+          <div className="bg-white dark:bg-cinema-card rounded-lg p-4 lg:p-6 border border-blue-200 dark:border-blue-700/30 shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">
+              <div className="flex items-center space-x-2 lg:space-x-3">
+                <span className="text-xl lg:text-2xl">
                   {proFeatures.find(f => f.id === activeFeature)?.icon}
                 </span>
-                <h4 className="text-xl font-semibold text-gray-800 dark:text-cinema-text">
+                <h4 className="text-lg lg:text-xl font-semibold text-gray-800 dark:text-cinema-text">
                   {proFeatures.find(f => f.id === activeFeature)?.name}
                 </h4>
               </div>
