@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import aiApiService from './aiApiService';
+import AvatarCreator from './AvatarCreator';
 
 const CharacterEngine = ({ currentJson, onResult }) => {
   const [characterDescription, setCharacterDescription] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCharacter, setGeneratedCharacter] = useState(null);
   const [error, setError] = useState(null);
+  const [showAvatarCreator, setShowAvatarCreator] = useState(false);
+  const [activeTab, setActiveTab] = useState('description'); // 'description' or 'avatar'
 
 
   const generateCharacter = async () => {
@@ -65,16 +68,77 @@ const CharacterEngine = ({ currentJson, onResult }) => {
     }
   };
 
+  const handleAvatarSave = (avatarData, description) => {
+    // Create a character object similar to AI-generated one
+    const avatarCharacter = {
+      name: 'Custom Avatar Character',
+      appearance: description,
+      personality: 'Customizable personality traits',
+      background: 'Custom character background',
+      formFieldMappings: {
+        gender: avatarData.gender,
+        age_range: avatarData.age_range,
+        ethnicity: avatarData.ethnicity,
+        body_type: avatarData.body_type,
+        skin_tone: avatarData.skin_tone,
+        hair_color: avatarData.hair_color,
+        hair_style: avatarData.hair_style,
+        eye_color: avatarData.eye_color,
+        clothing: `${avatarData.clothing_style} attire`,
+        character: description,
+        ...(avatarData.distinguishing_features && { distinguishing_features: avatarData.distinguishing_features }),
+        ...(avatarData.accessories && { accessories: avatarData.accessories })
+      }
+    };
+    
+    setGeneratedCharacter(avatarCharacter);
+    setShowAvatarCreator(false);
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
         <h4 className="text-lg font-semibold text-gray-800 dark:text-cinema-text mb-2">
-          Create Character from Description
+          AI Character Engine
         </h4>
         <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
-          Describe your character idea in a sentence or two, and AI will create a complete character with editable form fields
+          Create characters using AI description or visual avatar builder
         </p>
       </div>
+
+      {/* Character Creation Tabs */}
+      <div className="bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-cinema-border overflow-hidden">
+        <div className="flex border-b border-gray-200 dark:border-cinema-border">
+          <button
+            onClick={() => setActiveTab('description')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'description'
+                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-b-2 border-purple-500'
+                : 'bg-gray-50 dark:bg-cinema-panel text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+            }`}
+          >
+            📝 AI Description
+          </button>
+          <button
+            onClick={() => setActiveTab('avatar')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'avatar'
+                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-b-2 border-purple-500'
+                : 'bg-gray-50 dark:bg-cinema-panel text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+            }`}
+          >
+            🎨 Avatar Creator
+          </button>
+        </div>
+
+        <div className="p-4">
+          {activeTab === 'description' && (
+            <div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
+                  Describe your character idea and AI will create a complete character with detailed form fields
+                </p>
+              </div>
 
       {/* Character Input Form */}
       <div className="space-y-3">
@@ -140,17 +204,46 @@ const CharacterEngine = ({ currentJson, onResult }) => {
         </button>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm text-red-700 dark:text-red-300">{error}</span>
-          </div>
+              {/* Error Display */}
+              {error && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm text-red-700 dark:text-red-300">{error}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'avatar' && (
+            <div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
+                  Create your character visually using the avatar creator tool
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <button
+                  onClick={() => setShowAvatarCreator(true)}
+                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-lg text-sm font-medium transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <span>🎨</span>
+                  <span>Open Avatar Creator</span>
+                </button>
+                
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Customize appearance, style, and features visually
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
 
       {/* Generated Character Display */}
       {generatedCharacter && (
@@ -255,6 +348,13 @@ const CharacterEngine = ({ currentJson, onResult }) => {
           </button>
         </div>
       )}
+
+      {/* Avatar Creator Modal */}
+      <AvatarCreator
+        isOpen={showAvatarCreator}
+        onClose={() => setShowAvatarCreator(false)}
+        onSave={handleAvatarSave}
+      />
     </div>
   );
 };
