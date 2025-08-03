@@ -240,6 +240,126 @@ export const directorStyles = {
     customDetails: "John Carpenter's horror atmosphere with synth scores, practical effects, and the mounting dread of unseen threats"
   },
 
+  "peele-horror": {
+    id: "peele-horror",
+    name: "Jordan Peele Social Horror",
+    description: "Social thriller horror with hidden meaning and atmospheric tension",
+    category: "directors",
+    tags: ["peele", "horror", "social", "tension", "meaning"],
+    useCase: "Horror content, social commentary, psychological tension",
+    fields: {
+      camera_angle: "uncomfortable close-ups and unsettling perspectives",
+      camera_distance: "intimate yet menacing shots",
+      lens_type: "standard for realistic unease",
+      depth_of_field: "selective focus on disturbing details",
+      style: "realistic social horror",
+      color_palette: "natural tones hiding darkness",
+      lighting_type: "deceptively normal lighting with shadows",
+      motion_type: "slow building tension movements"
+    },
+    customDetails: "Jordan Peele's signature social horror with racial commentary, hidden meanings, and escalating psychological tension"
+  },
+
+  "johnson-mystery": {
+    id: "johnson-mystery",
+    name: "Rian Johnson Mystery",
+    description: "Clever whodunit style with sharp dialogue and intricate plotting",
+    category: "directors",
+    tags: ["johnson", "mystery", "clever", "dialogue", "intricate"],
+    useCase: "Mystery content, dialogue-heavy scenes, complex narratives",
+    fields: {
+      camera_angle: "clever framing revealing clues",
+      camera_distance: "intimate dialogue shots",
+      lens_type: "standard for natural mystery feel",
+      depth_of_field: "focus on important details",
+      style: "modern mystery sophistication",
+      color_palette: "rich warm tones with cool accents",
+      lighting_type: "natural motivated lighting",
+      motion_type: "smooth revealing camera moves"
+    },
+    customDetails: "Rian Johnson's intricate mystery style with clever dialogue, genre subversion, and sophisticated plotting"
+  },
+
+  "bong-genre": {
+    id: "bong-genre",
+    name: "Bong Joon-ho Genre Blend",
+    description: "Genre-blending masterpiece with class commentary and tonal shifts",
+    category: "directors",
+    tags: ["bong", "genre-blend", "class", "tonal", "masterpiece"],
+    useCase: "Genre-bending content, social commentary, complex narratives",
+    fields: {
+      camera_angle: "precise architectural framing",
+      camera_distance: "medium shots emphasizing space",
+      lens_type: "standard for realistic precision",
+      depth_of_field: "deep focus on environmental details",
+      style: "genre-blending realism",
+      color_palette: "naturalistic with symbolic accents",
+      lighting_type: "realistic with dramatic moments",
+      motion_type: "deliberate precise movements"
+    },
+    customDetails: "Bong Joon-ho's genre-blending mastery with class consciousness, architectural precision, and seamless tonal shifts"
+  },
+
+  "zhao-naturalistic": {
+    id: "zhao-naturalistic",
+    name: "Chloe Zhao Naturalistic",
+    description: "Contemplative naturalistic style with golden hour beauty",
+    category: "directors",
+    tags: ["zhao", "naturalistic", "contemplative", "golden-hour", "beauty"],
+    useCase: "Contemplative content, natural beauty, character studies",
+    fields: {
+      camera_angle: "natural observational perspectives",
+      camera_distance: "intimate character-focused shots",
+      lens_type: "wide angle for natural landscapes",
+      depth_of_field: "natural depth transitions",
+      style: "naturalistic contemplative realism",
+      color_palette: "golden hour earth tones",
+      lighting_type: "natural golden hour lighting",
+      motion_type: "gentle flowing camera movements"
+    },
+    customDetails: "Chloe Zhao's naturalistic vision with golden hour magic, contemplative pacing, and intimate human stories in vast landscapes"
+  },
+
+  "jenkins-intimate": {
+    id: "jenkins-intimate",
+    name: "Barry Jenkins Intimate",
+    description: "Intimate character studies with warm emotional cinematography",
+    category: "directors",
+    tags: ["jenkins", "intimate", "character", "warm", "emotional"],
+    useCase: "Character studies, emotional content, intimate storytelling",
+    fields: {
+      camera_angle: "intimate close character shots",
+      camera_distance: "close emotional framing",
+      lens_type: "standard for natural intimacy",
+      depth_of_field: "soft focus on emotional moments",
+      style: "intimate emotional realism",
+      color_palette: "warm embracing tones",
+      lighting_type: "soft warm natural lighting",
+      motion_type: "gentle handheld movements"
+    },
+    customDetails: "Barry Jenkins' intimate character work with warm cinematography, emotional depth, and tender human connections"
+  },
+
+  "wang-cultural": {
+    id: "wang-cultural",
+    name: "Lulu Wang Cultural Bridge",
+    description: "Cross-cultural family stories with authentic emotional depth",
+    category: "directors",
+    tags: ["wang", "cultural", "family", "authentic", "emotional"],
+    useCase: "Family content, cultural stories, authentic emotion",
+    fields: {
+      camera_angle: "authentic family perspectives",
+      camera_distance: "intimate family gathering shots",
+      lens_type: "standard for natural family feel",
+      depth_of_field: "natural family focus",
+      style: "authentic cultural storytelling",
+      color_palette: "warm family gathering tones",
+      lighting_type: "natural family lighting",
+      motion_type: "natural family dynamics movement"
+    },
+    customDetails: "Lulu Wang's authentic cultural storytelling with family dynamics, cross-cultural understanding, and genuine emotional depth"
+  },
+
   // AESTHETIC STYLES (12 presets)
   "gothic-dark": {
     id: "gothic-dark",
@@ -685,7 +805,7 @@ export const directorCategories = {
   dialogue: {
     name: "Dialogue Driven", 
     icon: "💬",
-    presets: ["tarantino-dialogue", "spielberg-family"]
+    presets: ["tarantino-dialogue", "spielberg-family", "johnson-mystery"]
   },
   movement: {
     name: "Dynamic Movement",
@@ -695,12 +815,17 @@ export const directorCategories = {
   epic: {
     name: "Epic Scale",
     icon: "🌅",
-    presets: ["nolan-complexity", "villeneuve-epic"]
+    presets: ["nolan-complexity", "villeneuve-epic", "zhao-naturalistic"]
   },
   genre: {
     name: "Genre Masters",
     icon: "🎭",
-    presets: ["wright-cornetto", "carpenter-horror"]
+    presets: ["wright-cornetto", "carpenter-horror", "peele-horror", "bong-genre"]
+  },
+  intimate: {
+    name: "Intimate Character",
+    icon: "💫",
+    presets: ["jenkins-intimate", "wang-cultural"]
   },
   aesthetic: {
     name: "Visual Aesthetics",

@@ -13,6 +13,9 @@ const usePromptStore = create((set, get) => ({
   // Universal custom details for ALL fields
   customDetails: {}, // Stores custom description text for any field (e.g., { hair_color: "custom description" })
   expandedCustomDetails: new Set(), // Tracks which fields have custom detail areas expanded
+  
+  // Aspect ratio for video generation
+  aspectRatio: '16:9',
 
   toggleCategory: (categoryId) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
@@ -172,7 +175,7 @@ const usePromptStore = create((set, get) => ({
   }),
 
   getJsonOutput: () => {
-    const { fieldValues, detailValues, customDetails } = get();
+    const { fieldValues, detailValues, customDetails, aspectRatio } = get();
     const filtered = {};
     
     // Include main field values
@@ -196,8 +199,18 @@ const usePromptStore = create((set, get) => ({
       }
     });
     
+    // Include aspect ratio
+    if (aspectRatio) {
+      filtered.aspect_ratio = aspectRatio;
+    }
+    
     return JSON.stringify(filtered, null, 2);
   },
+
+  // Aspect ratio management
+  setAspectRatio: (ratio) => set(() => ({
+    aspectRatio: ratio
+  })),
 
   // Advanced randomization system with scene coherence logic
   randomizeFields: () => {
@@ -1035,6 +1048,11 @@ const usePromptStore = create((set, get) => ({
     const { savedCharacters } = get();
     const character = savedCharacters.find(c => c.id === characterId);
     
+    if (import.meta && import.meta.env && import.meta.env.DEV) {
+      console.log('Loading character ID:', characterId);
+      console.log('Found character:', character);
+    }
+    
     if (character) {
       const newEnabledFields = new Set();
       const newExpandedCategories = new Set();
@@ -1051,11 +1069,21 @@ const usePromptStore = create((set, get) => ({
         });
       });
 
+      if (import.meta && import.meta.env && import.meta.env.DEV) {
+        console.log('Setting field values:', character.data);
+        console.log('Enabled fields:', newEnabledFields);
+      }
+
       set({
         fieldValues: { ...character.data },
         enabledFields: newEnabledFields,
         expandedCategories: newExpandedCategories
       });
+    } else {
+      if (import.meta && import.meta.env && import.meta.env.DEV) {
+        console.log('Character not found with ID:', characterId);
+        console.log('Available characters:', savedCharacters);
+      }
     }
   },
 

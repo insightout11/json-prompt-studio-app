@@ -40,7 +40,7 @@ const ProjectSelector = () => {
       {/* Project Selector Button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-md transition-all duration-300 h-10 shadow-lg hover:shadow-xl"
+        className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-sm font-medium rounded-md transition-all duration-300 shadow-lg hover:shadow-xl"
       >
         <span className="text-base">📁</span>
         <span>{currentProject ? currentProject.name : 'No Project'}</span>

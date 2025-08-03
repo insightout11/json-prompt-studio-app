@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import SceneOptionPreviewModal from './SceneOptionPreviewModal';
 
 const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, sceneOptions, onApplyOption, onDismissOptions, extensionLoading, extensionError }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [previewOption, setPreviewOption] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const handleGenerate = async () => {
     if (onSceneExtenderClick) {
@@ -11,6 +14,23 @@ const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, s
       } finally {
         setIsGenerating(false);
       }
+    }
+  };
+
+  const handlePreview = (option) => {
+    setPreviewOption(option);
+    setShowPreviewModal(true);
+  };
+
+  const handleQuickApply = (option, index) => {
+    if (onApplyOption) {
+      onApplyOption(option, index);
+    }
+  };
+
+  const handleApplyFromPreview = (option, mergeStrategy) => {
+    if (onApplyOption) {
+      onApplyOption(option, 0, mergeStrategy);
     }
   };
 
@@ -109,8 +129,7 @@ const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, s
             {sceneOptions.map((option, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-cinema-card rounded-lg p-4 border border-gray-200 dark:border-cinema-border hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 cursor-pointer hover:shadow-md"
-                onClick={() => onApplyOption && onApplyOption(option, index)}
+                className="bg-white dark:bg-cinema-card rounded-lg p-4 border border-gray-200 dark:border-cinema-border hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-md"
               >
                 <div className="flex items-start space-x-3">
                   <div className="text-2xl flex-shrink-0">{option.icon}</div>
@@ -118,13 +137,22 @@ const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, s
                     <h5 className="text-sm font-semibold text-gray-800 dark:text-cinema-text mb-1">
                       {option.type}
                     </h5>
-                    <p className="text-xs text-gray-600 dark:text-cinema-text-muted mb-2 line-clamp-3">
+                    <p className="text-xs text-gray-600 dark:text-cinema-text-muted mb-3 line-clamp-3">
                       {option.summary}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                        Click to apply →
-                      </span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handlePreview(option)}
+                        className="flex-1 px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-cinema-border dark:hover:bg-cinema-border/80 text-gray-700 dark:text-cinema-text rounded transition-colors"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={() => handleQuickApply(option, index)}
+                        className="flex-1 px-2 py-1.5 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+                      >
+                        Apply
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -133,7 +161,7 @@ const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, s
           </div>
           
           <div className="mt-4 text-xs text-gray-500 dark:text-cinema-text-muted text-center">
-            Click any option above to apply it to your current scene
+            Preview to see full details or Apply directly to your current scene
           </div>
         </div>
       )}
@@ -152,6 +180,18 @@ const SceneExtenderInterface = ({ currentJson, onResult, onSceneExtenderClick, s
           <li>Click any generated option to apply it to your current scene</li>
         </ul>
       </div>
+
+      {/* Preview Modal */}
+      <SceneOptionPreviewModal
+        option={previewOption}
+        isOpen={showPreviewModal}
+        onClose={() => {
+          setShowPreviewModal(false);
+          setPreviewOption(null);
+        }}
+        onApply={handleApplyFromPreview}
+        currentScene={currentJson}
+      />
     </div>
   );
 };

@@ -75,7 +75,7 @@ const LibrarySystem = () => {
     },
     audio: {
       icon: '🔊',
-      label: 'Audio',
+      label: 'Audios',
       data: savedAudio || [],
       saveHandler: saveAudio,
       loadHandler: loadAudio,

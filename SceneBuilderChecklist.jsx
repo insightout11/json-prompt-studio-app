@@ -23,6 +23,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     loadSetting,
     loadStyle,
     loadAudio,
+    saveCharacter,
     setFieldValue,
     randomizeCharacterFields,
     randomizeLocationBased,
@@ -38,6 +39,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubcategory, setActiveSubcategory] = useState('recent');
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [loadCategory, setLoadCategory] = useState(null);
 
   // Define the 5 main categories for the compact scene builder
   const sceneCategories = {
@@ -240,24 +243,36 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     setActiveSubcategory('recent'); // Reset to recent for next time
   };
   
-  // Handle Load action
+  // Handle Load action - show selection modal
   const handleLoad = (categoryKey) => {
     const categoryMap = {
-      characters: { data: savedCharacters, loader: loadCharacter },
-      actions: { data: savedActions, loader: loadAction },
-      settings: { data: savedSettings, loader: loadSetting },
-      style: { data: savedStyles, loader: loadStyle },
-      audio: { data: savedAudio, loader: loadAudio }
+      characters: { data: savedCharacters, loader: loadCharacter, label: 'Characters' },
+      actions: { data: savedActions, loader: loadAction, label: 'Actions' },
+      settings: { data: savedSettings, loader: loadSetting, label: 'Settings' },
+      style: { data: savedStyles, loader: loadStyle, label: 'Styles' },
+      audio: { data: savedAudio, loader: loadAudio, label: 'Audio' }
     };
 
     const category = categoryMap[categoryKey];
+    
     if (category && category.data && category.data.length > 0) {
-      category.loader(category.data[0].id);
+      setLoadCategory(category);
+      setShowLoadModal(true);
     } else if (categoryKey === 'settings' && savedScenes.length > 0) {
       // Fallback: if no saved settings, try loading the first scene for location
       loadScene(savedScenes[0].id);
     }
   };
+
+  // Handle selection from load modal
+  const handleLoadSelection = (itemId) => {
+    if (loadCategory && loadCategory.loader) {
+      loadCategory.loader(itemId);
+      setShowLoadModal(false);
+      setLoadCategory(null);
+    }
+  };
+
   
   // Handle Create action - expand relevant form fields
   const handleCreate = (categoryKey) => {
@@ -268,6 +283,68 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  // Load Modal Component - Shared between modes
+  const LoadModal = () => {
+    if (!showLoadModal || !loadCategory) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Select {loadCategory.label.slice(0, -1)} to Load
+            </h3>
+            <button
+              onClick={() => {
+                setShowLoadModal(false);
+                setLoadCategory(null);
+              }}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="space-y-2">
+            {loadCategory.data.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleLoadSelection(item.id)}
+                className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {item.name || `${loadCategory.label.slice(0, -1)} ${item.id}`}
+                </div>
+                {item.description && (
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {item.description}
+                  </div>
+                )}
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Created: {new Date(item.timestamp).toLocaleDateString()}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => {
+                setShowLoadModal(false);
+                setLoadCategory(null);
+              }}
+              className="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Enhanced Template Modal Component with Categories
@@ -475,6 +552,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
                         className="px-2 py-2 md:px-3 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                        title={
+                          (categoryKey === 'characters' && savedCharacters.length === 0) ? 
+                          'No saved characters. Create and save characters first using the Library System.' :
+                          `Load saved ${category.label.toLowerCase()}`
+                        }
                       >
                         Load
                       </button>
@@ -504,6 +586,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
         
         {/* Template Selection Modal */}
         <TemplateModal />
+        
+        {/* Load Selection Modal - Shared between compact and standard modes */}
+        <LoadModal />
       </>
     );
   }
@@ -561,6 +646,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       (categoryKey === 'audio' && savedAudio.length === 0)
                     }
                     className="flex-1 px-2 py-2 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                    title={
+                      (categoryKey === 'characters' && savedCharacters.length === 0) ? 
+                      'No saved characters. Create and save characters first using the Library System.' :
+                      `Load saved ${category.label.toLowerCase()}`
+                    }
                   >
                     Load
                   </button>
@@ -589,6 +679,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
       
       {/* Template Selection Modal */}
       <TemplateModal />
+      
+      {/* Load Selection Modal - Shared between compact and standard modes */}
+      <LoadModal />
     </>
   );
 };

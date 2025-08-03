@@ -62,28 +62,30 @@ const WorldBuilder = ({ currentJson, onResult }) => {
   };
 
   const applyLocationToScene = (location) => {
-    const updatedJson = {
-      ...currentJson,
-      setting: location.name,
-      location_description: location.description,
-      atmosphere: location.atmosphere,
-      environmental_details: location.details
-    };
+    // Only update scene/setting related fields, preserve everything else
+    const updatedJson = { ...currentJson };
+    
+    // Only change scene description fields
+    updatedJson.setting = location.name;
+    updatedJson.location_description = location.description;
+    updatedJson.atmosphere = location.atmosphere;
+    updatedJson.environmental_details = location.details;
     
     onResult(updatedJson);
   };
 
   const applyFullWorldToScene = () => {
     if (worldData) {
-      const updatedJson = {
-        ...currentJson,
-        world_name: worldData.name,
-        world_lore: worldData.lore,
-        world_rules: worldData.rules,
-        atmospheric_elements: worldData.atmosphere,
-        environmental_sounds: worldData.sounds,
-        cultural_context: worldData.culture
-      };
+      // Only update world/scene related fields, preserve everything else
+      const updatedJson = { ...currentJson };
+      
+      // Only change world/scene description fields
+      if (worldData.name) updatedJson.world_name = worldData.name;
+      if (worldData.lore) updatedJson.world_lore = worldData.lore;
+      if (worldData.rules) updatedJson.world_rules = worldData.rules;
+      if (worldData.atmosphere) updatedJson.atmospheric_elements = worldData.atmosphere;
+      if (worldData.sounds) updatedJson.environmental_sounds = worldData.sounds;
+      if (worldData.culture) updatedJson.cultural_context = worldData.culture;
       
       onResult(updatedJson);
       setWorldData(null);

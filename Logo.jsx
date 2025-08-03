@@ -20,7 +20,7 @@ const Logo = ({
   const sizeConfig = {
     small: { 
       width: 180, 
-      height: 70, 
+      height: 80, 
       mainFontSize: 28, 
       subFontSize: 10, 
       spacing: { main: 35, sub: 50, bracket: 62 },
@@ -28,7 +28,7 @@ const Logo = ({
     },
     medium: { 
       width: 280, 
-      height: 90, 
+      height: 100, 
       mainFontSize: 36, 
       subFontSize: 12, 
       spacing: { main: 55, sub: 75, bracket: 90 },
@@ -36,7 +36,7 @@ const Logo = ({
     },
     large: { 
       width: 400, 
-      height: 120, 
+      height: 140, 
       mainFontSize: 42, 
       subFontSize: 14, 
       spacing: { main: 70, sub: 95, bracket: 110 },

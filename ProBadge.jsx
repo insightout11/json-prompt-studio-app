@@ -12,7 +12,7 @@ const ProBadge = ({ className = "" }) => {
 
   return (
     <div className={`inline-flex items-center space-x-1 ${className}`}>
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1 shadow-lg">
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-2 rounded-md text-sm font-semibold flex items-center space-x-1 shadow-lg">
         <span className="text-xs">✨</span>
         <span>Pro Active</span>
         {isYearly && (

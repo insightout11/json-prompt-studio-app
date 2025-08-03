@@ -10,11 +10,15 @@ import { audioPresets } from './audioPresetsData';
 
 // Template categorization
 const TEMPLATE_CATEGORIES = {
+  // TEMPLATES (Level-based with 1/2/3 complexity)
   all: getAllTemplateKeys(),
   directors: [
+    // Original level-based director templates
     'wes_anderson', 'christopher_nolan', 'steven_spielberg', 'quentin_tarantino', 
     'hayao_miyazaki', 'zack_snyder', 'david_fincher', 'greta_gerwig', 
-    'guillermo_del_toro', 'stanley_kubrick'
+    'guillermo_del_toro', 'stanley_kubrick',
+    // Director style presets (only actual directors, not aesthetic styles)
+    ...Object.keys(directorStyles).filter(key => directorStyles[key].category === 'directors')
   ],
   genres: [
     'horror', 'cinematic', 'social_media', 'realistic_gritty', 
@@ -30,28 +34,29 @@ const TEMPLATE_CATEGORIES = {
   ],
   experimental: ExperimentalModeEngine.getAllFormats().map(format => format.id),
   
-  // New preset categories
-  characters: Object.keys(characterPresets),
-  scenes: Object.keys(scenePresets), 
-  actions: Object.keys(actionPresets),
-  styles: Object.keys(directorStyles),
-  audio: Object.keys(audioPresets)
+  // PRESETS (Direct field application, no levels)
+  preset_characters: Object.keys(characterPresets),
+  preset_scenes: Object.keys(scenePresets), 
+  preset_actions: Object.keys(actionPresets),
+  preset_styles: Object.keys(directorStyles).filter(key => directorStyles[key].category !== 'directors'),
+  preset_audio: Object.keys(audioPresets)
 };
 
 const TAB_LABELS = {
+  // TEMPLATES
   all: 'All Templates',
   directors: 'Directors',
   genres: 'Genres', 
   trending: 'Trending',
-  animation: '🎨 Animation Styles',
+  animation: '🎨 Animation',
   experimental: '🧪 Experimental',
   
-  // New preset category labels
-  characters: '👤 Characters',
-  scenes: '📍 Scenes', 
-  actions: '🎬 Actions',
-  styles: '🎨 Styles',
-  audio: '🔊 Audio'
+  // PRESETS
+  preset_characters: '👤 Character Presets',
+  preset_scenes: '📍 Scene Presets', 
+  preset_actions: '🎬 Action Presets',
+  preset_styles: '🎨 Styles',
+  preset_audio: '🔊 Audio Presets'
 };
 
 const TemplateSelector = () => {
@@ -61,6 +66,11 @@ const TemplateSelector = () => {
   const [selectedLevel, setSelectedLevel] = useState(2);
   const [preview, setPreview] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+
+  // Helper to check if current tab is a preset category
+  const isPresetCategory = (tabKey) => {
+    return tabKey.startsWith('preset_');
+  };
   
   // Experimental mode controls
   const [absurdityLevel, setAbsurdityLevel] = useState(1);
@@ -70,33 +80,67 @@ const TemplateSelector = () => {
   const handleTemplateSelect = (templateKey) => {
     setSelectedTemplate(templateKey);
     
-    // Check if this is an experimental format
-    if (activeTab === 'experimental') {
-      // Generate experimental preview
-      try {
-        const result = ExperimentalModeEngine.generateExperimentalContent(
-          templateKey,
-          absurdityLevel,
-          randomnessEnabled
-        );
-        setExperimentalPreview(result);
-        setPreview(null);
-      } catch (error) {
-        console.error('Error generating experimental preview:', error);
+    try {
+      // Check if this is an experimental format
+      if (activeTab === 'experimental') {
+        // Generate experimental preview
+        try {
+          const result = ExperimentalModeEngine.generateExperimentalContent(
+            templateKey,
+            absurdityLevel,
+            randomnessEnabled
+          );
+          setExperimentalPreview(result);
+          setPreview(null);
+        } catch (error) {
+          console.error('Error generating experimental preview:', error);
+        }
+      } else if (isPresetCategory(activeTab) || isPresetTemplate(templateKey)) {
+        // Preset preview - show direct field mapping
+        const template = getTemplate(templateKey);
+        if (template && template.fields) {
+          // Calculate field count and affected categories for preset preview
+          const fieldCount = Object.keys(template.fields).length;
+          const categoriesAffected = [...new Set(Object.keys(template.fields).map(field => {
+            // Map common field names to categories
+            if (field.includes('camera') || field.includes('lens') || field.includes('depth')) return 'Camera';
+            if (field.includes('lighting')) return 'Lighting';
+            if (field.includes('color')) return 'Color';
+            if (field.includes('style')) return 'Style';
+            if (field.includes('motion')) return 'Motion';
+            return 'Scene';
+          }))];
+          
+          setPreview({
+            fields: template.fields,
+            name: template.name,
+            description: template.description,
+            fieldCount: fieldCount,
+            categoriesAffected: categoriesAffected
+          });
+        } else {
+          setPreview(null);
+        }
+        setExperimentalPreview(null);
+      } else {
+        // Regular template preview with levels
+        const templatePreview = getTemplatePreview(templateKey, selectedLevel);
+        setPreview(templatePreview);
+        setExperimentalPreview(null);
       }
-    } else {
-      // Regular template preview
-      const templatePreview = getTemplatePreview(templateKey, selectedLevel);
-      setPreview(templatePreview);
+      
+      setShowModal(true);
+    } catch (error) {
+      console.error('Error in handleTemplateSelect:', error);
+      setPreview(null);
       setExperimentalPreview(null);
+      setShowModal(true);
     }
-    
-    setShowModal(true);
   };
 
   const handleLevelChange = (level) => {
     setSelectedLevel(level);
-    if (selectedTemplate) {
+    if (selectedTemplate && !isPresetCategory(activeTab) && !isPresetTemplate(selectedTemplate)) {
       const templatePreview = getTemplatePreview(selectedTemplate, level);
       setPreview(templatePreview);
     }
@@ -112,10 +156,10 @@ const TemplateSelector = () => {
             setFieldValue(key, value);
           }
         });
-      } else if (isPresetTemplate(selectedTemplate)) {
-        // Handle converted presets - apply fields directly
+      } else if (isPresetCategory(activeTab) || isPresetTemplate(selectedTemplate)) {
+        // Handle presets - apply fields directly
         const template = getTemplate(selectedTemplate);
-        if (template.fields) {
+        if (template && template.fields) {
           Object.entries(template.fields).forEach(([field, value]) => {
             setFieldValue(field, value);
           });
@@ -287,12 +331,13 @@ const TemplateSelector = () => {
                         // Regular template rendering
                         const template = allTemplates[templateKey];
                         const isDirectorTemplate = TEMPLATE_CATEGORIES.directors.includes(templateKey);
+                        const isPreset = isPresetTemplate(templateKey);
                         
                         return (
                           <button
                             key={templateKey}
                             onClick={() => handleTemplateSelect(templateKey)}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 group ${
+                            className={`p-4 border-2 rounded-lg transition-all duration-300 group relative ${
                               selectedTemplate === templateKey
                                 ? 'border-indigo-500 bg-indigo-50 dark:border-cinema-teal dark:bg-cinema-teal/10 dark:shadow-glow-teal'
                                 : `border-gray-200 hover:border-gray-300 dark:border-cinema-border dark:hover:border-cinema-teal/50 bg-white dark:bg-cinema-card hover:shadow-md dark:hover:shadow-glow-soft dark:hover:transform dark:hover:translateY(-2px) ${
@@ -300,6 +345,18 @@ const TemplateSelector = () => {
                                   }`
                             }`}
                           >
+                            {/* Type indicator badge */}
+                            {isPreset && (
+                              <div className="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                Style
+                              </div>
+                            )}
+                            {!isPreset && activeTab === 'directors' && (
+                              <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                3 Levels
+                              </div>
+                            )}
+                            
                             <div className="text-center">
                               <div className="text-3xl mb-2 transition-transform duration-300 group-hover:scale-110">{template.icon}</div>
                               <div className="font-medium text-gray-900 dark:text-cinema-text text-sm mb-1 transition-colors duration-300">
@@ -334,7 +391,7 @@ const TemplateSelector = () => {
                       {/* Template Info */}
                       <div>
                         <h4 className="font-semibold text-gray-900 dark:text-cinema-text flex items-center space-x-2">
-                          <span className="text-2xl">{allTemplates[selectedTemplate].icon}</span>
+                          <span className="text-2xl">{allTemplates[selectedTemplate]?.icon || '🎬'}</span>
                           <span>{preview.name}</span>
                         </h4>
                         <p className="text-sm text-gray-600 dark:text-cinema-text-muted mt-1 transition-colors duration-300">
@@ -343,15 +400,19 @@ const TemplateSelector = () => {
                       </div>
 
                       {/* Level Selector - Only for non-preset templates */}
-                      {!isPresetTemplate(selectedTemplate) && (
+                      {!isPresetCategory(activeTab) && !isPresetTemplate(selectedTemplate) && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text mb-2 transition-colors duration-300">
                             Complexity Level
                           </label>
                           <div className="space-y-2">
                             {[1, 2, 3].map((level) => {
-                              const levelData = allTemplates[selectedTemplate].levels[level];
-                              const fieldCount = Object.keys(levelData.fields).length;
+                              const template = allTemplates[selectedTemplate];
+                              if (!template || !template.levels || !template.levels[level]) {
+                                return null;
+                              }
+                              const levelData = template.levels[level];
+                              const fieldCount = Object.keys(levelData.fields || {}).length;
                               
                               return (
                                 <button
@@ -384,17 +445,17 @@ const TemplateSelector = () => {
                       )}
                       
                       {/* Preset Metadata - Only for presets */}
-                      {isPresetTemplate(selectedTemplate) && (
+                      {isPresetTemplate(selectedTemplate) && allTemplates[selectedTemplate] && (
                         <div className="space-y-3">
                           {/* Category & Tags */}
                           <div className="bg-white dark:bg-cinema-panel p-3 rounded-md border border-gray-200 dark:border-cinema-border transition-colors duration-300">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-medium text-gray-700 dark:text-cinema-text">Category:</span>
                               <span className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
-                                {allTemplates[selectedTemplate].category}
+                                {allTemplates[selectedTemplate]?.category || 'Unknown'}
                               </span>
                             </div>
-                            {allTemplates[selectedTemplate].tags && (
+                            {allTemplates[selectedTemplate]?.tags && (
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {allTemplates[selectedTemplate].tags.slice(0, 4).map(tag => (
                                   <span key={tag} className="text-xs bg-gray-100 dark:bg-cinema-border text-gray-600 dark:text-cinema-text-muted px-1.5 py-0.5 rounded">
@@ -406,7 +467,7 @@ const TemplateSelector = () => {
                           </div>
                           
                           {/* Use Case */}
-                          {allTemplates[selectedTemplate].useCase && (
+                          {allTemplates[selectedTemplate]?.useCase && (
                             <div className="bg-white dark:bg-cinema-panel p-3 rounded-md border border-gray-200 dark:border-cinema-border transition-colors duration-300">
                               <div className="text-sm font-medium text-gray-700 dark:text-cinema-text mb-1">Use Case:</div>
                               <div className="text-sm text-gray-600 dark:text-cinema-text-muted">
@@ -416,7 +477,7 @@ const TemplateSelector = () => {
                           )}
                           
                           {/* Custom Details */}
-                          {allTemplates[selectedTemplate].customDetails && (
+                          {allTemplates[selectedTemplate]?.customDetails && (
                             <div className="bg-white dark:bg-cinema-panel p-3 rounded-md border border-gray-200 dark:border-cinema-border transition-colors duration-300">
                               <div className="text-sm font-medium text-gray-700 dark:text-cinema-text mb-1">Details:</div>
                               <div className="text-sm text-gray-600 dark:text-cinema-text-muted">
@@ -431,10 +492,10 @@ const TemplateSelector = () => {
                       <div className="bg-white dark:bg-cinema-panel p-3 rounded-md border border-gray-200 dark:border-cinema-border transition-colors duration-300">
                         <div className="text-sm">
                           <div className="font-medium text-gray-900 dark:text-cinema-text mb-2 transition-colors duration-300">
-                            Will apply {preview.fieldCount} fields across:
+                            Will apply {preview.fieldCount || Object.keys(preview.fields || {}).length} fields across:
                           </div>
                           <div className="text-gray-600 dark:text-cinema-text-muted transition-colors duration-300">
-                            {preview.categoriesAffected.join(', ')}
+                            {preview.categoriesAffected ? preview.categoriesAffected.join(', ') : 'Multiple categories'}
                           </div>
                         </div>
                       </div>
@@ -445,7 +506,7 @@ const TemplateSelector = () => {
                           Fields to be set:
                         </div>
                         <div className="space-y-1 max-h-40 overflow-y-auto">
-                          {Object.entries(preview.fields).map(([key, value]) => (
+                          {Object.entries(preview.fields || {}).map(([key, value]) => (
                             <div key={key} className="text-xs text-gray-600 dark:text-cinema-text-muted transition-colors duration-300">
                               <span className="font-medium">{key}:</span> {value}
                             </div>
@@ -461,7 +522,7 @@ const TemplateSelector = () => {
                       onClick={handleApply}
                       className="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 dark:hover:shadow-glow-teal text-white font-medium rounded-md transition-all duration-300"
                     >
-                      {isPresetTemplate(selectedTemplate) ? 'Apply Preset' : 'Apply Template'}
+                      {(isPresetCategory(activeTab) || isPresetTemplate(selectedTemplate)) ? 'Apply Preset' : 'Apply Template'}
                     </button>
                   </div>
                 </div>

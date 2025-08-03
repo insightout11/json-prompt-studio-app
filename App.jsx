@@ -21,6 +21,7 @@ import UniversalInput from './UniversalInput';
 import aiApiService from './aiApiService';
 import usePromptStore from './store';
 import analytics from './analytics';
+import TutorialOverlay from './TutorialOverlay';
 
 const App = () => {
   const { 
@@ -37,11 +38,19 @@ const App = () => {
     clearAll,
     setFieldValue,
     saveScenePack,
+    saveCharacter,
+    saveAction,
+    saveAudio,
+    saveSetting,
+    saveStyle,
+    saveScene,
     currentProject,
     projects,
     switchProject,
     applySceneWithMergeStrategy,
-    incrementProjectSceneCount
+    incrementProjectSceneCount,
+    aspectRatio,
+    setAspectRatio
   } = usePromptStore();
   const [copySuccess, setCopySuccess] = useState(false);
   const [showRandomizeDropdown, setShowRandomizeDropdown] = useState(false);
@@ -50,7 +59,7 @@ const App = () => {
   const [showViralGenerator, setShowViralGenerator] = useState(false);
   const [showSceneExtender, setShowSceneExtender] = useState(false);
   const [sceneExtenderSuccess, setSceneExtenderSuccess] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState('16:9');
+  // Remove local aspectRatio state - now using store
   const [isFullScreen, toggleFullScreen] = useFullScreen(false);
   
   // Simple scene extension states
@@ -66,6 +75,26 @@ const App = () => {
   
   const subscriptionHook = useSubscription();
   const [devProOverride, setDevProOverride] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveCategory, setSaveCategory] = useState('');
+  const [saveName, setSaveName] = useState('');
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Tutorial action handler
+  const handleTutorialAction = (action, params) => {
+    switch (action) {
+      case 'toggleMode':
+        setIsAdvancedMode(!isAdvancedMode);
+        break;
+      case 'expandCategory':
+        if (params && !expandedCategories[params]) {
+          toggleCategory(params);
+        }
+        break;
+      default:
+        console.log('Unknown tutorial action:', action);
+    }
+  };
   
   // Override isPro with dev flag
   const isPro = devProOverride || subscriptionHook.isPro;
@@ -87,9 +116,28 @@ const App = () => {
         console.log('🔧 DEV: Current status - isPro:', isPro);
         return { isPro, subscription };
       };
-      console.log('🔧 DEV: Console commands available - devTogglePro(), devForcePro(), devStatus()');
+      window.devResetTutorial = () => {
+        console.log('🔧 DEV: Resetting tutorial');
+        localStorage.removeItem('hasSeenTutorial');
+        setShowTutorial(true);
+        return 'Tutorial reset and shown';
+      };
+      window.devShowTutorial = () => {
+        console.log('🔧 DEV: Showing tutorial directly');
+        setShowTutorial(true);
+        return 'Tutorial shown';
+      };
+      console.log('🔧 DEV: Console commands available - devTogglePro(), devForcePro(), devStatus(), devResetTutorial(), devShowTutorial()');
     }
   }, [toggleProStatus, forceProStatus, isPro, subscription]);
+
+  // Check if user should see tutorial
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('hasSeenTutorial');
+    if (!hasSeenTutorial && !isLoading) {
+      setShowTutorial(true);
+    }
+  }, [isLoading]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -358,29 +406,14 @@ const App = () => {
             <div className="hidden sm:block lg:block">
               <ProjectSelector />
             </div>
-            <ProBadge />
-            <UpgradeButton variant="compact" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2" />
+            <div data-tutorial="pro-features">
+              <ProBadge />
+              <UpgradeButton variant="compact" className="px-3 py-2 text-sm" />
+            </div>
             
             {/* Development Controls - Hide on mobile */}
             <div className="hidden lg:flex items-center space-x-2 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
               <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">DEV:</span>
-              <button
-                onClick={() => {
-                  const hasApiKey = aiApiService.hasApiKey();
-                  const currentKey = aiApiService.getApiKey();
-                  
-                  console.log('🔧 DEV: Debug info:');
-                  console.log('🔧 DEV: Current isPro:', isPro);
-                  console.log('🔧 DEV: Has API Key:', hasApiKey);
-                  console.log('🔧 DEV: API Key (first 10 chars):', currentKey ? currentKey.substring(0, 10) + '...' : 'None');
-                  
-                  alert(`Pro Status: ${isPro}\nHas API Key: ${hasApiKey}\nAPI Key: ${currentKey ? 'Set (' + currentKey.substring(0, 10) + '...)' : 'Not Set'}`);
-                }}
-                className="text-xs px-2 py-1 bg-yellow-200 dark:bg-yellow-800/50 hover:bg-yellow-300 dark:hover:bg-yellow-700/50 text-yellow-800 dark:text-yellow-200 rounded transition-colors"
-                title="Debug Pro and API Key Status"
-              >
-                🔍 Debug
-              </button>
               <button
                 onClick={() => {
                   const currentOverride = localStorage.getItem('DEV_PRO_OVERRIDE') === 'true';
@@ -394,31 +427,10 @@ const App = () => {
                   // Also update local state for button display
                   setDevProOverride(newOverride);
                 }}
-                className="text-xs px-2 py-1 bg-green-200 dark:bg-green-800/50 hover:bg-green-300 dark:hover:bg-green-700/50 text-green-800 dark:text-green-200 rounded transition-colors"
-                title="Set global dev Pro override flag"
+                className="text-sm px-3 py-2 bg-green-200 dark:bg-green-800/50 hover:bg-green-300 dark:hover:bg-green-700/50 text-green-800 dark:text-green-200 rounded-md transition-colors"
+                title="Toggle dev Pro override flag"
               >
                 {localStorage.getItem('DEV_PRO_OVERRIDE') === 'true' ? '✅ DEV PRO ON' : '🚫 DEV PRO OFF'}
-              </button>
-              <button
-                onClick={() => {
-                  const testKey = prompt('Enter OpenAI API Key for testing:');
-                  if (testKey && testKey.trim()) {
-                    aiApiService.setApiKey(testKey.trim());
-                    console.log('🔧 DEV: Set API key:', testKey.substring(0, 10) + '...');
-                    alert('API Key set! AI features should now be available.');
-                  }
-                }}
-                className="text-xs px-2 py-1 bg-blue-200 dark:bg-blue-800/50 hover:bg-blue-300 dark:hover:bg-blue-700/50 text-blue-800 dark:text-blue-200 rounded transition-colors"
-                title="Set OpenAI API Key for testing"
-              >
-                🔑 Set API Key
-              </button>
-              <button
-                onClick={resetUser}
-                className="text-xs px-2 py-1 bg-red-200 dark:bg-red-800/50 hover:bg-red-300 dark:hover:bg-red-700/50 text-red-800 dark:text-red-200 rounded transition-colors"
-                title="Reset User Data"
-              >
-                🔄 Reset
               </button>
             </div>
             
@@ -430,10 +442,11 @@ const App = () => {
           {/* Left Panel - Form with Compact Scene Builder */}
           <div className="space-y-4 lg:space-y-6">
             {/* Ultra-Compact Scene Builder */}
-            <SceneBuilderChecklist 
-              compact={true}
-              isAdvancedMode={isAdvancedMode}
-              setIsAdvancedMode={setIsAdvancedMode}
+            <div data-tutorial="scene-builder">
+              <SceneBuilderChecklist 
+                compact={true}
+                isAdvancedMode={isAdvancedMode}
+                setIsAdvancedMode={setIsAdvancedMode}
               onProjectChange={(data) => {
                 if (data && data.type === 'switchToAdvanced') {
                   setIsAdvancedMode(true);
@@ -451,8 +464,9 @@ const App = () => {
                 }
               }}
             />
+            </div>
             
-            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+            <div data-tutorial="form-fields" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
               <div className="mb-4 lg:mb-6">
                 <div className="mb-3 lg:mb-4">
                   <div className="flex items-center justify-between">
@@ -468,7 +482,7 @@ const App = () => {
                     </div>
                     
                     {/* Advanced Mode Toggle */}
-                    <div className="flex items-center space-x-3">
+                    <div data-tutorial="mode-toggle" className="flex items-center space-x-3">
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                         {isAdvancedMode ? '🔧 Advanced Mode' : '📝 Simple Mode'}
                       </span>
@@ -484,7 +498,9 @@ const App = () => {
                 </div>
               {/* Responsive button layout - stacks on mobile, rows on desktop */}
               <div className="flex flex-col md:flex-row md:justify-center space-y-2 md:space-y-0 md:space-x-2 flex-wrap md:gap-y-2">
-                <LibrarySystem />
+                <div data-tutorial="library-system">
+                  <LibrarySystem />
+                </div>
                 <TemplateSelector />
                 
                 {/* Viral Video Generator Button */}
@@ -515,12 +531,12 @@ const App = () => {
                       <div className="absolute top-full mt-1 right-0 bg-white dark:bg-cinema-panel border border-gray-200 dark:border-cinema-border rounded-md shadow-lg dark:shadow-glow-soft z-10 min-w-[220px]">
                         <button
                           onClick={() => {
-                            randomizeFields();
+                            randomizeCharacterFields();
                             setShowRandomizeDropdown(false);
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300 rounded-t-md"
                         >
-                          🎲 Full Scene Builder
+                          👤 Character
                         </button>
                         <button
                           onClick={() => {
@@ -529,16 +545,35 @@ const App = () => {
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
                         >
-                          📍 Location-Based
+                          📍 Setting
                         </button>
                         <button
                           onClick={() => {
-                            randomizeCharacterFields();
+                            // Need to create randomizeAudioFields function
+                            const audioFields = ['sound_effects', 'background_music', 'ambient_sound'];
+                            audioFields.forEach(field => {
+                              const randomOptions = ['cinematic', 'dramatic', 'upbeat', 'mysterious', 'calm', 'intense'];
+                              setFieldValue(field, randomOptions[Math.floor(Math.random() * randomOptions.length)]);
+                            });
                             setShowRandomizeDropdown(false);
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
                         >
-                          👤 Character Focus
+                          🎵 Audio
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Need to create randomizeActionFields function
+                            const actionFields = ['action', 'movement', 'activity'];
+                            actionFields.forEach(field => {
+                              const randomOptions = ['walking', 'running', 'dancing', 'talking', 'working', 'playing', 'sleeping', 'eating'];
+                              setFieldValue(field, randomOptions[Math.floor(Math.random() * randomOptions.length)]);
+                            });
+                            setShowRandomizeDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+                        >
+                          🎬 Action
                         </button>
                         <button
                           onClick={() => {
@@ -547,25 +582,16 @@ const App = () => {
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
                         >
-                          🎬 Cinematic Style
+                          🎨 Style
                         </button>
                         <button
                           onClick={() => {
-                            randomizeEnvironmental();
+                            randomizeFields();
                             setShowRandomizeDropdown(false);
                           }}
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
                         >
-                          🌿 Environmental
-                        </button>
-                        <button
-                          onClick={() => {
-                            randomizeTechnicalSetup();
-                            setShowRandomizeDropdown(false);
-                          }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
-                        >
-                          📷 Technical Setup
+                          🎲 Full Scene
                         </button>
                         <div className="border-t border-gray-200 dark:border-cinema-border my-1"></div>
                       </div>
@@ -620,7 +646,7 @@ const App = () => {
           
           {/* Right Panel - JSON Preview & Management */}
           <FullScreenToggle isFullScreen={isFullScreen} onToggle={toggleFullScreen}>
-            <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+            <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
             {/* JSON Output Section */}
             <div className="json-output-section">
               {/* Success Notification */}
@@ -670,6 +696,13 @@ const App = () => {
                     }`}
                   >
                     {copySuccess ? 'Copied!' : 'Copy to Clipboard'}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowSaveModal(true)}
+                    className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center"
+                  >
+                    💾 Save
                   </button>
                   
                   <button
@@ -773,33 +806,162 @@ const App = () => {
 
       </div>
       
+      {/* Save Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Save Current Scene
+              </h3>
+              <button
+                onClick={() => {
+                  setShowSaveModal(false);
+                  setSaveCategory('');
+                  setSaveName('');
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Save as:
+                </label>
+                <select
+                  value={saveCategory}
+                  onChange={(e) => setSaveCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">Select category...</option>
+                  <option value="character">Character</option>
+                  <option value="setting">Setting</option>
+                  <option value="audio">Audio</option>
+                  <option value="action">Action</option>
+                  <option value="style">Style</option>
+                  <option value="scene">Full Scene</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Name:
+                </label>
+                <input
+                  type="text"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="Enter a name for this save..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => {
+                  setShowSaveModal(false);
+                  setSaveCategory('');
+                  setSaveName('');
+                }}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (saveCategory && saveName.trim()) {
+                    // Handle save based on category
+                    switch (saveCategory) {
+                      case 'character':
+                        saveCharacter(saveName.trim());
+                        break;
+                      case 'setting':
+                        saveSetting(saveName.trim());
+                        break;
+                      case 'audio':
+                        saveAudio(saveName.trim());
+                        break;
+                      case 'action':
+                        saveAction(saveName.trim());
+                        break;
+                      case 'style':
+                        saveStyle(saveName.trim());
+                        break;
+                      case 'scene':
+                        saveScene(saveName.trim());
+                        break;
+                    }
+                    setShowSaveModal(false);
+                    setSaveCategory('');
+                    setSaveName('');
+                    // Show temporary success feedback
+                    const tempDiv = document.createElement('div');
+                    tempDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[70] transition-all';
+                    tempDiv.textContent = `✅ Saved "${saveName.trim()}" as ${saveCategory}`;
+                    document.body.appendChild(tempDiv);
+                    setTimeout(() => {
+                      tempDiv.style.opacity = '0';
+                      setTimeout(() => document.body.removeChild(tempDiv), 300);
+                    }, 2000);
+                  }
+                }}
+                disabled={!saveCategory || !saveName.trim()}
+                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Tutorial Overlay */}
+      {showTutorial && (
+        <TutorialOverlay
+          onComplete={() => setShowTutorial(false)}
+          onSkip={() => setShowTutorial(false)}
+          onTutorialAction={handleTutorialAction}
+          isAdvancedMode={isAdvancedMode}
+          expandedCategories={expandedCategories}
+        />
+      )}
+
       {/* Footer */}
-      <footer className="mt-8 pt-6 pb-4 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
-        <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-4">
+      <footer className="mt-12 pt-8 pb-6 border-t border-gray-200 dark:border-cinema-border">
+        <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
           <a 
             href="/privacy-policy.html" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
+            className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
           >
-            Privacy Policy
+            <span className="text-purple-500">🔒</span>
+            <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Privacy Policy</span>
           </a>
           <a 
             href="/terms-of-service.html" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
+            className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
           >
-            Terms of Service
+            <span className="text-purple-500">📜</span>
+            <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Terms of Service</span>
           </a>
           <a 
             href="mailto:insightout11@gmail.com"
-            className="hover:text-purple-500 transition-colors text-xs sm:text-sm"
+            className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
           >
-            Contact
+            <span className="text-purple-500">✉️</span>
+            <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Contact</span>
           </a>
         </div>
-        <p className="text-xs sm:text-sm">&copy; 2025 JSON Prompt Studio. All rights reserved.</p>
+        <div className="text-center">
+          <p className="text-xs text-gray-500 dark:text-cinema-text-muted">&copy; 2025 JSON Prompt Studio. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );

@@ -20,8 +20,8 @@ const UpgradeButton = ({
   const stats = userService.getUsageStats();
   const requirement = userService.getUsageRequirement();
 
-  // Don't show upgrade button if user is already Pro/Team
-  if (stats.tier === 'pro' || stats.tier === 'team') {
+  // Don't show upgrade button if user is already Pro
+  if (isPro) {
     return null;
   }
 
