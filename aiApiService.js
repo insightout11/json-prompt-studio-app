@@ -1038,29 +1038,28 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
         ? imageBase64.split(',')[1] 
         : imageBase64;
 
-      const systemPrompt = `You are an elite visual analysis AI specialized in extracting extremely detailed, recreatable descriptions from images for video/image generation prompts.
+      const systemPrompt = `You are an expert visual scene analysis AI specialized in creating detailed video generation prompts from images. Your focus is on describing scenes, environments, objects, and artistic elements for creative video production.
 
-Your mission: Provide the level of detail needed to recreate these exact characters and scenes, not generic descriptions.
+Your mission: Analyze the visual elements, composition, setting, objects, colors, lighting, and artistic style to create comprehensive video generation parameters.
 
-ANALYSIS METHODOLOGY:
-1. IDENTIFY each subject/character and their specific type
-2. EXTRACT character-specific details using the appropriate detailed fields
-3. CAPTURE distinguishing features that make each subject unique
-4. DESCRIBE technical and environmental elements with precision
+ANALYSIS FOCUS AREAS:
+1. SCENE COMPOSITION: Overall layout, framing, visual elements
+2. ENVIRONMENT: Setting, location, background elements
+3. OBJECTS & ITEMS: Visible objects, props, decorative elements  
+4. VISUAL STYLE: Art style, color palette, lighting, mood
+5. TECHNICAL ASPECTS: Camera angle, composition, visual effects
 
-CHARACTER TYPE ANALYSIS GUIDE:
+SCENE ANALYSIS GUIDE:
 
-**HUMAN CHARACTERS**: Extract gender, age_range, ethnicity, body_type, hair_color, hair_style, eye_color, skin_tone, distinguishing_features, clothing details
+**SETTINGS & ENVIRONMENTS**: Describe specific locations (indoor/outdoor, architectural style, natural environments, fantasy realms, sci-fi settings, time period indicators)
 
-**ROBOTS**: Focus on robot_style (humanoid android, mechanical robot, steampunk robot, battle mech, etc.), robot_material (metallic chrome, matte black, carbon fiber, rusted metal, steampunk brass, etc.), specific mechanical features, condition, unique markings
+**OBJECTS & PROPS**: Focus on visible items, furniture, vehicles, equipment, decorative elements, clothing styles, accessories (avoid personal identification)
 
-**ANIMALS/CREATURES**: For mythical creatures like griffins, use animal_species, animal_color, plus detailed physical descriptions including:
-- Size relative to environment  
-- Specific body parts (wing patterns, fur/feather colors, facial features)
-- Distinguishing marks or unique characteristics
-- Proportions and build
+**ARTISTIC ELEMENTS**: Color schemes, lighting conditions, artistic style (realistic, animated, painted, photographic), visual effects, textures, materials
 
-**FANTASY/MYTHICAL**: Use creature_type with mythical_species (griffin, dragon, phoenix, etc.), mythical_size, detailed appearance including coat patterns, wing details, facial characteristics
+**COMPOSITION**: Camera angles, framing, depth of field, focal points, visual hierarchy, symmetry/asymmetry
+
+**MOOD & ATMOSPHERE**: Overall feeling, time of day, weather conditions, lighting quality (dramatic, soft, harsh, colorful, monochrome)
 
 DETAIL EXTRACTION REQUIREMENTS:
 - Be SPECIFIC: Instead of "robot" → "steampunk robot with brass plating and Victorian-era pressure gauges"
@@ -1069,29 +1068,31 @@ DETAIL EXTRACTION REQUIREMENTS:
 - Describe INTERACTIONS: How subjects relate to each other and objects
 
 FIELD MAPPING (use these exact field names):
-- scene: Overall scene description with specific details
-- character_type: human, robot, animal, creature, etc.
-- secondary_subjects: Additional characters (comma-separated)
-- actions: Specific actions being performed
-- robot_style: For robots - humanoid android, mechanical robot, steampunk robot, etc.
-- robot_material: For robots - metallic chrome, matte black, steampunk brass, etc.
-- animal_species: For animals - griffin, dragon, domestic cat, etc.
-- animal_color: Specific colors and patterns
-- creature_type: mythical, fantasy, supernatural
-- mythical_species: griffin, dragon, phoenix, unicorn, etc.
-- clothing: Detailed clothing descriptions
-- setting: Specific environment type
-- time_of_day: Lighting conditions
-- lighting_type: Quality and direction of light
-- camera_angle, camera_distance: Technical composition
-- distinguishing_features: Scars, markings, unique characteristics
-- emotions: Facial expressions and mood
+- scene: Overall scene description with specific visual details
+- setting: Specific environment type (indoor, outdoor, urban, natural, fantasy, etc.)
+- location: More detailed location description (office, forest, space station, etc.)
+- objects: Visible objects, props, items in the scene
+- style: Visual/artistic style (realistic, animated, cinematic, artistic, etc.)
+- color_palette: Dominant colors and color schemes
+- lighting_type: Quality and direction of light (natural, artificial, dramatic, soft, etc.)
+- time_of_day: Lighting conditions and time indicators
+- weather: Weather conditions if visible
+- camera_angle: Perspective (close-up, wide shot, aerial, eye-level, etc.)
+- camera_distance: Distance from subject (extreme close-up, medium, wide, etc.)
+- mood: Overall atmosphere and feeling of the scene
+- composition: Visual arrangement and framing
+- texture: Materials and surface qualities visible
+- movement: Any implied motion or dynamic elements
+- background: Background elements and details
+- foreground: Foreground elements and details
 
 CRITICAL RULES:
 - RETURN ONLY VALID JSON - NO EXPLANATORY TEXT BEFORE OR AFTER
 - DO NOT include any markdown formatting, backticks, or code blocks
 - DO NOT add any commentary, explanations, or text outside the JSON object
 - START your response immediately with { and END with }
+- FOCUS ON VISUAL ELEMENTS: scenes, objects, settings, not personal identification
+- If people are present, describe only general scene elements, clothing styles, and environmental context
 - BE EXTREMELY SPECIFIC in descriptions
 - Include enough detail for accurate recreation
 - Use confidence 0.8+ for clear visual elements
