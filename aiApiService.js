@@ -909,7 +909,7 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
     // Remove leading/trailing whitespace
     let cleaned = content.trim();
 
-    // Check for markdown code blocks and extract JSON
+    // First, try to extract from markdown code blocks
     const codeBlockPatterns = [
       /```json\s*([\s\S]*?)\s*```/i,  // ```json ... ```
       /```\s*([\s\S]*?)\s*```/i,      // ``` ... ```
@@ -931,12 +931,101 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
       .replace(/```$/i, '')
       .trim();
 
-    // Validate that we have something that looks like JSON
+    // If we still don't have JSON, try to extract JSON objects from anywhere in the text
+    if (!cleaned.startsWith('{') && !cleaned.startsWith('[')) {
+      // Try to find JSON objects anywhere in the response
+      const jsonObjectPatterns = [
+        /\{[\s\S]*?\}/,  // Find first complete JSON object
+        /\[[\s\S]*?\]/   // Find first complete JSON array
+      ];
+
+      for (const pattern of jsonObjectPatterns) {
+        const match = cleaned.match(pattern);
+        if (match && match[0]) {
+          // Try to parse it to make sure it's valid
+          try {
+            JSON.parse(match[0]);
+            cleaned = match[0];
+            break;
+          } catch (e) {
+            // Continue to next pattern if this doesn't parse
+            continue;
+          }
+        }
+      }
+    }
+
+    // More aggressive JSON extraction - find the largest JSON-like structure
+    if (!cleaned.startsWith('{') && !cleaned.startsWith('[')) {
+      // Look for balanced braces starting with {
+      const braceMatch = this.extractBalancedJson(cleaned, '{', '}');
+      if (braceMatch) {
+        try {
+          JSON.parse(braceMatch);
+          cleaned = braceMatch;
+        } catch (e) {
+          // Continue with bracket extraction
+          const bracketMatch = this.extractBalancedJson(cleaned, '[', ']');
+          if (bracketMatch) {
+            try {
+              JSON.parse(bracketMatch);
+              cleaned = bracketMatch;
+            } catch (e) {
+              // Last resort - just take what we have and let it fail downstream
+            }
+          }
+        }
+      }
+    }
+
+    // Final validation that we have something that looks like JSON
     if (!cleaned.startsWith('{') && !cleaned.startsWith('[')) {
       throw new Error('Response does not contain valid JSON structure');
     }
 
     return cleaned;
+  }
+
+  // Helper function to extract balanced JSON (handles nested braces/brackets)
+  extractBalancedJson(text, openChar, closeChar) {
+    const startIndex = text.indexOf(openChar);
+    if (startIndex === -1) return null;
+
+    let count = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = startIndex; i < text.length; i++) {
+      const char = text[i];
+
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+
+      if (!inString) {
+        if (char === openChar) {
+          count++;
+        } else if (char === closeChar) {
+          count--;
+          if (count === 0) {
+            return text.substring(startIndex, i + 1);
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   // Image Analysis API - Analyze image and extract JSON fields
@@ -999,13 +1088,19 @@ FIELD MAPPING (use these exact field names):
 - emotions: Facial expressions and mood
 
 CRITICAL RULES:
-- Return ONLY pure JSON, no markdown formatting
+- RETURN ONLY VALID JSON - NO EXPLANATORY TEXT BEFORE OR AFTER
+- DO NOT include any markdown formatting, backticks, or code blocks
+- DO NOT add any commentary, explanations, or text outside the JSON object
+- START your response immediately with { and END with }
 - BE EXTREMELY SPECIFIC in descriptions
 - Include enough detail for accurate recreation
 - Use confidence 0.8+ for clear visual elements
 - Use confidence 0.6-0.8 for probable elements  
 - Use confidence 0.5-0.6 for possible elements
 - Focus on RECREATABLE details, not generic categories
+
+RESPONSE MUST BE PURE JSON ONLY - EXAMPLE:
+{"fields":{"scene":{"value":"...","confidence":0.9,"reasoning":"..."}},"overall_analysis":"..."}
 
 JSON FORMAT:
 {
@@ -1052,10 +1147,14 @@ JSON FORMAT:
       // Clean the response content to handle markdown formatting
       let cleanedContent;
       try {
+        console.log('🖼️ Image Analysis - Raw AI Response:', response.content.substring(0, 500) + '...');
         cleanedContent = this.cleanJsonResponse(response.content);
+        console.log('🧹 Image Analysis - Cleaned Content:', cleanedContent.substring(0, 300) + '...');
       } catch (cleanError) {
-        console.error('JSON cleaning error:', cleanError);
-        console.error('Raw response:', response.content);
+        console.error('❌ Image Analysis - JSON cleaning error:', cleanError.message);
+        console.error('📄 Image Analysis - Full raw response:', response.content);
+        console.error('🔍 Image Analysis - Response length:', response.content.length);
+        console.error('🔍 Image Analysis - Response starts with:', response.content.substring(0, 100));
         throw new Error(`Failed to extract JSON from AI response: ${cleanError.message}`);
       }
 
@@ -1063,10 +1162,12 @@ JSON FORMAT:
       let result;
       try {
         result = JSON.parse(cleanedContent);
+        console.log('✅ Image Analysis - Successfully parsed JSON');
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
-        console.error('Cleaned content:', cleanedContent);
-        console.error('Raw response:', response.content);
+        console.error('❌ Image Analysis - JSON parsing error:', parseError.message);
+        console.error('🧹 Image Analysis - Cleaned content that failed to parse:', cleanedContent);
+        console.error('📄 Image Analysis - Original raw response:', response.content);
+        console.error('🔍 Image Analysis - Cleaned content length:', cleanedContent.length);
         throw new Error(`AI returned invalid JSON format. Please try again.`);
       }
 
