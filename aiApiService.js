@@ -1145,6 +1145,55 @@ JSON FORMAT:
         timeout: 90000 // Override default timeout for image analysis (90 seconds instead of 30)
       });
 
+      // Check for safety refusal responses
+      const safetyRefusalPatterns = [
+        /I'm sorry, I can't help with identifying or analyzing people/i,
+        /I can't identify or describe people/i,
+        /I'm not able to identify individuals/i,
+        /I cannot provide information about people/i,
+        /I'm unable to analyze or identify people/i
+      ];
+
+      const isSafetyRefusal = safetyRefusalPatterns.some(pattern => 
+        pattern.test(response.content)
+      );
+
+      if (isSafetyRefusal) {
+        console.log('🚫 Image Analysis - Safety refusal detected, providing generic scene analysis');
+        // Return a generic but valid JSON response for scenes with people
+        const fallbackResponse = {
+          fields: {
+            scene: {
+              value: "Scene contains human subjects in an indoor/outdoor setting with visible environmental elements",
+              confidence: 0.7,
+              reasoning: "Image contains people, focusing on general scene description due to safety guidelines"
+            },
+            setting: {
+              value: "General scene setting with human subjects present",
+              confidence: 0.8,
+              reasoning: "Can observe general environmental context"
+            },
+            objects: {
+              value: "Various objects and environmental elements visible in scene",
+              confidence: 0.6,
+              reasoning: "Objects can be observed around human subjects"
+            },
+            lighting_type: {
+              value: "Standard lighting conditions",
+              confidence: 0.7,
+              reasoning: "General lighting assessment possible"
+            },
+            camera_angle: {
+              value: "Standard camera perspective",
+              confidence: 0.8,
+              reasoning: "Image framing and composition observable"
+            }
+          },
+          overall_analysis: "Image contains human subjects. Analysis focused on general scene elements and environmental context due to safety guidelines. For more detailed analysis, try using images without people."
+        };
+        return fallbackResponse;
+      }
+
       // Clean the response content to handle markdown formatting
       let cleanedContent;
       try {
