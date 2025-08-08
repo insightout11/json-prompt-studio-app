@@ -2,14 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import usePromptStore from './store';
 
-const UniversalInput = ({ className = "" }) => {
+const UniversalInput = ({ className = "", aiFeatures = null }) => {
   const [textInput, setTextInput] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState(null);
   const [inputMode, setInputMode] = useState('text-to-json');
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const { setFieldValue } = usePromptStore();
+  const [hasConverted, setHasConverted] = useState(false);
+  const [lastConvertedInput, setLastConvertedInput] = useState('');
+  const { setFieldValue, fieldValues } = usePromptStore();
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -28,20 +30,38 @@ const UniversalInput = ({ className = "" }) => {
     adjustTextareaHeight();
   }, [textInput]);
 
+  // Reset conversion state when input changes
+  useEffect(() => {
+    if (textInput !== lastConvertedInput && hasConverted) {
+      setHasConverted(false);
+    }
+  }, [textInput, lastConvertedInput, hasConverted]);
+
   const handleConvert = async () => {
     if (inputMode === 'text-to-json') {
       if (!textInput.trim()) {
         setError('Please enter a scene description');
         return;
       }
-      await handleTextToJson();
+      if (!aiApiService.hasGroqApiKey()) {
+        setError('Groq API key required for text conversion. Please set your Groq API key in settings.');
+        return;
+      }
+      
+      if (hasConverted && textInput === lastConvertedInput) {
+        // Enhancement mode - enhance existing fields
+        await handleTextEnhancement();
+      } else {
+        // Initial conversion mode
+        await handleTextToJson();
+      }
     } else if (inputMode === 'image-to-json') {
       if (!uploadedImage) {
         setError('Please upload an image first');
         return;
       }
-      if (!aiApiService.hasApiKey()) {
-        setError('OpenAI API key required. Please set your API key in settings.');
+      if (!aiApiService.hasOpenaiApiKey()) {
+        setError('OpenAI API key required for image analysis. Please set your OpenAI API key in settings.');
         return;
       }
       await handleImageToJson();
@@ -82,7 +102,7 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
       const response = await aiApiService.makeRequest([
         { role: 'user', content: prompt }
       ], {
-        model: 'gpt-4o-mini',
+        // No model specified - will default to Groq's mixtral-8x7b-32768
         temperature: 0.3,
         maxTokens: 800
       });
@@ -118,8 +138,9 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
         }
       });
 
-      // Clear the input after successful conversion
-      setTextInput('');
+      // Mark as converted and save the input for enhancement
+      setHasConverted(true);
+      setLastConvertedInput(textInput);
       
     } catch (err) {
       console.error('Text to JSON conversion error:', err);
@@ -128,6 +149,102 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
         : err.message.includes('rate limit')
         ? 'Rate limit exceeded. Please wait a moment before trying again.'
         : err.message || 'Failed to convert text to JSON. Please try again.';
+      
+      setError(errorMessage);
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleTextEnhancement = async () => {
+    setIsConverting(true);
+    setError(null);
+
+    try {
+      // Build current scene context from existing field values
+      const currentFields = Object.entries(fieldValues)
+        .filter(([key, value]) => value && value.trim() !== '')
+        .map(([key, value]) => `- ${key}: "${value}"`)
+        .join('\n');
+
+      const enhancementPrompt = `PROGRESSIVE ENHANCEMENT: Enhance existing JSON fields with more depth and specificity.
+
+Original input: "${textInput}"
+
+Current field values to enhance:
+${currentFields}
+
+INSTRUCTIONS:
+1. Keep all existing content but make it MORE detailed and specific
+2. Add new complementary fields that weren't filled before  
+3. Preserve the original concept "${textInput}" in core fields
+4. Focus on adding layers of detail, specificity, and richness
+
+Available fields (enhance existing or add new ones):
+- scene: Main scene description (enhance if exists)
+- character_type: Type of character 
+- setting: Location/environment
+- actions: What's happening
+- emotions: Character emotions
+- lighting_type: Lighting conditions
+- time_of_day: Time setting
+- camera_angle: Camera perspective
+- camera_distance: Shot type
+- style: Visual style
+- color_palette: Color scheme
+- atmosphere: Overall mood
+- clothing: Character clothing
+- hair_color, hair_style: Character appearance
+- age, gender: Character demographics
+- environment: Weather/conditions
+
+Return enhanced JSON with richer, more detailed descriptions. Don't remove existing content - build upon it.`;
+
+      const response = await aiApiService.makeRequest([
+        { role: 'system', content: 'You are an expert at enhancing and expanding creative content with rich, specific details.' },
+        { role: 'user', content: enhancementPrompt }
+      ], {
+        temperature: 0.8,
+        maxTokens: 1000
+      });
+
+      // Parse the enhanced JSON
+      let jsonData;
+      try {
+        let cleanedResponse = response.content.trim();
+        
+        // Remove markdown code blocks if present
+        cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '');
+        cleanedResponse = cleanedResponse.replace(/```\s*/gi, '');
+        
+        // Find JSON object boundaries
+        const jsonStart = cleanedResponse.indexOf('{');
+        const jsonEnd = cleanedResponse.lastIndexOf('}');
+        
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+          cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+        }
+        
+        jsonData = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        throw new Error('AI returned invalid JSON format. Please try again.');
+      }
+
+      // Update form fields with the enhanced data
+      Object.entries(jsonData).forEach(([fieldKey, fieldValue]) => {
+        if (fieldValue && typeof fieldValue === 'string' && fieldValue.trim()) {
+          setFieldValue(fieldKey, fieldValue.trim());
+        }
+      });
+
+    } catch (err) {
+      console.error('Text enhancement error:', err);
+      const errorMessage = err.message.includes('API key') 
+        ? 'Groq API key required. Please set your API key in settings.'
+        : err.message.includes('rate limit')
+        ? 'Rate limit exceeded. Please wait a moment before trying again.'
+        : err.message || 'Failed to enhance fields. Please try again.';
       
       setError(errorMessage);
     } finally {
@@ -255,8 +372,7 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
 
   const modeOptions = [
     { value: 'text-to-json', label: 'Text → JSON', icon: '✨' },
-    { value: 'image-to-json', label: 'Image → JSON', icon: '📸' },
-    { value: 'manual', label: 'Manual', icon: '✏️' }
+    { value: 'image-to-json', label: 'Image → JSON', icon: '📸' }
   ];
 
   const currentMode = modeOptions.find(mode => mode.value === inputMode);
@@ -347,27 +463,52 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
             )}
           </div>
 
-          {/* Mode dropdown and Convert button - stack on mobile */}
+          {/* Mode toggle and Convert button - stack on mobile */}
           <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 md:flex-shrink-0">
-            <select
-              value={inputMode}
-              onChange={(e) => setInputMode(e.target.value)}
-              className="px-3 py-2 text-sm border border-gray-200 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-700 dark:text-cinema-text focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
-              disabled={isConverting}
-            >
-              {modeOptions.map(mode => (
-                <option key={mode.value} value={mode.value}>
-                  {mode.icon} {mode.label}
-                </option>
-              ))}
-            </select>
+            {/* Toggle Switch */}
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-cinema-border rounded-md p-1">
+              <button
+                onClick={() => setInputMode('text-to-json')}
+                disabled={isConverting}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 ${
+                  inputMode === 'text-to-json'
+                    ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
+                }`}
+              >
+                <span>✨</span>
+                <span>Text</span>
+              </button>
+              <button
+                onClick={() => setInputMode('image-to-json')}
+                disabled={isConverting}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 ${
+                  inputMode === 'image-to-json'
+                    ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
+                }`}
+              >
+                <span>📸</span>
+                <span>Image</span>
+              </button>
+            </div>
 
             <button
+              data-tutorial="convert-button"
               onClick={handleConvert}
               disabled={isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)}
+              title={
+                inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput
+                  ? 'Enhance existing fields with more detail'
+                  : inputMode === 'text-to-json'
+                  ? 'Convert text description to JSON fields'
+                  : 'Analyze image and extract scene details'
+              }
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${
                 isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)
                   ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  : inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-md hover:shadow-lg'
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg'
               }`}
             >
@@ -377,17 +518,26 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span>Converting...</span>
+                  <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Enhancing...' : 'Converting...'}</span>
                 </>
               ) : (
                 <>
-                  <span>{currentMode?.icon}</span>
-                  <span>Convert</span>
+                  <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? '🎨' : currentMode?.icon}</span>
+                  <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Enhance' : 'Convert'}</span>
                 </>
               )}
             </button>
           </div>
         </div>
+
+        {/* AI Features positioned directly under Text/Image/Convert buttons */}
+        {aiFeatures && (
+          <div className="flex justify-end mt-2">
+            <div className="flex items-center">
+              {aiFeatures}
+            </div>
+          </div>
+        )}
 
         {/* Error display */}
         {error && (

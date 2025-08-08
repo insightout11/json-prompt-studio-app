@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 
 const WorldBuilder = ({ currentJson, onResult }) => {
@@ -29,6 +29,24 @@ const WorldBuilder = ({ currentJson, onResult }) => {
       description: 'Enhance mood, sounds, and environmental elements' 
     }
   ];
+
+  // Auto-scroll to generated world data when created
+  useEffect(() => {
+    if (worldData) {
+      const timer = setTimeout(() => {
+        const element = document.querySelector('[data-world-results]');
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest' 
+          });
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [worldData]);
 
   const generateWorld = async () => {
     if (!currentJson || Object.keys(currentJson).length === 0) {
@@ -203,10 +221,35 @@ const WorldBuilder = ({ currentJson, onResult }) => {
           </div>
         </div>
       )}
+      
+      {/* Loading state with scroll hint */}
+      {isGenerating && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+            <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">Building world expansion...</span>
+          </div>
+          <div className="text-xs text-blue-600 dark:text-blue-300 mt-2 flex items-center space-x-1">
+            <span>⬇️</span>
+            <span>World details will appear below - we'll scroll you there automatically</span>
+          </div>
+        </div>
+      )}
 
       {/* Generated World Display */}
       {worldData && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-4">
+        <div data-world-results className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-4">
+          {/* Success indicator */}
+          <div className="bg-green-100 dark:bg-green-800/20 border border-green-300 dark:border-green-600 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">✅</span>
+              <span className="font-medium text-green-800 dark:text-green-200">World expansion created successfully!</span>
+            </div>
+            <p className="text-sm text-green-600 dark:text-green-300 mt-1">
+              Explore the generated world details and apply elements to enhance your scene.
+            </p>
+          </div>
+          
           <div className="mb-4">
             <h5 className="font-semibold text-green-800 dark:text-green-300 mb-2">
               Generated World Expansion

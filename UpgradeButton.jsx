@@ -20,10 +20,8 @@ const UpgradeButton = ({
   const stats = userService.getUsageStats();
   const requirement = userService.getUsageRequirement();
 
-  // Don't show upgrade button if user is already Pro
-  if (isPro) {
-    return null;
-  }
+  // Don't show upgrade button - all users have free access
+  return null;
 
   const handleUpgradeSuccess = (subscriptionData) => {
     upgradeSubscription(subscriptionData);

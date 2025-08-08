@@ -1,45 +1,103 @@
-// Unified ChatGPT API Service for JSON Prompt Studio
+// Hybrid Groq + OpenAI API Service for JSON Prompt Studio
 // Comprehensive error handling, retry logic, and fallback systems
 
 import { buildPrompt } from './aiSystemPrompts.js';
 
 class AIApiService {
   constructor() {
-    this.apiKey = null;
-    this.baseURL = 'https://api.openai.com/v1/chat/completions';
+    this.groqApiKey = null;
+    this.openaiApiKey = null;
+    this.groqBaseURL = 'https://api.groq.com/openai/v1/chat/completions';
+    this.openaiBaseURL = 'https://api.openai.com/v1/chat/completions';
     this.maxRetries = 3;
     this.retryDelay = 1000; // ms
     this.timeout = 30000; // 30 seconds
     this.rateLimitDelay = 2000; // ms between requests
     this.lastRequestTime = 0;
     
-    // Initialize API key from environment or localStorage
-    this.initializeApiKey();
+    // Initialize API keys from environment or localStorage
+    this.initializeApiKeys();
   }
 
-  initializeApiKey() {
-    // Try to get API key from environment variables first (Vite style)
-    this.apiKey = import.meta?.env?.VITE_OPENAI_API_KEY || null;
+  initializeApiKeys(envVars = null) {
+    // Try to get API keys from provided environment variables or import.meta.env
+    let groqFromEnv, openaiFromEnv;
+    
+    if (envVars) {
+      // Use provided environment variables (passed from component that has access)
+      groqFromEnv = envVars.VITE_GROQ_API_KEY;
+      openaiFromEnv = envVars.VITE_OPENAI_API_KEY;
+    } else {
+      // Fallback to import.meta.env (might be undefined in some contexts)
+      groqFromEnv = import.meta?.env?.VITE_GROQ_API_KEY;
+      openaiFromEnv = import.meta?.env?.VITE_OPENAI_API_KEY;
+    }
+    
+    this.groqApiKey = groqFromEnv || null;
+    this.openaiApiKey = openaiFromEnv || null;
     
     // If not in environment, try localStorage (for user-provided keys)
-    if (!this.apiKey && typeof window !== 'undefined') {
-      this.apiKey = localStorage.getItem('openai_api_key');
+    if (typeof window !== 'undefined') {
+      if (!this.groqApiKey) {
+        this.groqApiKey = localStorage.getItem('groq_api_key');
+      }
+      if (!this.openaiApiKey) {
+        this.openaiApiKey = localStorage.getItem('openai_api_key');
+      }
+    }
+    
+    // Development logging
+    if (import.meta?.env?.DEV) {
+      console.log('🔑 API Keys initialized:', {
+        groq: !!this.groqApiKey,
+        openai: !!this.openaiApiKey
+      });
     }
   }
 
-  setApiKey(key) {
-    this.apiKey = key;
+  setGroqApiKey(key) {
+    this.groqApiKey = key;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('groq_api_key', key);
+    }
+  }
+
+  setOpenaiApiKey(key) {
+    this.openaiApiKey = key;
     if (typeof window !== 'undefined') {
       localStorage.setItem('openai_api_key', key);
     }
   }
 
-  getApiKey() {
-    return this.apiKey;
+  // Legacy method for backward compatibility
+  setApiKey(key) {
+    this.setGroqApiKey(key);
   }
 
+  getGroqApiKey() {
+    return this.groqApiKey;
+  }
+
+  getOpenaiApiKey() {
+    return this.openaiApiKey;
+  }
+
+  // Legacy method for backward compatibility  
+  getApiKey() {
+    return this.groqApiKey || this.openaiApiKey;
+  }
+
+  hasGroqApiKey() {
+    return !!this.groqApiKey;
+  }
+
+  hasOpenaiApiKey() {
+    return !!this.openaiApiKey;
+  }
+
+  // Legacy method for backward compatibility
   hasApiKey() {
-    return !!this.apiKey;
+    return this.hasGroqApiKey() || this.hasOpenaiApiKey();
   }
 
   // Rate limiting to prevent API abuse
@@ -55,16 +113,66 @@ class AIApiService {
     this.lastRequestTime = Date.now();
   }
 
-  // Core API request with comprehensive error handling
+  // Helper function to clean and parse JSON responses
+  parseJsonResponse(content) {
+    try {
+      // Clean the response to extract JSON
+      let cleanedResponse = content.trim();
+      
+      // Remove markdown code blocks if present
+      cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '');
+      cleanedResponse = cleanedResponse.replace(/```\s*/gi, '');
+      
+      // Find JSON object boundaries
+      const jsonStart = cleanedResponse.indexOf('{');
+      const jsonEnd = cleanedResponse.lastIndexOf('}');
+      
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+      }
+      
+      return JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      console.error('Original content:', content);
+      throw new Error('AI returned invalid JSON format. Please try again.');
+    }
+  }
+
+  // Core API request with comprehensive error handling - supports both Groq and OpenAI
   async makeRequest(messages, options = {}) {
-    if (!this.hasApiKey()) {
-      throw new Error('OpenAI API key is required. Please set your API key in settings.');
+    // Determine which provider to use
+    const useOpenAI = options.forceOpenAI || options.model?.includes('gpt-');
+    const provider = useOpenAI ? 'openai' : 'groq';
+    
+    // Enhanced debug logging for testing
+    if (import.meta?.env?.DEV) {
+      console.log(`🤖 AI Provider: ${provider.toUpperCase()}`);
+      console.log(`📝 Request: ${messages[0]?.content?.substring(0, 100)}...`);
+      console.log(`⚙️ Options:`, { 
+        model: options.model, 
+        forceOpenAI: options.forceOpenAI,
+        temperature: options.temperature 
+      });
+    }
+    
+    // Check if we have the required API key
+    if (useOpenAI && !this.hasOpenaiApiKey()) {
+      throw new Error('OpenAI API key is required for this operation. Please set your OpenAI API key in settings.');
+    }
+    if (!useOpenAI && !this.hasGroqApiKey()) {
+      throw new Error('Groq API key is required. Please set your Groq API key in settings.');
     }
 
     await this.enforceRateLimit();
 
+    // Select appropriate model and API details
+    const baseURL = useOpenAI ? this.openaiBaseURL : this.groqBaseURL;
+    const apiKey = useOpenAI ? this.openaiApiKey : this.groqApiKey;
+    const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'gemma2-9b-it';
+
     const requestPayload = {
-      model: options.model || 'gpt-4o-mini',
+      model: options.model || defaultModel,
       messages: messages,
       max_tokens: options.maxTokens || 2000,
       temperature: options.temperature || 0.7,
@@ -78,7 +186,7 @@ class AIApiService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify(requestPayload),
       signal: AbortSignal.timeout(options.timeout || this.timeout)
@@ -88,9 +196,9 @@ class AIApiService {
     
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        if (import.meta?.env?.DEV) console.log(`AI API Request attempt ${attempt}/${this.maxRetries}`);
+        if (import.meta?.env?.DEV) console.log(`${provider.toUpperCase()} API Request attempt ${attempt}/${this.maxRetries}`);
         
-        const response = await fetch(this.baseURL, requestOptions);
+        const response = await fetch(baseURL, requestOptions);
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -105,7 +213,16 @@ class AIApiService {
         const data = await response.json();
         
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-          throw new Error('Invalid response format from OpenAI API');
+          throw new Error(`Invalid response format from ${provider.toUpperCase()} API`);
+        }
+
+        // Success logging
+        if (import.meta?.env?.DEV) {
+          console.log(`✅ ${provider.toUpperCase()} Success:`, {
+            model: data.model,
+            usage: data.usage,
+            responseLength: data.choices[0].message.content.length
+          });
         }
 
         return {
@@ -206,7 +323,7 @@ class AIApiService {
         timeout: 90000 // 90 seconds for scene extensions
       });
 
-      const result = JSON.parse(response.content);
+      const result = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -252,7 +369,7 @@ class AIApiService {
         timeout: 90000 // 90 seconds for generating multiple scene options
       });
 
-      const result = JSON.parse(response.content);
+      const result = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -444,7 +561,7 @@ Make the character feel authentic, three-dimensional, and visually interesting f
         maxTokens: 1500
       });
 
-      const character = JSON.parse(response.content);
+      const character = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -523,7 +640,7 @@ Extract details from the description and expand them into a full character. If d
         maxTokens: 2000
       });
 
-      const character = JSON.parse(response.content);
+      const character = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -616,7 +733,7 @@ Create a world that feels lived-in, authentic, and visually compelling for video
         maxTokens: 2000
       });
 
-      const world = JSON.parse(response.content);
+      const world = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -635,6 +752,66 @@ Create a world that feels lived-in, authentic, and visually compelling for video
   }
 
   // Storyboard Generation API
+  async generateStyleSuggestion(currentScene) {
+    try {
+      const systemPrompt = `You are an expert cinematographer and film style consultant. Analyze the provided scene and generate intelligent style recommendations that would enhance the visual storytelling.
+
+Current Scene Context:
+${JSON.stringify(currentScene, null, 2)}
+
+Based on the scene's content, mood, genre, and setting, suggest appropriate:
+- Cinematography style and techniques
+- Color palette and lighting approach
+- Camera movement and framing
+- Overall visual mood and atmosphere
+- Specific technical recommendations
+
+Return your response in this EXACT JSON format:
+{
+  "cinematography_style": "specific cinematography approach and techniques",
+  "color_palette": "recommended color scheme and palette",
+  "lighting_approach": "lighting style and setup recommendations", 
+  "camera_movement": "recommended camera movements and techniques",
+  "visual_mood": "overall visual atmosphere and tone",
+  "framing_style": "shot composition and framing approach",
+  "technical_notes": "specific equipment or technique suggestions"
+}
+
+Focus on practical, actionable recommendations that match the scene's narrative needs.`;
+
+      const messages = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: `Analyze this scene and provide smart cinematographic style suggestions that would enhance the visual storytelling.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages);
+      
+      if (response.success) {
+        return {
+          success: true,
+          style: response.data
+        };
+      } else {
+        return {
+          success: false,
+          error: response.error
+        };
+      }
+    } catch (error) {
+      console.error('Style suggestion generation error:', error);
+      return {
+        success: false,
+        error: 'Failed to generate style suggestions. Please try again.'
+      };
+    }
+  }
+
   async generateStoryboard(currentScene, sceneCount, narrativeStructure) {
     try {
       const systemPrompt = `You are an expert storyboard creator and narrative designer. Create a compelling ${sceneCount}-scene sequence using ${narrativeStructure} structure, building from the provided starting scene.
@@ -692,7 +869,7 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
         maxTokens: 3000
       });
 
-      const storyboard = JSON.parse(response.content);
+      const storyboard = this.parseJsonResponse(response.content);
       
       return {
         success: true,
@@ -780,7 +957,7 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
       if (error.status === 401) {
         return {
           success: false,
-          error: 'Invalid API key. Please check your OpenAI API key in settings.',
+          error: 'Invalid API key. Please check your API keys in settings.',
           fallback: null
         };
       } else if (error.status === 429) {
@@ -792,7 +969,7 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
       } else if (error.status === 500) {
         return {
           success: false,
-          error: 'OpenAI service is temporarily unavailable. Please try again later.',
+          error: 'AI service is temporarily unavailable. Please try again later.',
           fallback: this.generateFallbackExtension(originalScene, continuationType)
         };
       }
@@ -811,7 +988,7 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
       if (error.status === 401) {
         return {
           success: false,
-          error: 'Invalid API key. Please check your OpenAI API key in settings.',
+          error: 'Invalid API key. Please check your API keys in settings.',
           fallback: null
         };
       } else if (error.status === 429) {
@@ -1140,6 +1317,7 @@ JSON FORMAT:
 
       const response = await this.makeRequest(messages, {
         model: 'gpt-4o', // Use GPT-4o for vision capabilities
+        forceOpenAI: true, // Force OpenAI for image analysis
         temperature: 0.2, // Lower temperature for more consistent, detailed analysis
         maxTokens: 2500, // Increased for detailed character descriptions
         timeout: 90000 // Override default timeout for image analysis (90 seconds instead of 30)
@@ -1297,6 +1475,194 @@ JSON FORMAT:
         success: false,
         error: error.message || 'Failed to analyze image. Please try again.',
         fields: {}
+      };
+    }
+  }
+
+  // Category-specific AI suggestions with user seed ideas
+  async generateCategorySuggestions(categoryKey, currentScene = {}, userSeedIdea = '', isProgressive = false) {
+    try {
+      if (!this.hasApiKey()) {
+        throw new Error('API key required for category suggestions');
+      }
+
+      const categoryPrompts = {
+        characters: {
+          systemPrompt: `You are an expert character designer for video content. Generate compelling character suggestions that would work well in video scenes.`,
+          fieldMap: {
+            character: ['user input preserved as main character description'],
+            character_type: ['person', 'animal', 'robot', 'fantasy creature', 'stylized character'],
+            age: ['child (5-12)', 'teenager (13-19)', 'young adult (20-35)', 'middle-aged (36-55)', 'elderly (55+)'],
+            gender: ['male', 'female', 'non-binary'],
+            hair_color: ['brown', 'blonde', 'black', 'red', 'gray', 'white', 'unusual color'],
+            hair_style: ['short', 'medium', 'long', 'curly', 'straight', 'wavy', 'braided'],
+            clothing: ['casual', 'formal', 'business', 'athletic', 'vintage', 'futuristic', 'cultural'],
+            emotions: ['happy', 'serious', 'contemplative', 'excited', 'mysterious', 'confident']
+          }
+        },
+        actions: {
+          systemPrompt: `You are an expert in video storytelling and action direction. Suggest compelling actions and movements for video scenes.`,
+          fieldMap: {
+            actions: ['user input preserved as main action description'],
+            emotions: ['joyful', 'determined', 'peaceful', 'energetic', 'focused', 'playful'],
+            dialogue: ['friendly conversation', 'important announcement', 'quiet reflection', 'animated discussion'],
+            performance_style: ['natural', 'theatrical', 'subtle', 'expressive', 'comedic', 'dramatic']
+          }
+        },
+        settings: {
+          systemPrompt: `You are an expert location scout and set designer. Suggest visually compelling settings for video content.`,
+          fieldMap: {
+            setting: ['user input preserved as main setting description'],
+            time_of_day: ['golden hour', 'blue hour', 'midday', 'night', 'dawn', 'dusk'],
+            weather: ['sunny', 'partly cloudy', 'overcast', 'light rain', 'dramatic clouds'],
+            environment: ['indoor', 'outdoor', 'mixed indoor/outdoor'],
+            lighting_type: ['natural light', 'artificial light', 'mixed lighting', 'dramatic lighting']
+          }
+        },
+        style: {
+          systemPrompt: `You are a cinematographer and visual style expert. Suggest camera angles, lighting, and visual styles for compelling video content.`,
+          fieldMap: {
+            style: ['user input preserved as main style description'],
+            camera_angle: ['eye level', 'low angle', 'high angle', 'dutch angle', 'over shoulder'],
+            camera_distance: ['close-up', 'medium shot', 'wide shot', 'establishing shot'],
+            lighting_type: ['soft natural', 'dramatic side', 'rim lighting', 'golden hour', 'blue hour'],
+            color_palette: ['warm tones', 'cool tones', 'monochromatic', 'high contrast', 'muted colors']
+          }
+        },
+        audio: {
+          systemPrompt: `You are an audio designer and music supervisor. Suggest audio elements that enhance video storytelling.`,
+          fieldMap: {
+            audio: ['user input preserved as main audio description'],
+            ambient_sound: ['city ambiance', 'nature sounds', 'indoor atmosphere', 'quiet background'],
+            music_style: ['subtle instrumental', 'upbeat', 'emotional', 'minimal', 'cinematic'],
+            sound_effects: ['subtle', 'realistic', 'enhanced', 'minimal'],
+            audio_mood: ['uplifting', 'contemplative', 'energetic', 'peaceful', 'inspiring']
+          }
+        }
+      };
+
+      const categoryConfig = categoryPrompts[categoryKey];
+      if (!categoryConfig) {
+        throw new Error(`Unknown category: ${categoryKey}`);
+      }
+
+      // Build context from current scene
+      const sceneContext = currentScene.field_values ? 
+        Object.entries(currentScene.field_values)
+          .filter(([key, value]) => value && value.trim() !== '')
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(', ') : 'No current scene context';
+
+      // Determine if this is expansion or generation
+      const isExpansion = userSeedIdea && userSeedIdea.trim().length > 0;
+      
+      // Check if this is a progressive expansion (existing fields have content)
+      const existingFields = currentScene.field_values || {};
+      const hasExistingContent = Object.keys(existingFields).some(key => 
+        categoryConfig.fieldMap[key] && existingFields[key] && existingFields[key].trim() !== ''
+      );
+      
+      const userPrompt = isExpansion 
+        ? (isProgressive && hasExistingContent 
+          ? `Given the current scene context: ${sceneContext}
+
+PROGRESSIVE EXPANSION: Enhance existing ${categoryKey} details with more depth and specificity.
+
+Original input: "${userSeedIdea.trim()}"
+
+Current field values to enhance:
+${Object.entries(existingFields)
+  .filter(([key, value]) => categoryConfig.fieldMap[key] && value && value.trim() !== '')
+  .map(([key, value]) => `- ${key}: "${value}"`)
+  .join('\n')}
+
+INSTRUCTIONS:
+1. Keep all existing content but make it MORE detailed and specific
+2. Add new complementary fields that weren't filled before  
+3. Preserve the original concept "${userSeedIdea.trim()}" in the primary field
+4. Focus on adding layers of detail, specificity, and richness
+
+Available fields to enhance or add:
+${Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
+  const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+  const currentValue = existingFields[field];
+  if (primaryFieldNames.includes(field)) {
+    return `- ${field}: ${currentValue ? `Enhance "${currentValue}" with more detail` : `MUST be exactly "${userSeedIdea.trim()}"`}`;
+  }
+  return `- ${field}: ${currentValue ? `Enhance "${currentValue}" with more specificity` : `(choose from: ${options.join(', ')} or suggest similar)`}`;
+}).join('\n')}
+
+Return enhanced JSON with richer, more detailed descriptions. Don't remove existing content - build upon it.`
+          : `Given the current scene context: ${sceneContext}
+
+Expand this ${categoryKey} idea: "${userSeedIdea.trim()}"
+
+CRITICAL INSTRUCTION: You must preserve the user's exact input "${userSeedIdea.trim()}" as the primary field value. Do not change or interpret it - use it exactly as provided.
+
+Then add complementary details that enhance and describe this specific concept.
+
+Respond with a JSON object containing field suggestions. Use these available fields:
+${Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
+  const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+  if (primaryFieldNames.includes(field)) {
+    return `- ${field}: MUST be exactly "${userSeedIdea.trim()}" (preserve user input exactly)`;
+  }
+  return `- ${field}: (choose from: ${options.join(', ')} or suggest similar that fits "${userSeedIdea.trim()}")`;
+}).join('\n')}
+
+Example: If user says "scarecrow", the primary field should be "scarecrow" and other fields should describe scarecrow-specific attributes (straw hair, burlap clothing, etc.).
+
+Focus on expanding "${userSeedIdea.trim()}" while preserving it as the core value. Return only the JSON object, no explanation.`)
+        : `Given the current scene context: ${sceneContext}
+
+Please suggest appropriate values for a ${categoryKey} category that would complement the existing scene elements. 
+
+Respond with a JSON object containing field suggestions. Use these available fields and choose values that work well together:
+${Object.entries(categoryConfig.fieldMap).map(([field, options]) => 
+  `- ${field}: (choose from: ${options.join(', ')} or suggest similar)`
+).join('\n')}
+
+Focus on creating cohesive suggestions that enhance the overall scene. Return only the JSON object, no explanation.`;
+
+      const messages = [
+        { role: 'system', content: categoryConfig.systemPrompt },
+        { role: 'user', content: userPrompt }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        maxTokens: 500,
+        temperature: 0.7
+      });
+
+      // Parse JSON response
+      let suggestions = {};
+      try {
+        suggestions = this.parseJsonResponse(response.content);
+      } catch (parseError) {
+        // If JSON parsing fails, try to extract reasonable defaults
+        console.warn('Failed to parse AI suggestions, using defaults');
+        const fieldMap = categoryConfig.fieldMap;
+        const keys = Object.keys(fieldMap);
+        keys.slice(0, 3).forEach(key => {
+          suggestions[key] = fieldMap[key][Math.floor(Math.random() * fieldMap[key].length)];
+        });
+      }
+
+      return {
+        success: true,
+        category: categoryKey,
+        suggestions,
+        isExpansion,
+        originalIdea: userSeedIdea.trim(),
+        model: response.model
+      };
+
+    } catch (error) {
+      console.error(`Category suggestion error for ${categoryKey}:`, error);
+      return {
+        success: false,
+        error: error.message,
+        category: categoryKey
       };
     }
   }

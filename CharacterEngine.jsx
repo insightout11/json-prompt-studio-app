@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import AvatarCreator from './AvatarCreator';
 
@@ -10,6 +10,23 @@ const CharacterEngine = ({ currentJson, onResult }) => {
   const [showAvatarCreator, setShowAvatarCreator] = useState(false);
   const [activeTab, setActiveTab] = useState('description'); // 'description' or 'avatar'
 
+  // Auto-scroll to generated character when created
+  useEffect(() => {
+    if (generatedCharacter) {
+      const timer = setTimeout(() => {
+        const element = document.querySelector('[data-character-results]');
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest' 
+          });
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [generatedCharacter]);
 
   const generateCharacter = async () => {
     if (!characterDescription.trim()) {
@@ -215,6 +232,20 @@ const CharacterEngine = ({ currentJson, onResult }) => {
                   </div>
                 </div>
               )}
+              
+              {/* Loading state with scroll hint */}
+              {isGenerating && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                    <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">Generating character...</span>
+                  </div>
+                  <div className="text-xs text-blue-600 dark:text-blue-300 mt-2 flex items-center space-x-1">
+                    <span>⬇️</span>
+                    <span>Character details will appear below - we'll scroll you there automatically</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -247,7 +278,18 @@ const CharacterEngine = ({ currentJson, onResult }) => {
 
       {/* Generated Character Display */}
       {generatedCharacter && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-4">
+        <div data-character-results className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-4">
+          {/* Success indicator */}
+          <div className="bg-green-100 dark:bg-green-800/20 border border-green-300 dark:border-green-600 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">✅</span>
+              <span className="font-medium text-green-800 dark:text-green-200">Character generated successfully!</span>
+            </div>
+            <p className="text-sm text-green-600 dark:text-green-300 mt-1">
+              Review the character details below and apply to your scene when ready.
+            </p>
+          </div>
+          
           <div className="mb-3">
             <h5 className="font-semibold text-green-800 dark:text-green-300 mb-2">
               Generated Character: {generatedCharacter.name}

@@ -290,11 +290,8 @@ export const useSubscription = () => {
     return updatedUser;
   };
 
-  // Dev override - check for dev override flag in localStorage
-  const devOverride = typeof window !== 'undefined' && 
-    localStorage.getItem('DEV_PRO_OVERRIDE') === 'true';
-  
-  const isPro = devOverride || user?.isPro || false;
+  // All users now have pro access - no restrictions
+  const isPro = true;
   const isYearly = user?.subscription?.billingCycle === 'yearly';
   const subscription = user?.subscription || null;
 

@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import usePromptStore from './store';
 import { schema } from './schema';
 import { allTemplates, isPresetTemplate, getTemplate } from './templates';
 import ToggleSwitch from './ToggleSwitch';
+import LoadingButton from './LoadingButton';
+import aiApiService from './aiApiService';
 
-const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMode, setIsAdvancedMode }) => {
+const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMode, setIsAdvancedMode, showToast }) => {
   const { 
     enabledFields, 
     fieldValues, 
@@ -41,6 +43,72 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   const [activeSubcategory, setActiveSubcategory] = useState('recent');
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [loadCategory, setLoadCategory] = useState(null);
+  const [loadingStates, setLoadingStates] = useState({});
+  const [animatingCategories, setAnimatingCategories] = useState(new Set());
+  const [expandSparkles, setExpandSparkles] = useState(new Set());
+  const [loadGlowEffects, setLoadGlowEffects] = useState(new Set());
+  const [previousSavedCounts, setPreviousSavedCounts] = useState({});
+  const [categoryInputs, setCategoryInputs] = useState({
+    characters: '',
+    actions: '',
+    settings: '',
+    style: '',
+    audio: ''
+  });
+
+  // Watch for activation of Load buttons (when content becomes available)
+  useEffect(() => {
+    const currentCounts = {
+      characters: savedCharacters.length,
+      actions: savedActions.length, 
+      settings: savedSettings.length + savedScenes.length, // Settings can load scenes too
+      style: savedStyles.length,
+      audio: savedAudio.length
+    };
+    
+    // Only proceed if we have previous counts to compare against
+    if (Object.keys(previousSavedCounts).length > 0) {
+      // Check for newly activated buttons (count went from 0 to >0)
+      Object.keys(currentCounts).forEach(categoryKey => {
+        const previousCount = previousSavedCounts[categoryKey] || 0;
+        const currentCount = currentCounts[categoryKey];
+        
+        if (previousCount === 0 && currentCount > 0) {
+          // Button just became active - trigger glow effect
+          setLoadGlowEffects(prev => new Set([...prev, categoryKey]));
+          
+          // Remove glow effect after animation completes
+          setTimeout(() => {
+            setLoadGlowEffects(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(categoryKey);
+              return newSet;
+            });
+          }, 1000); // Match animation duration
+        }
+      });
+    }
+    
+    setPreviousSavedCounts(currentCounts);
+  }, [savedCharacters.length, savedActions.length, savedSettings.length, savedScenes.length, savedStyles.length, savedAudio.length]);
+
+  // Loading state helpers
+  const setLoading = (key, isLoading) => {
+    setLoadingStates(prev => ({ ...prev, [key]: isLoading }));
+  };
+
+  const isLoading = (key) => {
+    return loadingStates[key] || false;
+  };
+
+  // Smart placeholder text for better user guidance
+  const placeholderText = {
+    characters: "e.g., A wise old wizard riding a giant turtle",
+    actions: "e.g., Dancing through a field of glowing flowers", 
+    settings: "e.g., On a floating island at golden hour",
+    style: "e.g., Studio Ghibli animation, soft watercolors",
+    audio: "e.g., Whispering wind with ambient synthesizers"
+  };
 
   // Define the 5 main categories for the compact scene builder
   const sceneCategories = {
@@ -236,6 +304,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
           toggleCategory(categoryId);
         }
       });
+
+      // Show success feedback
+      if (showToast?.showSuccess) {
+        showToast.showSuccess(`Template "${template.name}" applied successfully!`);
+      }
     }
     
     setShowTemplateModal(false);
@@ -244,32 +317,63 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   };
   
   // Handle Load action - show selection modal
-  const handleLoad = (categoryKey) => {
-    const categoryMap = {
-      characters: { data: savedCharacters, loader: loadCharacter, label: 'Characters' },
-      actions: { data: savedActions, loader: loadAction, label: 'Actions' },
-      settings: { data: savedSettings, loader: loadSetting, label: 'Settings' },
-      style: { data: savedStyles, loader: loadStyle, label: 'Styles' },
-      audio: { data: savedAudio, loader: loadAudio, label: 'Audio' }
-    };
-
-    const category = categoryMap[categoryKey];
+  const handleLoad = async (categoryKey) => {
+    const loadKey = `load-${categoryKey}`;
+    setLoading(loadKey, true);
     
-    if (category && category.data && category.data.length > 0) {
-      setLoadCategory(category);
-      setShowLoadModal(true);
-    } else if (categoryKey === 'settings' && savedScenes.length > 0) {
-      // Fallback: if no saved settings, try loading the first scene for location
-      loadScene(savedScenes[0].id);
+    try {
+      const categoryMap = {
+        characters: { data: savedCharacters, loader: loadCharacter, label: 'Characters' },
+        actions: { data: savedActions, loader: loadAction, label: 'Actions' },
+        settings: { data: savedSettings, loader: loadSetting, label: 'Settings' },
+        style: { data: savedStyles, loader: loadStyle, label: 'Styles' },
+        audio: { data: savedAudio, loader: loadAudio, label: 'Audio' }
+      };
+
+      const category = categoryMap[categoryKey];
+      
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      if (category && category.data && category.data.length > 0) {
+        setLoadCategory(category);
+        setShowLoadModal(true);
+      } else if (categoryKey === 'settings' && savedScenes.length > 0) {
+        // Fallback: if no saved settings, try loading the first scene for location
+        loadScene(savedScenes[0].id);
+        if (showToast?.showSuccess) {
+          showToast.showSuccess(`Loaded scene as setting reference`);
+        }
+      } else {
+        // Show feedback when no saved items exist
+        if (showToast?.showWarning) {
+          const messages = {
+            characters: 'No saved characters yet. Create and save characters using the Library system or Pro Features.',
+            actions: 'No saved actions yet. Create and save actions using the Library system.',
+            settings: 'No saved settings or scenes yet. Create and save settings using the Library system.',
+            style: 'No saved styles yet. Create and save styles using the Library system.',
+            audio: 'No saved audio configurations yet. Create and save audio using the Library system.'
+          };
+          showToast.showWarning(messages[categoryKey] || `No saved ${category?.label?.toLowerCase() || 'items'} available.`);
+        }
+      }
+    } finally {
+      setLoading(loadKey, false);
     }
   };
 
   // Handle selection from load modal
   const handleLoadSelection = (itemId) => {
     if (loadCategory && loadCategory.loader) {
+      const loadedItem = loadCategory.data.find(item => item.id === itemId);
       loadCategory.loader(itemId);
       setShowLoadModal(false);
       setLoadCategory(null);
+      
+      // Show success feedback
+      if (showToast?.showSuccess && loadedItem) {
+        showToast.showSuccess(`${loadCategory.label.slice(0, -1)} "${loadedItem.name}" loaded successfully!`);
+      }
     }
   };
 
@@ -482,68 +586,246 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
       }
     }, 100);
   };
+
+  // Category input handlers
+  const handleCategorySubmit = (categoryKey) => {
+    const input = categoryInputs[categoryKey];
+    if (input && input.trim()) {
+      // Trigger green pulse animation
+      setAnimatingCategories(prev => new Set([...prev, categoryKey]));
+      setTimeout(() => {
+        setAnimatingCategories(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(categoryKey);
+          return newSet;
+        });
+      }, 600); // Match animation duration
+      
+      // Direct submit - put exactly what user said into JSON
+      // Map category to primary field
+      const fieldMap = {
+        characters: 'characters',
+        actions: 'actions',
+        settings: 'setting',
+        style: 'style',
+        audio: 'ambient_sound'
+      };
+      
+      const field = fieldMap[categoryKey];
+      if (field) {
+        setFieldValue(field, input.trim());
+        
+        if (showToast?.showSuccess) {
+          const category = sceneCategories[categoryKey];
+          showToast.showSuccess(`${category?.label} "${input.trim()}" added to scene!`);
+        }
+        
+        setCategoryInputs(prev => ({ ...prev, [categoryKey]: '' }));
+      }
+    }
+  };
+
+  const handleCategoryExpand = async (categoryKey) => {
+    const input = categoryInputs[categoryKey];
+    
+    // Check if there's existing content to enhance
+    const category = sceneCategories[categoryKey];
+    const categoryFields = category?.fields || [];
+    const hasExistingContent = categoryFields.some(field => 
+      fieldValues[field] && fieldValues[field].trim() !== ''
+    );
+    
+    // For progressive expansion, we need either input OR existing content
+    if ((!input || !input.trim()) && !hasExistingContent) return;
+    
+    // Trigger sparkle effect
+    setExpandSparkles(prev => new Set([...prev, categoryKey]));
+    setTimeout(() => {
+      setExpandSparkles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(categoryKey);
+        return newSet;
+      });
+    }, 600);
+    
+    const expandKey = `${categoryKey}-expand`;
+    setLoading(expandKey, true);
+    
+    try {
+      // Check if this category already has expanded content (progressive expansion)
+      const category = sceneCategories[categoryKey];
+      const categoryFields = category?.fields || [];
+      const hasExistingContent = categoryFields.some(field => 
+        fieldValues[field] && fieldValues[field].trim() !== ''
+      );
+      
+      // For progressive expansion without input, use existing primary field value or generic enhancement
+      const enhancementInput = input?.trim() || (() => {
+        const primaryFields = ['character', 'actions', 'setting', 'style', 'audio'];
+        const primaryField = primaryFields.find(field => fieldValues[field]);
+        return primaryField ? fieldValues[primaryField] : 'enhance existing details';
+      })();
+      
+      // Use AI service to expand the description
+      const response = await aiApiService.generateCategorySuggestions(categoryKey, {
+        field_values: fieldValues
+      }, enhancementInput, hasExistingContent);
+      
+      if (response.success) {
+        // Apply expanded suggestions to the store
+        Object.entries(response.suggestions).forEach(([field, value]) => {
+          if (value && value.trim() !== '') {
+            setFieldValue(field, value);
+          }
+        });
+        
+        if (showToast?.showSuccess) {
+          const category = sceneCategories[categoryKey];
+          const expandType = hasExistingContent ? 'enhanced with more detail' : 'expanded into detailed';
+          const displayInput = input?.trim() || (hasExistingContent ? 'existing content' : 'details');
+          showToast.showSuccess(`${hasExistingContent ? '🔍 Enhanced' : '✨ Expanded'} "${displayInput}" - ${expandType} ${category?.label.toLowerCase()}!`);
+        }
+        
+        setCategoryInputs(prev => ({ ...prev, [categoryKey]: '' }));
+      } else {
+        if (showToast?.showError) {
+          showToast.showError(`Failed to expand ${categoryKey}. Please try again.`);
+        }
+      }
+    } catch (error) {
+      console.error(`${categoryKey} expand error:`, error);
+      if (showToast?.showError) {
+        showToast.showError(`Failed to expand ${categoryKey}. Please try again.`);
+      }
+    } finally {
+      setLoading(expandKey, false);
+    }
+  };
+
   
   // If in compact mode (for left panel), render ultra-compact version
   if (compact) {
     return (
       <>
-        <div className="bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-cinema-border p-3 shadow-sm mb-4">
-          {/* Ultra-Compact Header */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-base">🎬</span>
-              <div>
-                <span className="text-sm font-semibold text-gray-800 dark:text-cinema-text">
-                  Scene Builder
-                </span>
-                <div className="text-xs text-gray-500 dark:text-cinema-text-muted">
-                  Quick creation with templates
-                </div>
+        <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300 mb-4">
+          {/* Header - Matching JSON Output Style */}
+          <div className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
+                Scene Builder
+              </h2>
+              <div className="text-xs text-gray-500 dark:text-cinema-text-muted hidden sm:block">
+                Quick creation with templates
               </div>
             </div>
-            
-            {/* Simple/Advanced Mode Toggle */}
-            {setIsAdvancedMode && (
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {isAdvancedMode ? '🔧 Advanced' : '📝 Simple'}
-                </span>
-                <ToggleSwitch
-                  enabled={isAdvancedMode}
-                  onToggle={setIsAdvancedMode}
-                  size="small"
-                  color="blue"
-                  labelPosition="none"
-                />
-              </div>
-            )}
           </div>
           
-          {/* Ultra-Compact Horizontal Category List */}
-          <div className="space-y-2">
+          {/* Horizontal Category List */}
+          <div className="space-y-4">
             {Object.entries(sceneCategories).map(([categoryKey, category]) => {
               const completion = getCategoryCompletion(categoryKey);
               
               return (
-                <div key={categoryKey} className="bg-gray-50 dark:bg-cinema-panel rounded-md p-2">
-                  {/* Single Row Layout */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 flex-1">
-                      <span className="text-sm">{category.icon}</span>
-                      <div className="flex-1">
-                        <span className="text-xs font-medium text-gray-700 dark:text-cinema-text">
-                          {category.label}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-cinema-text-muted ml-2">
-                          {completion.percentage}%
-                        </span>
-                      </div>
+                <div key={categoryKey} className="bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft p-4 border border-cinema-border transition-all duration-300">
+                  {/* Full-width horizontal layout with proper alignment */}
+                  <div className="flex items-center space-x-3">
+                    {/* Left: Category Info - Fixed width */}
+                    <div className="flex items-center space-x-2 w-28 flex-shrink-0">
+                      <span className="text-base">{category.icon}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-cinema-text">
+                        {category.label}
+                      </span>
                     </div>
                     
-                    {/* Action Buttons - Stack vertically on mobile */}
-                    <div className="flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-1">
+                    {/* Center: Input Field with Status Indicator - Takes available space */}
+                    <div className="flex items-center space-x-2 flex-1">
+                      <div className="flex items-center justify-center w-4 flex-shrink-0">
+                        <span 
+                          className={`text-sm cursor-help transition-all duration-200 ${
+                            animatingCategories.has(categoryKey) 
+                              ? 'status-pulse' 
+                              : completion.filled > 0 
+                                ? 'text-cinema-teal dark:text-cinema-teal' 
+                                : 'text-gray-400 dark:text-gray-500'
+                          }`}
+                          title={completion.filled > 0 ? 'Has content - click Submit to add more' : 'Empty section - click Submit to activate'}
+                        >
+                          {completion.filled > 0 ? '●' : '○'}
+                        </span>
+                      </div>
+                    <div className="flex-1">
+                      <textarea
+                        value={categoryInputs[categoryKey] || ''}
+                        onChange={(e) => setCategoryInputs(prev => ({ ...prev, [categoryKey]: e.target.value }))}
+                        placeholder={placeholderText[categoryKey] || `Describe your ${category.label.toLowerCase()}...`}
+                        className="w-full px-3 py-3 text-sm border border-gray-300 dark:border-cinema-border rounded bg-white dark:bg-cinema-panel text-gray-700 dark:text-cinema-text placeholder-gray-500 dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none"
+                        style={{ height: '3.5rem' }}
+                        rows={1}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleCategorySubmit(categoryKey);
+                          }
+                        }}
+                      />
+                    </div>
+                    </div>
+                    
+                    {/* Right: Action Button Groups with Separation */}
+                    <div className="flex items-center space-x-6 flex-shrink-0">
+                      {/* Primary Actions Group */}
+                      <div className="flex items-center space-x-3">
                       <button
+                        onClick={() => handleCategorySubmit(categoryKey)}
+                        disabled={!categoryInputs[categoryKey]?.trim()}
+                        className="px-2 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200"
+                        title="Add this element to your prompt"
+                      >
+                        Submit
+                      </button>
+                      
+                      <LoadingButton
+                        onClick={() => handleCategoryExpand(categoryKey)}
+                        loading={isLoading(`${categoryKey}-expand`)}
+                        disabled={(() => {
+                          const hasInput = categoryInputs[categoryKey]?.trim();
+                          const category = sceneCategories[categoryKey];
+                          const categoryFields = category?.fields || [];
+                          const hasExistingContent = categoryFields.some(field => 
+                            fieldValues[field] && fieldValues[field].trim() !== ''
+                          );
+                          // Enable if there's input OR if there's existing content to enhance
+                          return !hasInput && !hasExistingContent;
+                        })()}
+                        className={`relative px-2 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200 ${
+                          expandSparkles.has(categoryKey) ? 'expand-sparkle' : ''
+                        }`}
+                        title={(() => {
+                          const category = sceneCategories[categoryKey];
+                          const categoryFields = category?.fields || [];
+                          const hasExistingContent = categoryFields.some(field => 
+                            fieldValues[field] && fieldValues[field].trim() !== ''
+                          );
+                          return hasExistingContent ? "Enhance with even more detail" : "Let AI add creative details";
+                        })()}
+                        loadingText="..."
+                      >
+                        {(() => {
+                          const category = sceneCategories[categoryKey];
+                          const categoryFields = category?.fields || [];
+                          const hasExistingContent = categoryFields.some(field => 
+                            fieldValues[field] && fieldValues[field].trim() !== ''
+                          );
+                          return hasExistingContent ? "Enhance" : "Expand";
+                        })()}
+                      </LoadingButton>
+                      </div>
+                      
+                      {/* Secondary Actions Group */}
+                      <div className="flex items-center space-x-3">
+                      <LoadingButton
                         onClick={() => handleLoad(categoryKey)}
+                        loading={isLoading(`load-${categoryKey}`)}
                         disabled={
                           (categoryKey === 'characters' && savedCharacters.length === 0) || 
                           (categoryKey === 'actions' && savedActions.length === 0) ||
@@ -551,31 +833,46 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className="px-2 py-2 md:px-3 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
-                        title={
-                          (categoryKey === 'characters' && savedCharacters.length === 0) ? 
-                          'No saved characters. Create and save characters first using the Library System.' :
-                          `Load saved ${category.label.toLowerCase()}`
-                        }
+                        className={`px-2 py-2 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none ${
+                          loadGlowEffects.has(categoryKey) ? 'load-activation-glow' : ''
+                        }`}
+                        title={(() => {
+                          const isDisabled = (categoryKey === 'characters' && savedCharacters.length === 0) || 
+                                           (categoryKey === 'actions' && savedActions.length === 0) ||
+                                           (categoryKey === 'settings' && savedSettings.length === 0 && savedScenes.length === 0) ||
+                                           (categoryKey === 'style' && savedStyles.length === 0) ||
+                                           (categoryKey === 'audio' && savedAudio.length === 0);
+                          
+                          if (isDisabled) {
+                            const messages = {
+                              'characters': 'Save a character first to load it here',
+                              'actions': 'Save an action first to load it here', 
+                              'settings': 'Save a setting first to load it here',
+                              'style': 'Save a style first to load it here',
+                              'audio': 'Save audio settings first to load them here'
+                            };
+                            return messages[categoryKey] || 'Save something first to load it';
+                          }
+                          
+                          return `Load saved ${sceneCategories[categoryKey]?.label?.toLowerCase() || categoryKey} from your library`;
+                        })()}
+                        loadingText="..."
                       >
                         Load
-                      </button>
+                      </LoadingButton>
+                      
                       <button
                         onClick={() => {
                           setActiveCategory(categoryKey);
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-2 py-2 md:px-3 md:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                        className="px-2 py-2 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200"
+                        title="Insert a preset idea"
                       >
                         Template
                       </button>
-                      <button
-                        onClick={() => handleAdvancedCreate(categoryKey)}
-                        className="px-2 py-2 md:px-3 md:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors flex items-center justify-center"
-                      >
-                        Create
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -636,8 +933,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                 
                 {/* Three Action Buttons - Stack vertically on mobile */}
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-                  <button
+                  <LoadingButton
                     onClick={() => handleLoad(categoryKey)}
+                    loading={isLoading(`load-${categoryKey}`)}
                     disabled={
                       (categoryKey === 'characters' && savedCharacters.length === 0) || 
                       (categoryKey === 'actions' && savedActions.length === 0) ||
@@ -645,22 +943,23 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       (categoryKey === 'style' && savedStyles.length === 0) ||
                       (categoryKey === 'audio' && savedAudio.length === 0)
                     }
-                    className="flex-1 px-2 py-2 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                    className="flex-1 px-2 py-2 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                     title={
                       (categoryKey === 'characters' && savedCharacters.length === 0) ? 
                       'No saved characters. Create and save characters first using the Library System.' :
                       `Load saved ${category.label.toLowerCase()}`
                     }
+                    loadingText="Loading..."
                   >
                     Load
-                  </button>
+                  </LoadingButton>
                   <button
                     onClick={() => {
                       setActiveCategory(categoryKey);
                       setShowTemplateModal(true);
                     }}
                     disabled={Object.keys(category.templates).length === 0}
-                    className="flex-1 px-2 py-2 md:py-1.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                    className="flex-1 px-2 py-2 md:py-1.5 bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Template
                   </button>

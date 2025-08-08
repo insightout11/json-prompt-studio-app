@@ -4,6 +4,7 @@ import FieldRenderer from './FieldRenderer';
 import TemplateSelector from './TemplateSelector';
 import ImportSystem from './ImportSystem';
 import ThemeToggle from './ThemeToggle';
+import ModeToggle from './ModeToggle';
 import CinematicModeToggle from './CinematicModeToggle';
 import Logo from './Logo';
 import LoadingScreen from './LoadingScreen';
@@ -25,7 +26,6 @@ import analytics from './analytics';
 import TutorialOverlay from './TutorialOverlay';
 import { ToastContainer } from './Toast';
 import { useToast } from './useToast';
-import IntegratedHeader from './IntegratedHeader';
 
 const App = () => {
   const { 
@@ -248,24 +248,6 @@ const App = () => {
       analytics.trackPageView('/', 'AI Video Prompt Generator - Home');
     }
   }, [isLoading]);
-
-  // Auto-scroll to scene options when they are generated
-  useEffect(() => {
-    if (sceneOptions && sceneOptions.length > 0) {
-      const timer = setTimeout(() => {
-        const optionsElement = document.querySelector('[data-scene-options]');
-        if (optionsElement) {
-          optionsElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start',
-            inline: 'nearest' 
-          });
-        }
-      }, 500); // Small delay to ensure DOM is updated
-      
-      return () => clearTimeout(timer);
-    }
-  }, [sceneOptions]);
 
   const copyToClipboard = async () => {
     try {
@@ -505,7 +487,7 @@ const App = () => {
 
   // Render randomize dropdown
   const renderRandomizeDropdown = () => (
-    <div className="header-dropdown top-full mt-1 right-0 bg-white dark:bg-cinema-panel border border-gray-200 dark:border-cinema-border rounded-md shadow-lg dark:shadow-glow-soft min-w-[220px]">
+    <div className="absolute top-full mt-1 right-0 bg-white dark:bg-cinema-panel border border-gray-200 dark:border-cinema-border rounded-md shadow-lg dark:shadow-glow-soft z-10 min-w-[220px]">
       <button
         onClick={() => {
           randomizeCharacterFields();
@@ -573,18 +555,7 @@ const App = () => {
     if (!sceneOptions || sceneOptions.length === 0) return null;
 
     return (
-      <div data-scene-options className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
-        {/* Success indicator */}
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg">✅</span>
-            <span className="font-medium text-green-800 dark:text-green-200">5 scene options generated successfully!</span>
-          </div>
-          <p className="text-sm text-green-600 dark:text-green-300 mt-1">
-            Choose an option below to extend your current scene, or preview for details.
-          </p>
-        </div>
-        
+      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-cinema-text flex items-center">
             <span className="mr-2">🎬</span>
@@ -642,132 +613,127 @@ const App = () => {
       <div className="container mx-auto px-4 lg:px-4 py-3 lg:py-6">
         
         {/* HEADER SECTION */}
-        <div className="header-base mb-6 bg-white/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-cinema-border rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-          {/* Desktop Header - 3 Section Grid */}
+        <div className="mb-6 bg-white/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-cinema-border rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+          {/* Desktop Header - 3 Column Grid */}
           <div className="hidden md:grid md:grid-cols-12 md:gap-4 items-center py-3 px-4 transition-all duration-300">
-            
-            {/* LEFT SECTION - Project & Library Manager */}
-            <div data-tutorial="project-system" className="col-span-3 flex items-center space-x-3">
+            {/* LEFT SECTION - Project & Navigation Context */}
+            <div className="col-span-4 flex items-center space-x-3">
               <Logo size="small" />
-              <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
-            </div>
-
-            {/* CENTER SECTION - Tools Group */}
-            <div data-tutorial="quick-tools" className="col-span-6 flex items-center justify-center space-x-2">
-              {/* Templates & Presets */}
-              <TemplateSelector />
-              
-              {/* Viral Generator */}
-              <button
-                onClick={() => setShowViralGenerator(true)}
-                className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
-                title="Viral Video Generator"
-              >
-                <span className="mr-2">📈</span>
-                <span>Viral Gen</span>
-              </button>
-              
-              {/* Randomize Tools */}
-              <div className="relative overflow-visible" ref={randomizeDropdownRef}>
-                <button
-                  onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                  className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
-                  title="Randomize Elements"
-                >
-                  <span className="mr-2">🎲</span>
-                  <span>Randomize</span>
-                  <svg
-                    className={`ml-1 w-4 h-4 transition-transform duration-200 ${
-                      showRandomizeDropdown ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showRandomizeDropdown && renderRandomizeDropdown()}
+              <div className="flex items-center space-x-3">
+                <ProjectSelector />
+                <div className="h-5 w-px header-section-divider"></div>
+                <LibrarySystem showToast={{ showSuccess, showError, showWarning, showInfo }} headerMode={true} />
               </div>
             </div>
 
-            {/* RIGHT SECTION - View Controls */}
-            <div className="col-span-3 flex items-center justify-end space-x-3">
+            {/* CENTER SECTION - Persistent Creative Tools */}
+            <div className="col-span-4 flex items-center justify-center">
+              <div className="flex items-center space-x-1 md:space-x-2 flex-wrap justify-center">
+                {/* Templates & Presets */}
+                <TemplateSelector />
+                
+                {/* Viral Generator */}
+                <button
+                  onClick={() => setShowViralGenerator(true)}
+                  className="px-2 md:px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs md:text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-1 md:space-x-2 shadow-md hover:shadow-lg"
+                  title="Viral Video Generator"
+                >
+                  <span>📹</span>
+                  <span className="hidden sm:inline">Viral</span>
+                </button>
+                
+                {/* Randomize Tools */}
+                <div className="relative" ref={randomizeDropdownRef}>
+                  <button
+                    onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
+                    className="px-2 md:px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs md:text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-1 md:space-x-2 shadow-md hover:shadow-lg"
+                    title="Randomize Elements"
+                  >
+                    <span>🎲</span>
+                    <span className="hidden sm:inline">Randomize</span>
+                  </button>
+                  {showRandomizeDropdown && renderRandomizeDropdown()}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT SECTION - Mode & UI Controls */}
+            <div className="col-span-4 flex items-center justify-end space-x-3">
+              <ModeToggle 
+                isAdvancedMode={isAdvancedMode} 
+                onModeChange={setIsAdvancedMode}
+              />
+              <div className="h-6 w-px header-section-divider"></div>
               <CinematicModeToggle />
             </div>
           </div>
 
           {/* Mobile Header - Stacked Layout */}
           <div className="md:hidden space-y-3 py-3 px-4 transition-all duration-300">
-            {/* Top Row: Logo and View Controls */}
+            {/* Top Row: Logo, Project, Mode Controls */}
             <div className="flex items-center justify-between">
-              <Logo size="small" width={100} height={40} />
-              <CinematicModeToggle className="scale-90" />
+              <div className="flex items-center space-x-2">
+                <Logo size="small" width={100} height={40} />
+                <ProjectSelector />
+              </div>
+              <div className="flex items-center space-x-2">
+                <ModeToggle 
+                  isAdvancedMode={isAdvancedMode} 
+                  onModeChange={setIsAdvancedMode}
+                  className="scale-90"
+                />
+                <CinematicModeToggle className="scale-90" />
+              </div>
             </div>
             
-            {/* Bottom Row: Project & Library Manager and Tools */}
-            <div data-tutorial="project-system" className="flex flex-wrap items-center gap-2">
-              <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
-              <TemplateSelector />
-              <button
-                onClick={() => setShowViralGenerator(true)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs"
-                title="Viral Video Generator"
-              >
-                <span className="mr-1">📈</span>
-                <span>Viral Gen</span>
-              </button>
-              <button
-                onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs"
-                title="Randomize Elements"
-              >
-                <span className="mr-1">🎲</span>
-                <span>Randomize</span>
-              </button>
+            {/* Bottom Row: Library and Creative Tools */}
+            <div className="flex items-center justify-between">
+              <LibrarySystem showToast={{ showSuccess, showError, showWarning, showInfo }} headerMode={true} />
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setShowViralGenerator(true)}
+                  className="px-2 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs font-medium rounded-md transition-all duration-300"
+                  title="Viral Generator"
+                >
+                  📹
+                </button>
+                <button
+                  onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
+                  className="px-2 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-xs font-medium rounded-md transition-all duration-300"
+                  title="Randomize"
+                >
+                  🎲
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* CONTEXT-SENSITIVE MODE TOGGLE */}
+        {/* MODE INDICATOR */}
         <div className="mb-4 flex items-center justify-center">
-          <button
-            data-tutorial="advanced-mode-toggle"
-            onClick={() => setIsAdvancedMode(!isAdvancedMode)}
-            className={`
-              inline-flex items-center px-4 py-2 rounded-full font-medium transition-all duration-300 cursor-pointer
-              hover:scale-105 active:scale-95 group
-              bg-teal-100 text-teal-800 border-2 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 dark:hover:bg-teal-800/40
-            `}
-            title="Switch between simple and advanced editing modes"
-          >
-            <div className="w-3 h-3 rounded-full mr-2 transition-all duration-300 group-hover:scale-110 bg-teal-500" />
-            
-            {/* Desktop: Full text */}
-            <span className="hidden sm:inline">
-              {isAdvancedMode ? 'Advanced Mode' : 'Simple Mode'}
-            </span>
-            
-            {/* Mobile: Icon only */}
-            <span className="sm:hidden text-lg" title="Switch editing mode">
-              ⚙️
-            </span>
-            
-            {/* Switch indicator */}
-            <svg className="w-4 h-4 ml-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-          </button>
+          <div className={`
+            inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all duration-300
+            ${isAdvancedMode 
+              ? 'bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700' 
+              : 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700'
+            }
+          `}>
+            <div className={`
+              w-2 h-2 rounded-full mr-2 transition-colors duration-300
+              ${isAdvancedMode ? 'bg-purple-500' : 'bg-blue-500'}
+            `} />
+            {isAdvancedMode ? 'Advanced Mode' : 'Simple Mode'}
+          </div>
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
           
           {/* LEFT PANEL */}
-          <div className="space-y-4 lg:space-y-6 h-full relative">
+          <div className="space-y-4 lg:space-y-6 min-h-[400px] relative">
             {/* Simple Mode: Scene Builder Only */}
             {!isAdvancedMode && (
-              <div data-tutorial="scene-builder" className="transition-all duration-500 ease-in-out transform h-full">
+              <div data-tutorial="scene-builder" className="transition-all duration-500 ease-in-out transform">
                 <SceneBuilderChecklist 
                   compact={true}
                   isAdvancedMode={isAdvancedMode}
@@ -810,6 +776,19 @@ const App = () => {
                         )}
                       </div>
                       
+                      {/* Advanced Mode Toggle */}
+                      <div data-tutorial="mode-toggle" className="flex items-center space-x-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {isAdvancedMode ? '🔧 Advanced ↔ Simple' : '📝 Simple ↔ Advanced'}
+                        </span>
+                        <ToggleSwitch
+                          enabled={isAdvancedMode}
+                          onToggle={setIsAdvancedMode}
+                          size="medium"
+                          color="blue"
+                          labelPosition="none"
+                        />
+                      </div>
                     </div>
                   </div>
                 
@@ -883,7 +862,7 @@ const App = () => {
                     <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
                       JSON Output
                     </h2>
-                    <div data-tutorial="advanced-controls" className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1">
                       <span className="text-xs text-gray-500 dark:text-cinema-text-muted">Ratio:</span>
                       <select
                         value={aspectRatio}
@@ -954,13 +933,12 @@ const App = () => {
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}
-              <div data-tutorial="text-input" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+              <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
                 <UniversalInput 
                   aiFeatures={
-                    <div data-tutorial="ai-tools">
-                      <ProFeaturesHub 
-                        isPro={isPro}
-                        onShowPricing={() => setShowPricing(true)}
+                    <ProFeaturesHub 
+                      isPro={isPro}
+                      onShowPricing={() => setShowPricing(true)}
                       onSceneExtenderClick={() => handleGenerate5Options()}
                       currentJson={JSON.parse(getJsonOutput() || '{}')}
                       onJsonUpdate={(updatedJson) => {
@@ -980,7 +958,6 @@ const App = () => {
                       extensionError={extensionError}
                       compact={true}
                     />
-                    </div>
                   }
                 />
               </div>
@@ -999,26 +976,26 @@ const App = () => {
               href="/privacy-policy.html" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">🔒</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Privacy Policy</span>
+              <span className="text-purple-500">🔒</span>
+              <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Privacy Policy</span>
             </a>
             <a 
               href="/terms-of-service.html" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">📜</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Terms of Service</span>
+              <span className="text-purple-500">📜</span>
+              <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Terms of Service</span>
             </a>
             <a 
               href="mailto:insightout11@gmail.com"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-4 py-2 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">✉️</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Contact</span>
+              <span className="text-purple-500">✉️</span>
+              <span className="text-sm font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Contact</span>
             </a>
           </div>
           <div className="text-center">
@@ -1030,164 +1007,6 @@ const App = () => {
         <ToastContainer toasts={toasts} removeToast={removeToast} />
 
       </div>
-
-      {/* MODALS */}
-      {showViralGenerator && (
-        <ViralVideoGeneratorModal 
-          onClose={() => setShowViralGenerator(false)}
-          showToast={{ showSuccess, showError, showWarning, showInfo }}
-        />
-      )}
-
-      {showTutorial && (
-        <TutorialOverlay 
-          onComplete={() => setShowTutorial(false)}
-          onSkip={() => setShowTutorial(false)}
-          onTutorialAction={handleTutorialAction}
-          isAdvancedMode={isAdvancedMode}
-          expandedCategories={expandedCategories}
-        />
-      )}
-
-      {/* Save Modal */}
-      {showSaveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[3000] p-4">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text">
-              💾 Save Current Scene
-            </h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text mb-2">
-                Save as:
-              </label>
-              <select
-                value={saveCategory}
-                onChange={(e) => setSaveCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 mb-3 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text"
-              >
-                <option value="">Select category...</option>
-                <option value="scene">Complete Scene</option>
-                <option value="character">Character Only</option>
-                <option value="action">Action Only</option>
-                <option value="setting">Setting Only</option>
-                <option value="style">Style Only</option>
-                <option value="audio">Audio Only</option>
-              </select>
-              <input
-                type="text"
-                value={saveName}
-                onChange={(e) => setSaveName(e.target.value)}
-                placeholder="Enter name for saved item..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text"
-                onKeyPress={(e) => e.key === 'Enter' && saveCategory && saveName.trim() && document.querySelector('.save-modal-confirm-btn').click()}
-                autoFocus
-              />
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  if (saveCategory && saveName.trim()) {
-                    try {
-                      // Call the appropriate save function based on category
-                      switch(saveCategory) {
-                        case 'scene':
-                          saveScene(saveName.trim());
-                          break;
-                        case 'character':
-                          saveCharacter(saveName.trim());
-                          break;
-                        case 'action':
-                          saveAction(saveName.trim());
-                          break;
-                        case 'setting':
-                          saveSetting(saveName.trim());
-                          break;
-                        case 'style':
-                          saveStyle(saveName.trim());
-                          break;
-                        case 'audio':
-                          saveAudio(saveName.trim());
-                          break;
-                        default:
-                          throw new Error('Invalid save category');
-                      }
-                      setShowSaveModal(false);
-                      setSaveName('');
-                      setSaveCategory('');
-                      showSuccess(`Saved "${saveName.trim()}" as ${saveCategory}!`);
-                    } catch (error) {
-                      console.error('Save error:', error);
-                      showError(`Failed to save: ${error.message}`);
-                    }
-                  }
-                }}
-                disabled={!saveCategory || !saveName.trim()}
-                className="save-modal-confirm-btn flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-cinema-border text-white rounded-md transition-all duration-300"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => {
-                  setShowSaveModal(false);
-                  setSaveName('');
-                  setSaveCategory('');
-                }}
-                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-all duration-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[3000] p-4">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text">
-              {showConfirmModal.title}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-cinema-text-muted mb-6">
-              {showConfirmModal.message}
-            </p>
-            <div className="flex items-center justify-between mb-6">
-              <label className="flex items-center space-x-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={dontShowAgain}
-                  onChange={(e) => setDontShowAgain(e.target.checked)}
-                  className="rounded border-gray-300 dark:border-cinema-border"
-                />
-                <span className="text-gray-600 dark:text-cinema-text-muted">Don't show this again</span>
-              </label>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  if (showConfirmModal.onConfirm) {
-                    showConfirmModal.onConfirm();
-                  }
-                  setShowConfirmModal(null);
-                  setDontShowAgain(false);
-                }}
-                className={`flex-1 px-4 py-2 text-white rounded-md transition-all duration-300 ${showConfirmModal.confirmClass || 'bg-red-500 hover:bg-red-600'}`}
-              >
-                {showConfirmModal.confirmText || 'Confirm'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowConfirmModal(null);
-                  setDontShowAgain(false);
-                }}
-                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-all duration-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

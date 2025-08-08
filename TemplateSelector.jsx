@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { allTemplates, getAllTemplateKeys, isPresetTemplate, getTemplate } from './templates';
 import ExperimentalModeEngine from './ExperimentalModeEngine';
 import usePromptStore from './store';
@@ -236,17 +237,17 @@ const TemplateSelector = () => {
       {/* Template Trigger Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="w-full md:w-auto px-2 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center md:justify-start space-x-2 h-10 shadow-lg hover:shadow-xl"
+        className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5M3 7h18M3 17h18" />
         </svg>
         <span>Templates & Presets</span>
       </button>
 
       {/* Template Selection Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      {showModal && createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto z-[3000]">
           <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border transition-all duration-300">
             
             {/* Modal Header */}
@@ -661,7 +662,8 @@ const TemplateSelector = () => {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -14,6 +14,9 @@ const usePromptStore = create((set, get) => ({
   customDetails: {}, // Stores custom description text for any field (e.g., { hair_color: "custom description" })
   expandedCustomDetails: new Set(), // Tracks which fields have custom detail areas expanded
   
+  // Undo functionality
+  undoStack: [], // Stack to store previous states for undo
+  
   // Aspect ratio for video generation
   aspectRatio: '16:9',
 
@@ -27,26 +30,35 @@ const usePromptStore = create((set, get) => ({
     return { expandedCategories: newExpanded };
   }),
 
-  toggleField: (fieldKey) => set((state) => {
-    const newEnabled = new Set(state.enabledFields);
-    const newValues = { ...state.fieldValues };
+  toggleField: (fieldKey) => {
+    const { saveStateForUndo } = get();
+    saveStateForUndo(); // Save state before making changes
     
-    if (newEnabled.has(fieldKey)) {
-      newEnabled.delete(fieldKey);
-      delete newValues[fieldKey];
-    } else {
-      newEnabled.add(fieldKey);
-      newValues[fieldKey] = '';
-    }
-    
-    return { enabledFields: newEnabled, fieldValues: newValues };
-  }),
+    set((state) => {
+      const newEnabled = new Set(state.enabledFields);
+      const newValues = { ...state.fieldValues };
+      
+      if (newEnabled.has(fieldKey)) {
+        newEnabled.delete(fieldKey);
+        delete newValues[fieldKey];
+      } else {
+        newEnabled.add(fieldKey);
+        newValues[fieldKey] = '';
+      }
+      
+      return { enabledFields: newEnabled, fieldValues: newValues };
+    });
+  },
 
-  updateFieldValue: (fieldKey, value) => set((state) => {
-    const newFieldValues = {
-      ...state.fieldValues,
-      [fieldKey]: value
-    };
+  updateFieldValue: (fieldKey, value) => {
+    const { saveStateForUndo } = get();
+    saveStateForUndo(); // Save state before making changes
+    
+    set((state) => {
+      const newFieldValues = {
+        ...state.fieldValues,
+        [fieldKey]: value
+      };
     
     // Auto-expand Character Details when any character_type is selected
     let newExpandedCategories = state.expandedCategories;
@@ -86,26 +98,32 @@ const usePromptStore = create((set, get) => ({
       newExpandedDetails.add(fieldKey);
     }
     
-    return {
-      fieldValues: newFieldValues,
-      expandedCategories: newExpandedCategories,
-      expandedDetails: newExpandedDetails
-    };
-  }),
+      return {
+        fieldValues: newFieldValues,
+        expandedCategories: newExpandedCategories,
+        expandedDetails: newExpandedDetails
+      };
+    });
+  },
 
   // Simplified field value setter for external components like viral video generator
-  setFieldValue: (fieldKey, value) => set((state) => {
-    const newEnabledFields = new Set([...state.enabledFields, fieldKey]);
-    const newFieldValues = {
-      ...state.fieldValues,
-      [fieldKey]: value
-    };
+  setFieldValue: (fieldKey, value) => {
+    const { saveStateForUndo } = get();
+    saveStateForUndo(); // Save state before making changes
     
-    return {
-      enabledFields: newEnabledFields,
-      fieldValues: newFieldValues
-    };
-  }),
+    set((state) => {
+      const newEnabledFields = new Set([...state.enabledFields, fieldKey]);
+      const newFieldValues = {
+        ...state.fieldValues,
+        [fieldKey]: value
+      };
+    
+      return {
+        enabledFields: newEnabledFields,
+        fieldValues: newFieldValues
+      };
+    });
+  },
 
   // New methods for detail management
   toggleDetailExpansion: (fieldKey) => set((state) => {
@@ -678,7 +696,51 @@ const usePromptStore = create((set, get) => ({
     return genericTemplates[Math.floor(Math.random() * genericTemplates.length)];
   },
 
+  // Save current state for undo functionality
+  saveStateForUndo: () => {
+    const state = get();
+    const currentState = {
+      enabledFields: new Set(state.enabledFields),
+      fieldValues: { ...state.fieldValues },
+      expandedCategories: new Set(state.expandedCategories),
+      expandedDetails: new Set(state.expandedDetails),
+      detailValues: { ...state.detailValues },
+      customDetails: { ...state.customDetails },
+      expandedCustomDetails: new Set(state.expandedCustomDetails)
+    };
+    
+    set((state) => ({
+      undoStack: [...state.undoStack.slice(-9), currentState] // Keep last 10 states
+    }));
+  },
+  
+  // Undo last action
+  undo: () => {
+    const state = get();
+    if (state.undoStack.length > 0) {
+      const previousState = state.undoStack[state.undoStack.length - 1];
+      const newUndoStack = state.undoStack.slice(0, -1);
+      
+      set({
+        enabledFields: previousState.enabledFields,
+        fieldValues: previousState.fieldValues,
+        expandedCategories: previousState.expandedCategories,
+        expandedDetails: previousState.expandedDetails,
+        detailValues: previousState.detailValues,
+        customDetails: previousState.customDetails,
+        expandedCustomDetails: previousState.expandedCustomDetails,
+        undoStack: newUndoStack
+      });
+      
+      return true; // Successfully undid
+    }
+    return false; // Nothing to undo
+  },
+  
   clearAll: () => {
+    const { saveStateForUndo } = get();
+    saveStateForUndo(); // Save state before clearing
+    
     set({
       enabledFields: new Set(),
       fieldValues: {},

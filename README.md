@@ -69,7 +69,8 @@ VITE_APP_URL=https://your-domain.com
 VITE_GA4_ID=G-XXXXXXXXXX
 VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
-# Optional
+# Optional AI API Keys
+VITE_GROQ_API_KEY=gsk_...
 VITE_OPENAI_API_KEY=sk-...
 VITE_SEARCH_CONSOLE_ID=your-verification-id
 ```
@@ -147,7 +148,11 @@ location / {
 
 ### API Integration
 
-Users can provide their own OpenAI API key for AI features, or you can provide a global key via environment variables.
+The application uses a hybrid AI approach:
+- **Groq API**: For fast text generation and prompt optimization (most features)
+- **OpenAI API**: For image analysis and vision capabilities
+
+Users can provide their own API keys for AI features, or you can provide global keys via environment variables. Both APIs support the OpenAI-compatible format.
 
 ## 🎨 Customization
 

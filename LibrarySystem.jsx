@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import usePromptStore from './store';
 
-const LibrarySystem = () => {
+const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle }) => {
   const { 
     savedCharacters, savedScenes, savedScenePacks, savedActions, 
     savedSettings, savedStyles, savedAudio,
@@ -12,7 +12,6 @@ const LibrarySystem = () => {
     applySceneWithMergeStrategy
   } = usePromptStore();
   
-  const [showDropdown, setShowDropdown] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveType, setSaveType] = useState('character');
   const [saveName, setSaveName] = useState('');
@@ -21,11 +20,13 @@ const LibrarySystem = () => {
   const [selectedScenePack, setSelectedScenePack] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // Close library when clicking outside (if in modal mode)
   useEffect(() => {
+    if (!isOpen || headerMode) return;
+    
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+        onToggle?.(false);
       }
     };
 
@@ -33,7 +34,7 @@ const LibrarySystem = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isOpen, headerMode, onToggle]);
 
   // Library categories with their respective data and handlers
   const libraryCategories = {
@@ -107,10 +108,14 @@ const LibrarySystem = () => {
       const category = libraryCategories[saveType];
       if (category && category.saveHandler) {
         category.saveHandler(saveName.trim());
+        
+        // Show success feedback
+        if (showToast?.showSuccess) {
+          showToast.showSuccess(`${category.label.slice(0, -1)} "${saveName.trim()}" saved successfully!`);
+        }
       }
       setSaveName('');
       setShowSaveModal(false);
-      setShowDropdown(false);
     }
   };
 
@@ -123,15 +128,26 @@ const LibrarySystem = () => {
   const handleLoadItem = (categoryKey, id) => {
     const category = libraryCategories[categoryKey];
     if (category && category.loadHandler) {
+      const loadedItem = category.data.find(item => item.id === id);
       category.loadHandler(id);
+      
+      // Show success feedback
+      if (showToast?.showSuccess && loadedItem) {
+        showToast.showSuccess(`${category.label.slice(0, -1)} "${loadedItem.name}" loaded successfully!`);
+      }
     }
-    setShowDropdown(false);
   };
 
   const handleDeleteItem = (categoryKey, id) => {
     const category = libraryCategories[categoryKey];
     if (category && category.deleteHandler) {
+      const itemToDelete = category.data.find(item => item.id === id);
       category.deleteHandler(id);
+      
+      // Show success feedback
+      if (showToast?.showSuccess && itemToDelete) {
+        showToast.showSuccess(`${category.label.slice(0, -1)} "${itemToDelete.name}" deleted successfully.`);
+      }
     }
   };
 
@@ -141,7 +157,6 @@ const LibrarySystem = () => {
     if (pack) {
       setSelectedScenePack(pack);
       setShowScenePackModal(true);
-      setShowDropdown(false);
     }
   };
 
@@ -149,6 +164,16 @@ const LibrarySystem = () => {
     if (scene.json && typeof scene.json === 'object') {
       applySceneWithMergeStrategy(scene.json, strategy);
       setShowScenePackModal(false);
+      
+      // Show success feedback
+      if (showToast?.showSuccess) {
+        const strategyLabels = {
+          smart: 'Smart merge',
+          merge: 'Added to scene',
+          replace: 'Scene replaced'
+        };
+        showToast.showSuccess(`${strategyLabels[strategy] || 'Scene applied'} successfully!`);
+      }
       
       setTimeout(() => {
         const jsonSection = document.querySelector('.json-output-section');
@@ -263,7 +288,6 @@ const LibrarySystem = () => {
                 <button
                   onClick={() => {
                     exportData(categoryKey === 'scenes' ? 'scene' : categoryKey.slice(0, -1), item.id);
-                    setShowDropdown(false);
                   }}
                   className="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded-md transition-all"
                 >
@@ -277,108 +301,138 @@ const LibrarySystem = () => {
     );
   };
 
-  return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Main Dropdown Button */}
+  // If used as a button (header mode), return just the button
+  if (headerMode) {
+    return (
       <button
-        onClick={() => setShowDropdown(!showDropdown)}
-        className="w-full md:w-auto flex items-center justify-center md:justify-start space-x-2 px-2 md:px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 h-10 shadow-lg hover:shadow-xl"
+        onClick={() => onToggle?.(!isOpen)}
+        className="flex items-center space-x-2 px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-all duration-300 shadow-lg hover:shadow-xl"
+        title="View saved content and manage your library"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5" />
-        </svg>
+        <span className="text-base">📚</span>
         <span>Library</span>
-        <svg className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
+    );
+  }
 
-      {/* Dropdown Content */}
-      {showDropdown && (
-        <div className="absolute top-full mt-2 right-0 bg-white dark:bg-cinema-panel border border-gray-200 dark:border-cinema-border rounded-lg shadow-xl dark:shadow-glow-soft z-50 w-80 max-h-96 overflow-hidden">
-          {/* Tabs */}
-          <div className="flex flex-wrap border-b border-gray-200 dark:border-cinema-border">
+  // If not open, return null (hidden)
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" ref={dropdownRef}>
+      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full max-h-[90vh] overflow-hidden border border-teal-200 dark:border-teal-700/50">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border">
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">📚</span>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-cinema-text">Library</h2>
+          </div>
+          <button
+            onClick={() => onToggle?.(false)}
+            className="text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex flex-wrap border-b border-gray-200 dark:border-cinema-border px-6">
+          <button
+            onClick={() => setActiveTab('quick-actions')}
+            className={`px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === 'quick-actions'
+                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text'
+            }`}
+          >
+            Actions
+          </button>
+          {Object.entries(libraryCategories).map(([key, category]) => (
             <button
-              onClick={() => setActiveTab('quick-actions')}
-              className={`px-2 py-2 text-xs font-medium transition-all ${
-                activeTab === 'quick-actions'
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === key
                   ? 'border-b-2 border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
                   : 'text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text'
               }`}
             >
-              Actions
-            </button>
-            {Object.entries(libraryCategories).map(([key, category]) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`px-2 py-2 text-xs font-medium transition-all ${
-                  activeTab === key
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text'
-                }`}
-              >
-                <span className="flex items-center space-x-1">
-                  <span>{category.icon}</span>
-                  <span className="hidden sm:inline">{category.label}</span>
-                  <span className="text-xs">({category.data.length})</span>
+              <span className="flex items-center space-x-2">
+                <span>{category.icon}</span>
+                <span>{category.label}</span>
+                <span className="text-xs bg-gray-200 dark:bg-cinema-border px-2 py-1 rounded-full">
+                  {category.data.length}
                 </span>
-              </button>
-            ))}
-          </div>
+              </span>
+            </button>
+          ))}
+        </div>
 
-          {/* Tab Content */}
-          <div className="p-3 max-h-80 overflow-y-auto">
-            {activeTab === 'quick-actions' && (
-              <div className="space-y-2">
-                {/* Save Actions Row */}
-                <div className="grid grid-cols-2 gap-2 mb-3">
+        {/* Content */}
+        <div className="p-6 max-h-96 overflow-y-auto">
+          {activeTab === 'quick-actions' && (
+            <div className="space-y-6">
+              {/* Save Actions Section */}
+              <div>
+                <div className="border-b border-gray-200 dark:border-cinema-border pb-3 mb-4">
+                  <h4 className="text-sm font-medium text-gray-600 dark:text-cinema-text-muted uppercase tracking-wide">
+                    💾 Save Current Elements
+                  </h4>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
                   {Object.entries(libraryCategories).filter(([key]) => key !== 'scene-packs').map(([key, category]) => (
                     <button
                       key={key}
                       onClick={() => openSaveModal(key)}
-                      className={`px-3 py-2 ${getColorClasses(category.color)} text-white text-xs font-medium rounded-md transition-all duration-200 flex items-center space-x-2`}
+                      className={`px-4 py-3 ${getColorClasses(category.color)} text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover:shadow-lg`}
                     >
-                      <span>{category.icon}</span>
+                      <span className="text-lg">{category.icon}</span>
                       <span>Save {category.label.slice(0, -1)}</span>
                     </button>
                   ))}
                 </div>
+              </div>
 
-                <div className="border-t border-gray-200 dark:border-cinema-border pt-2 mt-2">
+              {/* Export Section */}
+              <div>
+                <div className="border-b border-gray-200 dark:border-cinema-border pb-3 mb-4">
+                  <h4 className="text-sm font-medium text-gray-600 dark:text-cinema-text-muted uppercase tracking-wide">
+                    📦 Export & Backup
+                  </h4>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => {
-                      exportData('current');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-all duration-200 flex items-center space-x-2"
+                    onClick={() => exportData('current')}
+                    className="px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover:shadow-lg"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <span>Export Current</span>
                   </button>
 
                   <button
-                    onClick={() => {
-                      exportData('all');
-                      setShowDropdown(false);
-                    }}
-                    className="w-full px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition-all duration-200 flex items-center space-x-2 mt-1"
+                    onClick={() => exportData('all')}
+                    className="px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover:shadow-lg"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     <span>Export All (Backup)</span>
                   </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab !== 'quick-actions' && renderCategoryItems(activeTab)}
-          </div>
+          {activeTab !== 'quick-actions' && renderCategoryItems(activeTab)}
         </div>
-      )}
+      </div>
 
       {/* Save Modal */}
       {showSaveModal && (

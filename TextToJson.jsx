@@ -14,6 +14,11 @@ const TextToJson = ({ onResult, className = "" }) => {
       return;
     }
 
+    if (!aiApiService.hasGroqApiKey()) {
+      setError('Groq API key required for text conversion. Please set your Groq API key in settings.');
+      return;
+    }
+
     setIsConverting(true);
     setError(null);
 
@@ -42,10 +47,10 @@ Extract relevant details for these types of fields:
 
 Return ONLY valid JSON with fields you're confident about. Use descriptive but concise values.`;
 
-      const response = await aiApiService.generateCompletion([
+      const response = await aiApiService.makeRequest([
         { role: 'user', content: prompt }
       ], {
-        model: 'gpt-4o-mini',
+        // No model specified - will default to Groq's mixtral-8x7b-32768
         temperature: 0.3,
         maxTokens: 800
       });

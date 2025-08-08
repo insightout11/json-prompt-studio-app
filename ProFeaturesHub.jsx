@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import CharacterEngine from './CharacterEngine';
 import WorldBuilder from './WorldBuilder';
 import StoryboardGenerator from './StoryboardGenerator';
-import ImageToJson from './ImageToJson';
+import StyleGenerator from './StyleGenerator';
 import SceneExtender from './SceneExtender';
 import SceneExtenderInterface from './SceneExtenderInterface';
-import TextToJson from './TextToJson';
 import UsageMeter from './UsageMeter';
 import UpgradeButton from './UpgradeButton';
 import InlineAuth from './InlineAuth';
@@ -13,16 +12,10 @@ import { useSubscription } from './StripeIntegration';
 import { useAuth } from './useAuth';
 import { userService } from './userService';
 
-const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSceneExtenderClick, sceneOptions, onApplySceneOption, onDismissSceneOptions, extensionLoading, extensionError }) => {
+const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSceneExtenderClick, sceneOptions, onApplySceneOption, onDismissSceneOptions, extensionLoading, extensionError, compact = false }) => {
   const [activeFeature, setActiveFeature] = useState(null);
-  const [showAuthRequired, setShowAuthRequired] = useState(false);
   const { trackFeatureUsage, getUsageStats } = useSubscription();
   const { isAuthenticated, isEmailVerified, user } = useAuth();
-  
-  // Get current user stats from enhanced user service
-  const usageStats = userService.getUsageStats();
-  const canUseAI = userService.canUseAIFeatures();
-  const requirement = userService.getUsageRequirement();
 
   const proFeatures = [
     {
@@ -30,6 +23,8 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
       name: 'AI Character Engine',
       icon: '🎭',
       description: 'Generate detailed characters with backstories and traits',
+      benefits: ['Consistent character details', 'Rich backstories', 'Reusable character templates'],
+      sampleOutput: '{\n  "character": "Elena_Martinez",\n  "age": 28,\n  "background": "Former marine biologist",\n  "personality": "Determined yet empathetic",\n  "motivation": "Save ocean ecosystems"\n}',
       component: CharacterEngine
     },
     {
@@ -37,236 +32,221 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
       name: 'AI World Builder',
       icon: '🌍',
       description: 'Create immersive environments with consistent lore',
+      benefits: ['Detailed world-building', 'Consistent environments', 'Rich atmospheric details'],
+      sampleOutput: '{\n  "setting": "Neo_Tokyo_2087",\n  "atmosphere": "Neon-lit cyberpunk metropolis",\n  "weather": "Perpetual rain",\n  "landmarks": ["Digital_Shrine", "Corporate_Towers"]\n}',
       component: WorldBuilder
+    },
+    {
+      id: 'style-generator',
+      name: 'Style Generator',
+      icon: '🎥',
+      description: 'Apply cinematic styles, camera angles, and director aesthetics',
+      benefits: ['Preset style library', 'Camera angle guides', 'Director style combos', 'Smart AI suggestions'],
+      sampleOutput: 'Applied Wes Anderson style:\nSymmetrical framing, pastel colors, whimsical storytelling...',
+      component: StyleGenerator
     },
     {
       id: 'storyboard-generator',
       name: 'Storyboard Generator',
       icon: '🎬',
       description: 'Break a script or JSON into a full storyboard sequence',
+      benefits: ['Multi-scene planning', 'Shot-by-shot breakdown', 'Visual continuity'],
+      sampleOutput: 'Scene 1: Wide establishing shot\nScene 2: Medium close-up\nScene 3: Dramatic reveal...',
       component: StoryboardGenerator
     },
     {
       id: 'scene-extender',
       name: 'Scene Extender',
-      icon: '🎬',
-      description: 'Generate 5 different scene continuations with AI',
-      component: SceneExtenderInterface
-    }
+      icon: '✨',
+      description: 'Extend existing scenes with AI-generated variations',
+      benefits: ['Multiple scene options', 'Creative variations', 'Smart merging'],
+      sampleOutput: 'Generated 5 scene variations:\n1. Action sequence\n2. Dialogue focus\n3. Environmental details...',
+      component: SceneExtender
+    },
   ];
 
-  const handleFeatureResult = (result) => {
-    if (result && typeof result === 'object') {
+  // Handler functions for feature results
+  const handleCharacterGenerated = (result) => {
+    if (result && onJsonUpdate) {
+      onJsonUpdate(result);
+    }
+  };
+
+  const handleWorldGenerated = (result) => {
+    if (result && onJsonUpdate) {
+      onJsonUpdate(result);
+    }
+  };
+
+  const handleStoryboardGenerated = (result) => {
+    if (result && onJsonUpdate) {
+      onJsonUpdate(result);
+    }
+  };
+
+  const handleStyleGenerated = (result) => {
+    if (result && onJsonUpdate) {
+      onJsonUpdate(result);
+    }
+  };
+
+  const handleJsonGenerated = (result) => {
+    if (result && onJsonUpdate) {
       onJsonUpdate(result);
     }
   };
 
   const handleFeatureClick = (featureId) => {
-    // Check if user can use AI features based on new tier system
-    if (!canUseAI) {
-      if (requirement.type === 'signup_required') {
-        setShowAuthRequired(true);
-        return;
-      } else if (requirement.type === 'verification_required') {
-        // TODO: Show verification reminder
-        alert('Please verify your email to use AI features');
-        return;
-      } else if (requirement.type === 'upgrade_required') {
-        // TODO: Show upgrade modal
-        onShowPricing && onShowPricing();
-        return;
-      }
-    }
-
-    try {
-      // Track usage using the enhanced user service
-      userService.trackAIFeatureUsage(featureId);
-      
-      // Toggle feature active state
-      setActiveFeature(activeFeature === featureId ? null : featureId);
-    } catch (error) {
-      console.error('Failed to track feature usage:', error);
-      alert(error.message);
-    }
+    // All users can now use features
+    setActiveFeature(activeFeature === featureId ? null : featureId);
   };
 
-  const handleAuthComplete = (authData) => {
-    setShowAuthRequired(false);
-    // User is now signed up, they can use AI features
-  };
 
-  // Show inline auth if required
-  if (showAuthRequired) {
-    return (
-      <div className="mt-6">
-        <InlineAuth 
-          onAuthComplete={handleAuthComplete}
-          title="Sign up for 10 free AI generations"
-          subtitle="No password required - just verify your email"
-        />
-      </div>
-    );
-  }
 
-  // For users who need to upgrade (hit their limits)
-  if (requirement.type === 'upgrade_required') {
+
+  // Compact layout for integration with UniversalInput - larger buttons spanning text to convert width
+  if (compact) {
     return (
-      <div className="mt-6">
-        {/* Usage Limit Reached Banner */}
-        <div className="bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-700/50 mb-6">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-3">🚀</div>
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-cinema-text mb-2">
-              You've Used All Your Free Generations!
-            </h3>
-            <p className="text-gray-600 dark:text-cinema-text-muted mb-4">
-              {requirement.message}
-            </p>
-            <div className="bg-white dark:bg-cinema-card rounded-lg p-4 mb-4 inline-block">
-              <div className="text-sm text-gray-600 dark:text-cinema-text-muted mb-1">This month's usage:</div>
-              <div className="text-2xl font-bold text-gray-800 dark:text-cinema-text">
-                {usageStats.monthly_usage}/{usageStats.usage_limit}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-cinema-text-muted">
-                {usageStats.days_remaining} days until reset
-              </div>
-            </div>
-          </div>
-          <div className="text-center">
-            <UpgradeButton />
-          </div>
+      <div>
+        {/* Row of 5 AI feature buttons - sized similar to Convert button */}
+        <div className="flex space-x-2">
+          {proFeatures.slice(0, 5).map((feature) => (
+            <button
+              key={feature.id}
+              onClick={() => handleFeatureClick(feature.id)}
+              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-1 ${
+                activeFeature === feature.id
+                  ? 'bg-cinema-teal text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-cinema-border text-gray-700 dark:text-cinema-text hover:bg-gray-200 dark:hover:bg-cinema-card shadow-sm hover:shadow-md'
+              }`}
+              title={feature.name}
+            >
+              <span className="text-base">{feature.icon}</span>
+              <span className="text-xs font-medium">{feature.name}</span>
+            </button>
+          ))}
         </div>
-
-        {/* Show Locked Features */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-700/50">
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-cinema-text mb-4 text-center">
-            Upgrade for unlimited access to these features:
-          </h4>
-          
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {proFeatures.map((feature) => (
-              <div 
-                key={feature.id} 
-                className="bg-white dark:bg-cinema-card rounded-lg p-4 border border-gray-200 dark:border-cinema-border relative opacity-75"
-              >
-                <div className="absolute top-2 right-2 text-gray-400 dark:text-cinema-text-muted">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+        
+        {/* Active Feature Content - Inline */}
+        {activeFeature && (
+          <div className="mt-2 p-2 bg-cinema-teal/5 rounded border border-cinema-teal/20">
+            {(() => {
+              const feature = proFeatures.find(f => f.id === activeFeature);
+              if (!feature) return null;
+              
+              if (activeFeature === 'scene-extender') {
+                return (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-cinema-text">{feature.name}</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={onSceneExtenderClick}
+                        disabled={extensionLoading}
+                        className="px-3 py-1 bg-cinema-teal text-white rounded text-xs font-medium hover:bg-cinema-teal/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {extensionLoading ? 'Generating...' : 'Generate'}
+                      </button>
+                      <button
+                        onClick={() => setActiveFeature(null)}
+                        className="text-gray-400 hover:text-gray-600 text-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+              
+              // For other features, show full component in compact mode
+              return (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-cinema-text font-medium">{feature.name}</span>
+                    <button
+                      onClick={() => setActiveFeature(null)}
+                      className="text-gray-400 hover:text-gray-600 text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  {/* Render the actual AI tool component */}
+                  <div className="bg-white dark:bg-cinema-card rounded-lg p-3 border border-cinema-border">
+                    {activeFeature === 'character-engine' && (
+                      <CharacterEngine currentJson={currentJson} onResult={handleCharacterGenerated} />
+                    )}
+                    {activeFeature === 'world-builder' && (
+                      <WorldBuilder currentJson={currentJson} onResult={handleWorldGenerated} />
+                    )}
+                    {activeFeature === 'storyboard-generator' && (
+                      <StoryboardGenerator currentJson={currentJson} onResult={handleStoryboardGenerated} />
+                    )}
+                    {activeFeature === 'style-generator' && (
+                      <StyleGenerator currentJson={currentJson} onResult={handleStyleGenerated} />
+                    )}
+                  </div>
                 </div>
-                
-                <div className="text-3xl mb-3">{feature.icon}</div>
-                <h4 className="font-semibold text-gray-800 dark:text-cinema-text mb-2">
-                  {feature.name}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
-                  {feature.description}
-                </p>
+              );
+            })()}
+            {extensionError && (
+              <p className="text-red-500 text-xs mt-1">{extensionError}</p>
+            )}
+            {extensionLoading && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mt-2 border border-blue-200 dark:border-blue-700">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                  <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">Generating 5 scene options...</span>
+                </div>
+                <div className="text-xs text-blue-600 dark:text-blue-300 mt-2 flex items-center space-x-1">
+                  <span>⬇️</span>
+                  <span>Options will appear below - we'll scroll you there automatically</span>
+                </div>
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        )}
       </div>
     );
   }
 
+  // Full layout for standalone use
   return (
-    <div className="mt-6">      
+    <div className="mt-6">
       <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-700/50">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <span className="text-2xl mr-2">🤖</span>  
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-cinema-text">
-              AI Features
-            </h3>
+            <h3 className="text-2xl font-bold text-cinema-text">AI Features</h3>
           </div>
-          <div className="flex items-center space-x-3">
-            {/* Usage Counter */}
-            <div className="bg-white dark:bg-cinema-card px-3 py-1 rounded-full text-sm font-semibold border border-blue-200 dark:border-blue-700/50">
-              <span className="text-gray-600 dark:text-cinema-text-muted">
-                {requirement.type === 'available' ? (
-                  <span className="text-green-600 dark:text-green-400">
-                    {requirement.remaining} remaining
-                  </span>
-                ) : (
-                  <span className="text-orange-600 dark:text-orange-400">
-                    {usageStats.monthly_usage}/{usageStats.usage_limit} used
-                  </span>
-                )}
-              </span>
-            </div>
-            
-            {/* Tier Badge */}
-            <div className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1 ${
-              usageStats.tier === 'pro' || usageStats.tier === 'team' 
-                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white'
-                : usageStats.tier === 'free' 
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}>
-              <span>
-                {usageStats.tier === 'pro' ? '✨' : 
-                 usageStats.tier === 'team' ? '👥' : 
-                 usageStats.tier === 'free' ? '🆓' : '👤'}
-              </span>
-              <span className="capitalize">{usageStats.tier === 'anonymous' ? 'Visitor' : usageStats.tier}</span>
-            </div>
+          <div className="bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-1 rounded-full text-white text-sm font-semibold">
+            ✨ Active
           </div>
         </div>
         
-        {/* Feature Selection Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           {proFeatures.map((feature) => {
             const isActive = activeFeature === feature.id;
-            const isAvailable = canUseAI || usageStats.tier === 'pro' || usageStats.tier === 'team';
             
             return (
               <div 
                 key={feature.id}
-                data-feature={feature.id}
-                className={`bg-white dark:bg-cinema-card rounded-lg p-2 border transition-all duration-300 relative ${
-                  isAvailable 
-                    ? `cursor-pointer ${
-                        isActive 
-                          ? 'border-blue-500 dark:border-blue-400 shadow-lg ring-2 ring-blue-200 dark:ring-blue-800' 
-                          : 'border-blue-200 dark:border-blue-700/30 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md'
-                      }`
-                    : 'cursor-not-allowed opacity-60 border-gray-200 dark:border-gray-700'
+                className={`bg-cinema-card rounded-lg p-3 border transition-all duration-300 cursor-pointer ${
+                  isActive 
+                    ? 'border-cinema-teal shadow-glow-teal' 
+                    : 'border-cinema-border hover:border-cinema-teal hover:shadow-glow-soft'
                 }`}
                 onClick={() => handleFeatureClick(feature.id)}
-                title={isAvailable ? feature.description : requirement.message}
               >
-                {/* Show lock icon if not available */}
-                {!isAvailable && (
-                  <div className="absolute top-1 right-1 text-gray-400 dark:text-cinema-text-muted">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                )}
-                
                 <div className="text-center">
-                  <div className="text-base md:text-lg mb-1">{feature.icon}</div>
-                  <h4 className="font-medium text-gray-800 dark:text-cinema-text text-xs md:text-xs leading-tight">
+                  <div className="text-2xl mb-2">{feature.icon}</div>
+                  <h4 className="font-medium text-cinema-text text-sm leading-tight mb-1">
                     {feature.name}
                   </h4>
                   
                   {isActive && (
-                    <div className="flex items-center justify-center space-x-1 text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
-                      <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="flex items-center justify-center space-x-1 text-xs text-cinema-teal font-medium">
+                      <div className="w-1 h-1 bg-cinema-teal rounded-full animate-pulse"></div>
                       <span>Active</span>
-                    </div>
-                  )}
-                  
-                  {!isAvailable && requirement.type === 'signup_required' && (
-                    <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                      Sign up required
-                    </div>
-                  )}
-                  
-                  {!isAvailable && requirement.type === 'upgrade_required' && (
-                    <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      Upgrade needed
                     </div>
                   )}
                 </div>
@@ -275,111 +255,41 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
           })}
         </div>
         
-        {/* Usage Progress Bar for Free/Anonymous Users */}
-        {(usageStats.tier === 'free' || usageStats.tier === 'anonymous') && (
-          <div className="mb-4 bg-white dark:bg-cinema-card rounded-lg p-3 border border-blue-200 dark:border-blue-700/50">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-gray-600 dark:text-cinema-text-muted">
-                {usageStats.tier === 'anonymous' ? 'Anonymous usage' : 'Monthly usage'}
-              </span>
-              <span className="font-medium text-gray-800 dark:text-cinema-text">
-                {usageStats.monthly_usage}/{usageStats.usage_limit}
-              </span>
-            </div>
-            
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-              <div 
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  usageStats.usage_percentage >= 100 
-                    ? 'bg-gradient-to-r from-red-500 to-red-600' 
-                    : usageStats.usage_percentage >= 80 
-                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500'
-                      : 'bg-gradient-to-r from-green-500 to-blue-500'
-                }`}
-                style={{ width: `${Math.min(usageStats.usage_percentage, 100)}%` }}
-              ></div>
-            </div>
-            
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-cinema-text-muted">
-              <span>
-                {usageStats.tier === 'anonymous' 
-                  ? 'Sign up for 10 free generations per month' 
-                  : usageStats.days_remaining > 0 
-                    ? `Resets in ${usageStats.days_remaining} days`
-                    : 'Cycle ended'
-                }
-              </span>
-              {usageStats.tier !== 'pro' && usageStats.tier !== 'team' && (
-                <button
-                  onClick={() => onShowPricing && onShowPricing()}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
-                  Upgrade for more →
-                </button>
-              )}
-            </div>
+        {/* Active Feature Panel */}
+        {activeFeature && (
+          <div className="mt-4">
+            {activeFeature === 'character-engine' && (
+              <CharacterEngine currentJson={currentJson} onResult={handleCharacterGenerated} />
+            )}
+            {activeFeature === 'world-builder' && (
+              <WorldBuilder currentJson={currentJson} onResult={handleWorldGenerated} />
+            )}
+            {activeFeature === 'storyboard-generator' && (
+              <StoryboardGenerator currentJson={currentJson} onResult={handleStoryboardGenerated} />
+            )}
+            {activeFeature === 'style-generator' && (
+              <StyleGenerator currentJson={currentJson} onResult={handleStyleGenerated} />
+            )}
+            {activeFeature === 'scene-extender' && sceneOptions && (
+              <div className="space-y-4">
+                {sceneOptions.map((option, index) => (
+                  <div key={index} className="bg-cinema-card rounded-lg p-4 border border-cinema-border">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-cinema-text">{option.type}</h4>
+                      <button
+                        onClick={() => onApplySceneOption(option, index)}
+                        className="bg-cinema-teal text-white px-3 py-1 rounded text-sm hover:bg-cinema-teal-bright transition-colors"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    <p className="text-sm text-cinema-text-muted">{option.summary}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-      
-      {/* Full-Width Active Feature Component */}
-      {activeFeature && (
-        <div className="border-t border-blue-200 dark:border-blue-700/50 pt-4 lg:pt-6 animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-white dark:bg-cinema-card rounded-lg p-4 lg:p-6 border border-blue-200 dark:border-blue-700/30 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2 lg:space-x-3">
-                <span className="text-xl lg:text-2xl">
-                  {proFeatures.find(f => f.id === activeFeature)?.icon}
-                </span>
-                <h4 className="text-lg lg:text-xl font-semibold text-gray-800 dark:text-cinema-text">
-                  {proFeatures.find(f => f.id === activeFeature)?.name}
-                </h4>
-              </div>
-              <button
-                onClick={() => setActiveFeature(null)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-cinema-border rounded-lg transition-colors"
-                title="Close"
-              >
-                <svg className="w-5 h-5 text-gray-500 dark:text-cinema-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {/* Render the active feature component */}
-            {(() => {
-              const activeFeatureData = proFeatures.find(f => f.id === activeFeature);
-              if (activeFeatureData && activeFeatureData.component) {
-                const FeatureComponent = activeFeatureData.component;
-                
-                // Special props for Scene Extender
-                if (activeFeature === 'scene-extender') {
-                  return (
-                    <FeatureComponent 
-                      currentJson={currentJson} 
-                      onResult={handleFeatureResult}
-                      onSceneExtenderClick={onSceneExtenderClick}
-                      sceneOptions={sceneOptions}
-                      onApplyOption={onApplySceneOption}
-                      onDismissOptions={onDismissSceneOptions}
-                      extensionLoading={extensionLoading}
-                      extensionError={extensionError}
-                    />
-                  );
-                }
-                
-                // Regular props for other features
-                return (
-                  <FeatureComponent 
-                    currentJson={currentJson} 
-                    onResult={handleFeatureResult} 
-                  />
-                );
-              }
-              return null;
-            })()}
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );
