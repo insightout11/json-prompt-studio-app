@@ -1,8 +1,11 @@
-# Redirect /app to the React application
+# Serve the React app for direct /app access
 /app /app.html 200
 
-# Catch-all redirect for React app routes to app.html  
+# Serve the React app for all /app subroutes
 /app/* /app.html 200
 
-# Default route serves landing page
+# Serve landing page for root
 / /index.html 200
+
+# Catch-all: serve landing page for all other unmatched routes
+/* /index.html 200
