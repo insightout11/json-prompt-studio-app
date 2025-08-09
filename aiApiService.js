@@ -751,33 +751,37 @@ Create a world that feels lived-in, authentic, and visually compelling for video
     }
   }
 
-  // Storyboard Generation API
+  // Style Suggestion Generation API
   async generateStyleSuggestion(currentScene) {
     try {
-      const systemPrompt = `You are an expert cinematographer and film style consultant. Analyze the provided scene and generate intelligent style recommendations that would enhance the visual storytelling.
+      console.log('🎬 Style Generation Request - Input Scene:', currentScene);
+      
+      // Create a concise scene summary for better AI processing
+      const sceneText = typeof currentScene === 'string' ? currentScene :
+        currentScene.scene || currentScene.description || 
+        JSON.stringify(currentScene, null, 2);
 
-Current Scene Context:
-${JSON.stringify(currentScene, null, 2)}
+      console.log('🎬 Processed Scene Text:', sceneText);
 
-Based on the scene's content, mood, genre, and setting, suggest appropriate:
-- Cinematography style and techniques
-- Color palette and lighting approach
-- Camera movement and framing
-- Overall visual mood and atmosphere
-- Specific technical recommendations
+      const systemPrompt = `You are an expert cinematographer. Analyze this scene and provide cinematographic style suggestions.
 
-Return your response in this EXACT JSON format:
+SCENE TO ANALYZE: "${sceneText}"
+
+RESPOND WITH ONLY THIS JSON FORMAT (no explanation, no markdown):
 {
-  "cinematography_style": "specific cinematography approach and techniques",
-  "color_palette": "recommended color scheme and palette",
-  "lighting_approach": "lighting style and setup recommendations", 
-  "camera_movement": "recommended camera movements and techniques",
-  "visual_mood": "overall visual atmosphere and tone",
-  "framing_style": "shot composition and framing approach",
-  "technical_notes": "specific equipment or technique suggestions"
+  "visual_style": "overall cinematic approach and genre style",
+  "lighting": "lighting setup and mood recommendations",
+  "camera_work": "shot types, angles, and movement suggestions",
+  "color_mood": "color palette and visual tone"
 }
 
-Focus on practical, actionable recommendations that match the scene's narrative needs.`;
+EXAMPLE:
+{
+  "visual_style": "Film noir with high contrast shadows",
+  "lighting": "Low-key dramatic lighting with venetian blind patterns",
+  "camera_work": "Dutch angles, close-ups, static shots",
+  "color_mood": "Monochromatic with stark black and white contrasts"
+}`;
 
       const messages = [
         {
@@ -786,29 +790,70 @@ Focus on practical, actionable recommendations that match the scene's narrative 
         },
         {
           role: 'user',
-          content: `Analyze this scene and provide smart cinematographic style suggestions that would enhance the visual storytelling.`
+          content: 'Provide cinematographic style suggestions for this scene.'
         }
       ];
 
+      console.log('🎬 AI Request Configuration:', {
+        model: 'gpt-4o',
+        temperature: 0.3,
+        maxTokens: 800
+      });
+
       const response = await this.makeRequest(messages, {
-        forceOpenAI: true, // Style suggestions work better with OpenAI
-        model: 'gpt-4o-mini',
-        temperature: 0.7,
-        maxTokens: 1500
+        forceOpenAI: true,
+        model: 'gpt-4o', // Using full gpt-4o for better structured output
+        temperature: 0.3, // Lower temperature for consistent JSON
+        maxTokens: 800    // Reduced tokens for focused response
       });
       
-      // Parse the JSON response
-      const styleData = this.parseJsonResponse(response.content);
+      console.log('🎬 Raw AI Response:', response.content);
+      console.log('🎬 Response length:', response.content.length);
+      
+      // Enhanced JSON parsing with detailed logging
+      let styleData;
+      try {
+        styleData = this.parseJsonResponse(response.content);
+        console.log('🎬 Parsed Style Data:', styleData);
+        
+        // Validate that we got the expected structure
+        const requiredFields = ['visual_style', 'lighting', 'camera_work', 'color_mood'];
+        const missingFields = requiredFields.filter(field => !styleData[field]);
+        
+        if (missingFields.length > 0) {
+          console.warn('🎬 Missing fields in response:', missingFields);
+          // Fill in missing fields with defaults
+          missingFields.forEach(field => {
+            styleData[field] = 'Style recommendation not available';
+          });
+        }
+        
+      } catch (parseError) {
+        console.error('🎬 JSON Parsing Failed:', parseError);
+        console.error('🎬 Raw content that failed:', response.content);
+        
+        // Provide fallback style suggestions
+        styleData = {
+          visual_style: 'Cinematic storytelling with dramatic composition',
+          lighting: 'Natural lighting with controlled shadows',
+          camera_work: 'Medium shots with smooth camera movements',
+          color_mood: 'Balanced color palette with emotional warmth'
+        };
+        console.log('🎬 Using fallback style data:', styleData);
+      }
       
       return {
         success: true,
         style: styleData
       };
+      
     } catch (error) {
-      console.error('Style suggestion generation error:', error);
+      console.error('🎬 Style Generation Error:', error);
+      console.error('🎬 Error stack:', error.stack);
+      
       return {
         success: false,
-        error: 'Failed to generate style suggestions. Please try again.'
+        error: `Style generation failed: ${error.message || 'Unknown error'}. Check console for details.`
       };
     }
   }
