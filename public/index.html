@@ -23,9 +23,9 @@
         // Simple routing logic
         const path = window.location.pathname;
         
-        // If accessing /app, redirect to app.html
+        // If accessing /app, load the React app directly
         if (path === '/app' || path.startsWith('/app/')) {
-            window.location.href = 'https://jsonpromptstudio.com/app';
+            window.location.href = '/app.html';
             // Don't execute the rest of the script
             return;
         }
@@ -36,7 +36,7 @@
         
         // If returning user has enabled auto-redirect, go straight to app
         if (hasUsedApp && autoRedirect) {
-            window.location.href = 'https://jsonpromptstudio.com/app';
+            window.location.href = '/app.html';
         }
     </script>
     
