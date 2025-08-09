@@ -801,8 +801,8 @@ EXAMPLE:
       });
 
       const response = await this.makeRequest(messages, {
-        forceOpenAI: true,
-        model: 'gpt-4o', // Using full gpt-4o for better structured output
+        // Use Groq by default (user's existing API key)
+        model: 'llama-3.1-70b-versatile', // Good Groq model for structured output
         temperature: 0.3, // Lower temperature for consistent JSON
         maxTokens: 800    // Reduced tokens for focused response
       });

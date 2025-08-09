@@ -169,8 +169,8 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       return;
     }
 
-    if (!aiApiService.hasOpenaiApiKey()) {
-      setError('OpenAI API key required for Smart Style Suggestions. Please set your OpenAI API key in settings.');
+    if (!aiApiService.hasGroqApiKey()) {
+      setError('Groq API key required for Smart Style Suggestions. Please set your Groq API key in settings.');
       return;
     }
 
@@ -481,29 +481,29 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       </div>
 
       {/* API Key Setup Prompt */}
-      {!aiApiService.hasOpenaiApiKey() && activeSection === 'smart' && (
+      {!aiApiService.hasGroqApiKey() && activeSection === 'smart' && (
         <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/50 rounded-lg">
           <div className="flex items-center space-x-2 mb-2">
             <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <span className="text-sm font-medium text-orange-800 dark:text-orange-200">
-              OpenAI API Key Required
+              Groq API Key Required
             </span>
           </div>
           <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-            Smart Style Suggestions require an OpenAI API key to analyze your scene and generate recommendations.
+            Smart Style Suggestions require a Groq API key to analyze your scene and generate recommendations.
           </p>
           <button 
             onClick={() => {
-              const key = prompt('Enter your OpenAI API key:');
+              const key = prompt('Enter your Groq API key:');
               if (key) {
-                aiApiService.setOpenaiApiKey(key);
+                aiApiService.setGroqApiKey(key);
               }
             }}
             className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors"
           >
-            Set OpenAI API Key
+            Set Groq API Key
           </button>
         </div>
       )}
