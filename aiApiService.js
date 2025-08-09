@@ -790,19 +790,20 @@ Focus on practical, actionable recommendations that match the scene's narrative 
         }
       ];
 
-      const response = await this.makeRequest(messages);
+      const response = await this.makeRequest(messages, {
+        forceOpenAI: true, // Style suggestions work better with OpenAI
+        model: 'gpt-4o-mini',
+        temperature: 0.7,
+        maxTokens: 1500
+      });
       
-      if (response.success) {
-        return {
-          success: true,
-          style: response.data
-        };
-      } else {
-        return {
-          success: false,
-          error: response.error
-        };
-      }
+      // Parse the JSON response
+      const styleData = this.parseJsonResponse(response.content);
+      
+      return {
+        success: true,
+        style: styleData
+      };
     } catch (error) {
       console.error('Style suggestion generation error:', error);
       return {

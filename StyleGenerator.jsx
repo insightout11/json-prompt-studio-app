@@ -169,8 +169,8 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       return;
     }
 
-    if (!aiApiService.hasApiKey()) {
-      setError('OpenAI API key required. Please set your API key in settings.');
+    if (!aiApiService.hasOpenaiApiKey()) {
+      setError('OpenAI API key required for Smart Style Suggestions. Please set your OpenAI API key in settings.');
       return;
     }
 
@@ -179,7 +179,9 @@ const StyleGenerator = ({ currentJson, onResult }) => {
     setStyleData(null);
 
     try {
+      console.log('Generating smart style suggestions for:', currentJson);
       const response = await aiApiService.generateStyleSuggestion(currentJson);
+      console.log('Style generation response:', response);
       
       if (response.success) {
         setStyleData(response.style);
@@ -188,7 +190,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       }
     } catch (err) {
       console.error('Style generation error:', err);
-      setError('Failed to generate style suggestions. Please try again.');
+      setError(`Failed to generate style suggestions: ${err.message || 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -200,6 +202,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       cinematography_style: preset.name,
       ...preset.style
     };
+    console.log('StyleGenerator: Applying preset style:', preset.name, updatedJson);
     onResult(updatedJson);
   };
 
@@ -210,6 +213,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       shot_description: angle.description,
       framing_notes: `${angle.name}: ${angle.description}`
     };
+    console.log('StyleGenerator: Applying camera angle:', angle.name, updatedJson);
     onResult(updatedJson);
   };
 
@@ -220,6 +224,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       style_notes: director.characteristics,
       aesthetic_approach: director.description
     };
+    console.log('StyleGenerator: Applying director style:', director.name, updatedJson);
     onResult(updatedJson);
   };
 
@@ -229,6 +234,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
         ...currentJson,
         ...styleData
       };
+      console.log('StyleGenerator: Applying generated style:', styleData, updatedJson);
       onResult(updatedJson);
       setStyleData(null);
     }
@@ -475,7 +481,7 @@ const StyleGenerator = ({ currentJson, onResult }) => {
       </div>
 
       {/* API Key Setup Prompt */}
-      {!aiApiService.hasApiKey() && activeSection === 'smart' && (
+      {!aiApiService.hasOpenaiApiKey() && activeSection === 'smart' && (
         <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/50 rounded-lg">
           <div className="flex items-center space-x-2 mb-2">
             <svg className="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,12 +498,12 @@ const StyleGenerator = ({ currentJson, onResult }) => {
             onClick={() => {
               const key = prompt('Enter your OpenAI API key:');
               if (key) {
-                aiApiService.setApiKey(key);
+                aiApiService.setOpenaiApiKey(key);
               }
             }}
             className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors"
           >
-            Set API Key
+            Set OpenAI API Key
           </button>
         </div>
       )}
