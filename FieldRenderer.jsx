@@ -126,7 +126,7 @@ const FieldRenderer = ({ field }) => {
   const renderInput = () => {
     if (!isEnabled) return null;
 
-    const baseClasses = "w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-base lg:text-sm";
+    const baseClasses = "w-full px-3 py-3 sm:py-2.5 lg:py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal focus:border-transparent bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300 text-base sm:text-sm";
 
     switch (field.type) {
       case 'textarea':
@@ -137,6 +137,7 @@ const FieldRenderer = ({ field }) => {
             placeholder={field.label}
             rows={3}
             className={baseClasses}
+            aria-label={`Enter ${field.label.toLowerCase()}`}
           />
         );
       
@@ -145,11 +146,12 @@ const FieldRenderer = ({ field }) => {
           <div>
             {!showCustomInput ? (
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                   <select
                     value={fieldValue}
                     onChange={(e) => handleValueChange(e.target.value)}
-                    className={`${baseClasses} ${canShowDetails ? 'flex-1' : ''}`}
+                    className={`${baseClasses} ${canShowDetails ? 'sm:flex-1' : ''}`}
+                    aria-label={`Select ${field.label.toLowerCase()}`}
                   >
                     <option value="">Select {field.label}</option>
                     {field.options?.map((option) => (
@@ -163,11 +165,12 @@ const FieldRenderer = ({ field }) => {
                     <button
                       type="button"
                       onClick={() => toggleDetailExpansion(field.key)}
-                      className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-1 ${
+                      className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center sm:justify-start space-x-1 focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-0 sm:min-w-max ${
                         isDetailExpanded
                           ? 'bg-blue-100 text-blue-700 dark:bg-cinema-teal/20 dark:text-cinema-teal border border-blue-200 dark:border-cinema-teal'
                           : 'bg-gray-100 text-gray-600 dark:bg-cinema-card dark:text-cinema-text-muted hover:bg-gray-200 dark:hover:bg-cinema-border border border-gray-200 dark:border-cinema-border'
                       }`}
+                      aria-label={isDetailExpanded ? 'Hide structured details' : 'Add structured details'}
                       title={isDetailExpanded ? 'Hide structured details' : 'Add structured details'}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,11 +184,12 @@ const FieldRenderer = ({ field }) => {
                     <button
                       type="button"
                       onClick={() => toggleCustomDetailExpansion(field.key)}
-                      className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 flex items-center space-x-1 ${
+                      className={`px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-all duration-300 flex items-center justify-center sm:justify-start space-x-1 focus:outline-none focus:ring-2 focus:ring-green-400 min-w-0 sm:min-w-max ${
                         isCustomDetailExpanded
                           ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-700'
                           : 'bg-gray-50 text-gray-500 dark:bg-cinema-card/50 dark:text-cinema-text-muted hover:bg-gray-100 dark:hover:bg-cinema-border/50 border border-gray-150 dark:border-cinema-border/50'
                       }`}
+                      aria-label={isCustomDetailExpanded ? 'Hide custom description' : 'Add custom description'}
                       title={isCustomDetailExpanded ? 'Hide custom description' : 'Add custom description'}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +215,8 @@ const FieldRenderer = ({ field }) => {
                     setShowCustomInput(false);
                     updateFieldValue(field.key, '');
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-cinema-teal dark:hover:text-cinema-teal/80 underline transition-colors duration-300"
+                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-cinema-teal dark:hover:text-cinema-teal/80 underline transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded px-1"
+                  aria-label="Go back to dropdown selection"
                 >
                   ← Back to dropdown
                 </button>
@@ -266,20 +271,22 @@ const FieldRenderer = ({ field }) => {
             onChange={(e) => handleValueChange(e.target.value)}
             placeholder={field.label}
             className={baseClasses}
+            aria-label={`Enter ${field.label.toLowerCase()}`}
           />
         );
     }
   };
 
   return (
-    <div className="mb-3 lg:mb-4">
-      <div className="flex items-center space-x-3 mb-2 py-1">
+    <div className="mb-3 sm:mb-4">
+      <div className="flex items-center space-x-2 sm:space-x-3 mb-2 py-1">
         <input
           type="checkbox"
           id={field.key}
           checked={isEnabled}
           onChange={handleToggle}
           className="h-5 w-5 lg:h-4 lg:w-4 text-blue-600 dark:text-cinema-teal focus:ring-blue-500 dark:focus:ring-cinema-teal border-gray-300 dark:border-cinema-border rounded bg-white dark:bg-cinema-card transition-colors duration-300"
+          aria-describedby={field.dependency ? `${field.key}-dependency` : undefined}
         />
         <label 
           htmlFor={field.key}
@@ -287,7 +294,11 @@ const FieldRenderer = ({ field }) => {
         >
           <span>{field.label}</span>
           {field.dependency && (
-            <span className="text-xs text-gray-500 dark:text-cinema-text-muted bg-gray-100 dark:bg-cinema-card px-2 py-0.5 rounded-full transition-colors duration-300">
+            <span 
+              id={`${field.key}-dependency`}
+              className="text-xs text-gray-500 dark:text-cinema-text-muted bg-gray-100 dark:bg-cinema-card px-2 py-0.5 rounded-full transition-colors duration-300"
+              aria-label={`This field requires ${field.dependency === 'character_type' ? 'character type' : field.dependency} to be selected first`}
+            >
               requires {field.dependency === 'character_type' ? 'character type' : field.dependency}
             </span>
           )}
@@ -302,8 +313,8 @@ const FieldRenderer = ({ field }) => {
       
       {/* Universal custom details for ALL dropdown fields */}
       {isCustomDetailExpanded && canShowCustomDetails && (
-        <div className="mt-3 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/50 rounded-lg transition-all duration-300">
-          <div className="flex items-center space-x-2 mb-3">
+        <div className="mt-3 p-3 sm:p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/50 rounded-lg transition-all duration-300">
+          <div className="flex items-center space-x-2 mb-2 sm:mb-3">
             <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
@@ -318,6 +329,7 @@ const FieldRenderer = ({ field }) => {
             placeholder={getCustomDetailsPlaceholder()}
             rows={3}
             className="w-full px-3 py-2 border border-green-300 dark:border-green-700 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 dark:focus:ring-green-400 focus:border-transparent bg-white dark:bg-green-900/20 text-gray-900 dark:text-green-100 transition-all duration-300 text-sm resize-none"
+            aria-label={`Custom details for ${field.label.toLowerCase()}`}
           />
           
           <div className="mt-2 text-xs text-green-600 dark:text-green-400">

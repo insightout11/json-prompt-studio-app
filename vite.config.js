@@ -3,17 +3,19 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  root: '.',
   build: {
+    rollupOptions: {
+      input: 'react-app.html',
+    },
     // Enable source maps for debugging
     sourcemap: true,
     
     // Optimize chunks for better caching
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          utils: ['zustand'],
-        },
+    output: {
+      manualChunks: {
+        vendor: ['react', 'react-dom'],
+        utils: ['zustand'],
       },
     },
     

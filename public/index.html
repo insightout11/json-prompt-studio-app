@@ -18,6 +18,18 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     
+    <!-- Auto-redirect returning users (optional preference) -->
+    <script>
+        // Check if user has used the app before and set auto-redirect preference
+        const hasUsedApp = localStorage.getItem('jsonPromptStudio_hasUsedApp') === 'true';
+        const autoRedirect = localStorage.getItem('jsonPromptStudio_autoRedirect') === 'true';
+        
+        // If returning user has enabled auto-redirect, go straight to app
+        if (hasUsedApp && autoRedirect) {
+            window.location.href = '/app';
+        }
+    </script>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -142,6 +154,24 @@
 </head>
 
 <body class="bg-cinema-black text-cinema-text antialiased min-h-screen">
+    <!-- Returning User Quick Access Banner -->
+    <div id="returning-user-banner" class="hidden bg-gradient-to-r from-cinema-teal to-cinema-purple py-2 px-4 text-center relative z-50">
+        <div class="flex items-center justify-center space-x-4">
+            <span class="text-white text-sm">👋 Welcome back!</span>
+            <a href="/app" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                Skip to App →
+            </a>
+            <button id="enable-auto-redirect" class="text-white/80 hover:text-white text-xs underline">
+                Always skip landing page
+            </button>
+            <button id="close-banner" class="text-white/80 hover:text-white ml-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-cinema-black/90 backdrop-blur-md border-b border-cinema-border z-50">
         <div class="container mx-auto px-4 lg:px-6">
@@ -159,12 +189,12 @@
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">How it Works</a>
                     <a href="#pricing" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Pricing</a>
-                    <a href="/" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Login</a>
+                    <a href="/app" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Login</a>
                 </div>
                 
                 <!-- CTA Button -->
                 <div class="flex items-center space-x-4">
-                    <a href="/" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright transition-all duration-300 transform hover:scale-105">
+                    <a href="/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright transition-all duration-300 transform hover:scale-105">
                         Start Free Trial
                     </a>
                     
@@ -183,7 +213,7 @@
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">How it Works</a>
                     <a href="#pricing" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Pricing</a>
-                    <a href="/" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Login</a>
+                    <a href="/app" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Login</a>
                 </div>
             </div>
         </div>
@@ -203,7 +233,7 @@
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
-                    <a href="/" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-8 py-4 rounded-lg text-white font-semibold text-lg hover:shadow-glow-teal-bright transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-center">
+                    <a href="/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-8 py-4 rounded-lg text-white font-semibold text-lg hover:shadow-glow-teal-bright transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-center">
                         Start Building Scenes Free
                     </a>
                     <button class="border border-cinema-border px-8 py-4 rounded-lg text-cinema-text font-medium hover:bg-cinema-panel transition-all duration-300 w-full sm:w-auto">
@@ -520,7 +550,7 @@
                         </li>
                     </ul>
                     
-                    <a href="/" class="w-full bg-cinema-border hover:bg-cinema-teal text-cinema-text hover:text-white py-3 rounded-lg font-medium transition-all duration-300 text-center block">
+                    <a href="/app" class="w-full bg-cinema-border hover:bg-cinema-teal text-cinema-text hover:text-white py-3 rounded-lg font-medium transition-all duration-300 text-center block">
                         Start Free - No Card Required
                     </a>
                 </div>
@@ -564,7 +594,7 @@
                         </li>
                     </ul>
                     
-                    <a href="/" class="w-full bg-gradient-to-r from-cinema-teal to-cinema-purple text-white py-3 rounded-lg font-medium hover:shadow-glow-teal-bright transition-all duration-300 text-center block transform hover:scale-105">
+                    <a href="/app" class="w-full bg-gradient-to-r from-cinema-teal to-cinema-purple text-white py-3 rounded-lg font-medium hover:shadow-glow-teal-bright transition-all duration-300 text-center block transform hover:scale-105">
                         Start 14-Day Free Trial
                     </a>
                     <p class="text-xs text-cinema-text-muted mt-2 text-center">
@@ -753,6 +783,30 @@
 
     <!-- JavaScript -->
     <script>
+        // Show returning user banner
+        document.addEventListener('DOMContentLoaded', () => {
+            const hasUsedApp = localStorage.getItem('jsonPromptStudio_hasUsedApp') === 'true';
+            const bannerDismissed = localStorage.getItem('jsonPromptStudio_bannerDismissed') === 'true';
+            
+            if (hasUsedApp && !bannerDismissed) {
+                document.getElementById('returning-user-banner').classList.remove('hidden');
+            }
+            
+            // Handle banner close
+            document.getElementById('close-banner').addEventListener('click', () => {
+                document.getElementById('returning-user-banner').classList.add('hidden');
+                localStorage.setItem('jsonPromptStudio_bannerDismissed', 'true');
+            });
+            
+            // Handle auto-redirect enable
+            document.getElementById('enable-auto-redirect').addEventListener('click', () => {
+                localStorage.setItem('jsonPromptStudio_autoRedirect', 'true');
+                document.getElementById('returning-user-banner').classList.add('hidden');
+                localStorage.setItem('jsonPromptStudio_bannerDismissed', 'true');
+                alert('Auto-redirect enabled! You\'ll be taken directly to the app on future visits.');
+            });
+        });
+
         // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');

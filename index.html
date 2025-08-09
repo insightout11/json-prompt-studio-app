@@ -25,7 +25,7 @@
         
         // If accessing /app, redirect to app.html
         if (path === '/app' || path.startsWith('/app/')) {
-            window.location.href = '/app.html';
+            window.location.href = 'http://localhost:5179/react-app.html';
             // Don't execute the rest of the script
             return;
         }
@@ -36,7 +36,7 @@
         
         // If returning user has enabled auto-redirect, go straight to app
         if (hasUsedApp && autoRedirect) {
-            window.location.href = '/app.html';
+            window.location.href = 'http://localhost:5179/react-app.html';
         }
     </script>
     
@@ -359,7 +359,10 @@
         .platform-rotate:hover {
             transform: rotate(8deg) scale(1.15);
             filter: brightness(1.2) saturate(1.1);
-            box-shadow: 0 8px 25px rgba(0, 139, 139, 0.3);
+        }
+        
+        .platform-rotate:hover img {
+            filter: drop-shadow(0 4px 8px rgba(0, 139, 139, 0.4));
         }
         
         /* Parallax scrolling effects */
@@ -679,7 +682,7 @@
     <div id="returning-user-banner" class="hidden bg-gradient-to-r from-cinema-teal to-cinema-purple py-2 px-4 text-center relative z-50">
         <div class="flex items-center justify-center space-x-4">
             <span class="text-white text-sm">👋 Welcome back!</span>
-            <a href="/app.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
+            <a href="http://localhost:5179/react-app.html" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
                 Skip to App →
             </a>
             <button id="enable-auto-redirect" class="text-white/80 hover:text-white text-xs underline">
@@ -699,8 +702,8 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-cinema-teal to-cinema-purple rounded-lg flex items-center justify-center shadow-glow-teal logo-breathe">
-                        <span class="text-white font-bold text-sm">JP</span>
+                    <div class="w-8 h-8 flex items-center justify-center logo-breathe">
+                        <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
                     </div>
                     <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
                 </div>
@@ -709,12 +712,12 @@
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="/app.html" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
+                    <a href="http://localhost:5179/react-app.html" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
                 </div>
                 
                 <!-- CTA Button -->
                 <div class="flex items-center space-x-4">
-                    <a href="/app.html" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
+                    <a href="http://localhost:5179/react-app.html" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
                         Launch JSON Prompt Studio
                     </a>
                     
@@ -732,7 +735,7 @@
                 <div class="flex flex-col space-y-3">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="/app.html" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
+                    <a href="http://localhost:5179/react-app.html" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
                 </div>
             </div>
         </div>
@@ -756,7 +759,7 @@
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
-                    <a href="/app.html" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-8 py-4 rounded-lg text-white font-semibold text-lg hover:shadow-glow-teal-bright btn-primary w-full sm:w-auto text-center">
+                    <a href="http://localhost:5179/react-app.html" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-8 py-4 rounded-lg text-white font-semibold text-lg hover:shadow-glow-teal-bright btn-primary w-full sm:w-auto text-center">
                         Launch JSON Prompt Studio
                     </a>
                     <button class="border border-cinema-border px-8 py-4 rounded-lg text-cinema-text font-medium hover:bg-cinema-panel transition-all duration-300 w-full sm:w-auto">
@@ -815,18 +818,18 @@
             <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
                 <!-- Feature 1 -->
                 <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                    <div class="text-4xl mb-4 float-gentle">📈</div>
+                    <div class="text-4xl mb-4 float-gentle">⚙️</div>
                     <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                        AI Viral Video Generator
+                        Perfect JSON Output
                     </h3>
                     <p class="text-cinema-text-muted mb-3">
-                        Generate trending video concepts that analyze current trends and audience preferences.
+                        Clean, structured JSON prompts with multiple aspect ratios and one-click copying.
                     </p>
-                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="viral-details">
+                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="json-details">
                         Learn More →
                     </button>
-                    <div id="viral-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                        Perfect for TikTok, Instagram Reels, and YouTube Shorts creators who need fresh, engaging content ideas.
+                    <div id="json-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
+                        Here's what your prompt looks like in JSON — clean, reusable, and AI-ready. Includes undo/redo and project management.
                     </div>
                 </div>
                 
@@ -904,18 +907,18 @@
                     
                     <!-- Feature 6 -->
                     <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                        <div class="text-4xl mb-4 float-gentle">⚙️</div>
+                        <div class="text-4xl mb-4 float-gentle">📈</div>
                         <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                            Perfect JSON Output
+                            AI Viral Video Generator
                         </h3>
                         <p class="text-cinema-text-muted mb-3">
-                            Clean, structured JSON prompts with multiple aspect ratios and one-click copying.
+                            Generate trending video concepts that analyze current trends and audience preferences.
                         </p>
-                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="json-details">
+                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="viral-details">
                             Learn More →
                         </button>
-                        <div id="json-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                            Here's what your prompt looks like in JSON — clean, reusable, and AI-ready. Includes undo/redo and project management.
+                        <div id="viral-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
+                            Perfect for TikTok, Instagram Reels, and YouTube Shorts creators who need fresh, engaging content ideas.
                         </div>
                     </div>
                 </div>
@@ -1070,8 +1073,8 @@
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6 max-w-6xl mx-auto">
                 <!-- RunwayML -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">R</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/runway.svg" alt="RunwayML Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">RunwayML</h3>
                     <p class="text-xs text-cinema-text-muted">Gen-3 Alpha</p>
@@ -1079,8 +1082,8 @@
                 
                 <!-- Pika Labs -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-red-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">P</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/pika.svg" alt="Pika Labs Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">Pika Labs</h3>
                     <p class="text-xs text-cinema-text-muted">Pika 1.5</p>
@@ -1088,8 +1091,8 @@
                 
                 <!-- Luma AI -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">L</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/luma.svg" alt="Luma AI Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">Luma AI</h3>
                     <p class="text-xs text-cinema-text-muted">Dream Machine</p>
@@ -1097,8 +1100,8 @@
                 
                 <!-- OpenAI Sora -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">S</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/openai.svg" alt="OpenAI Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">OpenAI Sora</h3>
                     <p class="text-xs text-cinema-text-muted">Text-to-Video AI</p>
@@ -1106,8 +1109,8 @@
                 
                 <!-- Google Veo -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">V</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/google.svg" alt="Google Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">Google Veo</h3>
                     <p class="text-xs text-cinema-text-muted">Veo 3</p>
@@ -1115,8 +1118,8 @@
                 
                 <!-- Midjourney -->
                 <div class="bg-cinema-card rounded-lg p-6 border border-cinema-border hover:shadow-glow-soft transition-all duration-300 text-center group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg mx-auto mb-3 flex items-center justify-center platform-rotate">
-                        <span class="text-white font-bold text-lg">M</span>
+                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center platform-rotate">
+                        <img src="/logos/midjourney.svg" alt="Midjourney Logo" class="w-12 h-12 object-contain" loading="lazy">
                     </div>
                     <h3 class="font-semibold text-cinema-text mb-1">Midjourney</h3>
                     <p class="text-xs text-cinema-text-muted">Structured Prompts</p>
@@ -1304,9 +1307,9 @@
                 <!-- Logo and tagline -->
                 <div class="text-center lg:text-left">
                     <div class="flex items-center justify-center lg:justify-start space-x-3 mb-3">
-                        <div class="w-8 h-8 bg-gradient-to-br from-cinema-teal to-cinema-purple rounded-lg flex items-center justify-center shadow-glow-teal">
-                        <span class="text-white font-bold text-sm">JP</span>
-                    </div>
+                        <div class="w-8 h-8 flex items-center justify-center">
+                            <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
+                        </div>
                         <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
                     </div>
                     <p class="text-cinema-text-muted">Prompt like a director, not a guesser.</p>

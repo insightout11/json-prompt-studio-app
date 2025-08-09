@@ -224,11 +224,13 @@ const IntegratedHeader = ({ showToast }) => {
       {/* Hamburger Menu Button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className={`relative inline-flex items-center px-3 py-2 rounded-md font-medium text-sm transition-all duration-300 group ${
+        className={`relative inline-flex items-center px-3 py-2 rounded-md font-medium text-sm transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cinema-teal ${
           showDropdown
             ? 'bg-cinema-teal text-white shadow-glow-teal border border-cinema-teal'
             : 'bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal'
         }`}
+        aria-label="Project and library menu"
+        aria-expanded={showDropdown}
         title="Project & Library Menu"
       >
         {/* Hamburger Icon */}
@@ -248,17 +250,24 @@ const IntegratedHeader = ({ showToast }) => {
 
       {/* Unified Dropdown Menu */}
       {showDropdown && (
-        <div className="absolute top-full left-0 mt-2 w-96 bg-white dark:bg-cinema-panel border border-cinema-teal/20 rounded-lg shadow-xl dark:shadow-glow-soft z-50 max-h-96 overflow-hidden">
+        <div 
+          className="absolute top-full left-0 mt-2 w-80 sm:w-96 bg-white dark:bg-cinema-panel border border-cinema-teal/20 rounded-lg shadow-xl dark:shadow-glow-soft z-50 max-h-80 sm:max-h-96 overflow-hidden"
+          role="menu"
+          aria-labelledby="menu-button"
+        >
           
           {/* Tab Navigation */}
-          <div className="flex border-b border-gray-200 dark:border-cinema-border">
+          <div className="flex border-b border-gray-200 dark:border-cinema-border" role="tablist">
             <button
               onClick={() => setActiveTab('projects')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cinema-teal ${
                 activeTab === 'projects'
                   ? 'border-b-2 border-cinema-teal text-cinema-teal bg-cinema-teal/5'
                   : 'text-gray-500 hover:text-cinema-text dark:text-cinema-text-muted dark:hover:text-cinema-text'
               }`}
+              role="tab"
+              aria-selected={activeTab === 'projects'}
+              aria-controls="projects-panel"
             >
               <div className="flex items-center justify-center space-x-2">
                 <span>📁</span>
@@ -270,11 +279,14 @@ const IntegratedHeader = ({ showToast }) => {
             </button>
             <button
               onClick={() => setActiveTab('library')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+              className={`flex-1 px-4 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cinema-teal ${
                 activeTab === 'library'
                   ? 'border-b-2 border-cinema-teal text-cinema-teal bg-cinema-teal/5'
                   : 'text-gray-500 hover:text-cinema-text dark:text-cinema-text-muted dark:hover:text-cinema-text'
               }`}
+              role="tab"
+              aria-selected={activeTab === 'library'}
+              aria-controls="library-panel"
             >
               <div className="flex items-center justify-center space-x-2">
                 <span>🧩</span>
@@ -287,7 +299,7 @@ const IntegratedHeader = ({ showToast }) => {
           </div>
 
           {/* Tab Content */}
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-64 sm:max-h-80 overflow-y-auto">
             {activeTab === 'projects' ? (
               <div>
                 {/* Project Header */}
@@ -298,7 +310,7 @@ const IntegratedHeader = ({ showToast }) => {
 
                 {/* Project Quick Actions */}
                 <div className="p-3 border-b border-gray-200 dark:border-cinema-border">
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2">
                     <button
                       onClick={() => setShowCreateProject(true)}
                       className="px-2 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded transition-colors flex flex-col items-center space-y-1"
@@ -385,7 +397,7 @@ const IntegratedHeader = ({ showToast }) => {
                 {/* Quick Save Components */}
                 <div className="p-3 border-b border-gray-200 dark:border-cinema-border bg-gray-50 dark:bg-cinema-card/50">
                   <h4 className="text-xs font-medium text-cinema-text mb-2">💾 Save Current Components</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1 sm:gap-2">
                     <button
                       onClick={() => {
                         const name = prompt('Character name:');

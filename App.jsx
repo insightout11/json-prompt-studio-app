@@ -8,7 +8,6 @@ import CinematicModeToggle from './CinematicModeToggle';
 import Logo from './Logo';
 import LoadingScreen from './LoadingScreen';
 import InstantUpgradeModal from './InstantUpgradeModal';
-import FullScreenToggle, { useFullScreen } from './FullScreenToggle';
 import ViralVideoGeneratorModal from './ViralVideoGeneratorModal';
 import LibrarySystem from './LibrarySystem';
 import ProFeaturesHub from './ProFeaturesHub';
@@ -67,7 +66,6 @@ const App = () => {
   const [showViralGenerator, setShowViralGenerator] = useState(false);
   const [showSceneExtender, setShowSceneExtender] = useState(false);
   const [sceneExtenderSuccess, setSceneExtenderSuccess] = useState(false);
-  const [isFullScreen, toggleFullScreen] = useFullScreen(false);
   
   // Scene extension states
   const [extensionLoading, setExtensionLoading] = useState(false);
@@ -133,8 +131,10 @@ const App = () => {
 
   // Confirmation modal handlers
   const handleClearAllClick = () => {
+    if (clearLoading) return;
+    
     if (getConfirmationPreference('ClearAll')) {
-      clearAll();
+      handleClearAll();
       return;
     }
     setDontShowAgain(false);
@@ -149,11 +149,23 @@ const App = () => {
         if (dontShowAgain) {
           setConfirmationPreference('ClearAll', true);
         }
-        clearAll();
+        handleClearAll();
         setShowConfirmModal(null);
         setDontShowAgain(false);
       }
     });
+  };
+
+  const handleClearAll = async () => {
+    setClearLoading(true);
+    try {
+      clearAll();
+      showSuccess('All data cleared successfully!');
+    } catch (error) {
+      showError('Failed to clear data');
+    } finally {
+      setClearLoading(false);
+    }
   };
 
   const handleFullSceneRandomizeClick = () => {
@@ -267,7 +279,14 @@ const App = () => {
     }
   }, [sceneOptions]);
 
+  const [copyLoading, setCopyLoading] = useState(false);
+  const [clearLoading, setClearLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+  
   const copyToClipboard = async () => {
+    if (copyLoading) return;
+    
+    setCopyLoading(true);
     try {
       await navigator.clipboard.writeText(getJsonOutput());
       setCopySuccess(true);
@@ -278,6 +297,9 @@ const App = () => {
     } catch (err) {
       console.error('Failed to copy: ', err);
       analytics.trackError('clipboard_copy_failed', err.message);
+      showError('Failed to copy to clipboard');
+    } finally {
+      setCopyLoading(false);
     }
   };
 
@@ -289,14 +311,18 @@ const App = () => {
     }
 
     if (!aiApiService.hasApiKey()) {
-      setExtensionError('OpenAI API key required. Please set your API key in settings.');
+      const errorMessage = 'OpenAI API key required. Please set your API key in settings.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
       return;
     }
 
     const currentScene = getJsonOutput() ? JSON.parse(getJsonOutput() || '{}') : {};
     
     if (Object.keys(currentScene).length === 0) {
-      setExtensionError('No scene to extend. Please create a scene first.');
+      const errorMessage = 'No scene to extend. Please create a scene first.';
+      setExtensionError(errorMessage);
+      showWarning(errorMessage);
       return;
     }
 
@@ -311,12 +337,17 @@ const App = () => {
       if (response.success && response.options && response.options.length > 0) {
         setSceneOptions(response.options);
       } else {
-        setExtensionError(response.error || 'Failed to generate scene options. Please try again.');
+        const errorMessage = response.error || 'Failed to generate scene options. Please try again.';
+        setExtensionError(errorMessage);
+        showError(errorMessage);
       }
       
     } catch (error) {
       console.error('Scene options generation error:', error);
-      setExtensionError('Failed to generate scene options. Please try again.');
+      const errorMessage = error.message || 'Failed to generate scene options. Please try again.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
+      analytics.trackError('scene_options_generation_failed', error.message);
     } finally {
       setExtensionLoading(false);
     }
@@ -363,7 +394,9 @@ const App = () => {
       }, 100);
     } else {
       console.error('Scene option missing json property:', option);
-      setExtensionError('Scene option is missing JSON data. Please try generating new options.');
+      const errorMessage = 'Scene option is missing JSON data. Please try generating new options.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
     }
   };
 
@@ -401,7 +434,10 @@ const App = () => {
       
     } catch (error) {
       console.error('Error saving scene pack:', error);
-      setExtensionError('Failed to save scene pack. Please try again.');
+      const errorMessage = error.message || 'Failed to save scene pack. Please try again.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
+      analytics.trackError('scene_pack_save_failed', error.message);
     }
   };
 
@@ -413,14 +449,18 @@ const App = () => {
     }
 
     if (!aiApiService.hasApiKey()) {
-      setExtensionError('OpenAI API key required. Please set your API key in settings.');
+      const errorMessage = 'OpenAI API key required. Please set your API key in settings.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
       return;
     }
 
     const currentScene = getJsonOutput() ? JSON.parse(getJsonOutput() || '{}') : {};
     
     if (Object.keys(currentScene).length === 0) {
-      setExtensionError('No scene to extend. Please create a scene first.');
+      const errorMessage = 'No scene to extend. Please create a scene first.';
+      setExtensionError(errorMessage);
+      showWarning(errorMessage);
       return;
     }
 
@@ -453,12 +493,17 @@ const App = () => {
         }, 5000);
         
       } else {
-        setExtensionError(response.error || 'Extension failed. Please try again.');
+        const errorMessage = response.error || 'Extension failed. Please try again.';
+        setExtensionError(errorMessage);
+        showError(errorMessage);
       }
       
     } catch (error) {
       console.error('Extension error:', error);
-      setExtensionError('Extension failed. Please try again.');
+      const errorMessage = error.message || 'Extension failed. Please try again.';
+      setExtensionError(errorMessage);
+      showError(errorMessage);
+      analytics.trackError('scene_extension_failed', error.message);
     } finally {
       setExtensionLoading(false);
     }
@@ -639,21 +684,21 @@ const App = () => {
   // Main app render
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-cinema-black transition-colors duration-300">
-      <div className="container mx-auto px-4 lg:px-4 py-3 lg:py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
         
         {/* HEADER SECTION */}
-        <div className="header-base mb-6 bg-white/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-cinema-border rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+        <header className="header-base mb-4 sm:mb-6 bg-white/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-cinema-border rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" role="banner">
           {/* Desktop Header - 3 Section Grid */}
           <div className="hidden md:grid md:grid-cols-12 md:gap-4 items-center py-3 px-4 transition-all duration-300">
             
             {/* LEFT SECTION - Project & Library Manager */}
-            <div data-tutorial="project-system" className="col-span-3 flex items-center space-x-3">
+            <div data-tutorial="project-system" className="col-span-3 flex items-center space-x-2 lg:space-x-3">
               <Logo size="small" />
               <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
             </div>
 
             {/* CENTER SECTION - Tools Group */}
-            <div data-tutorial="quick-tools" className="col-span-6 flex items-center justify-center space-x-2">
+            <div data-tutorial="quick-tools" className="col-span-6 flex items-center justify-center space-x-1.5 lg:space-x-2">
               {/* Templates & Presets */}
               <TemplateSelector />
               
@@ -692,7 +737,7 @@ const App = () => {
             </div>
 
             {/* RIGHT SECTION - View Controls */}
-            <div className="col-span-3 flex items-center justify-end space-x-3">
+            <div className="col-span-3 flex items-center justify-end space-x-2 lg:space-x-3">
               <CinematicModeToggle />
             </div>
           </div>
@@ -711,23 +756,27 @@ const App = () => {
               <TemplateSelector />
               <button
                 onClick={() => setShowViralGenerator(true)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs"
+                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                aria-label="Open viral video generator"
                 title="Viral Video Generator"
               >
                 <span className="mr-1">📈</span>
-                <span>Viral Gen</span>
+                <span className="hidden xs:inline">Viral Gen</span>
+                <span className="xs:hidden">Viral</span>
               </button>
               <button
                 onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs"
+                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                aria-label="Open randomization tools"
                 title="Randomize Elements"
               >
                 <span className="mr-1">🎲</span>
-                <span>Randomize</span>
+                <span className="hidden xs:inline">Randomize</span>
+                <span className="xs:hidden">Random</span>
               </button>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* CONTEXT-SENSITIVE MODE TOGGLE */}
         <div className="mb-4 flex items-center justify-center">
@@ -736,9 +785,10 @@ const App = () => {
             onClick={() => setIsAdvancedMode(!isAdvancedMode)}
             className={`
               inline-flex items-center px-4 py-2 rounded-full font-medium transition-all duration-300 cursor-pointer
-              hover:scale-105 active:scale-95 group
+              hover:scale-105 active:scale-95 group focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-600
               bg-teal-100 text-teal-800 border-2 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 dark:hover:bg-teal-800/40
             `}
+            aria-label={`Switch to ${isAdvancedMode ? 'Simple' : 'Advanced'} editing mode`}
             title="Switch between simple and advanced editing modes"
           >
             <div className="w-3 h-3 rounded-full mr-2 transition-all duration-300 group-hover:scale-110 bg-teal-500" />
@@ -761,10 +811,10 @@ const App = () => {
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 min-h-[600px]">
+        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
           
           {/* LEFT PANEL */}
-          <div className="space-y-4 lg:space-y-6 h-full relative">
+          <div className="space-y-4 sm:space-y-5 lg:space-y-6 h-full relative">
             {/* Simple Mode: Scene Builder Only */}
             {!isAdvancedMode && (
               <div data-tutorial="scene-builder" className="transition-all duration-500 ease-in-out transform h-full">
@@ -858,8 +908,7 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <FullScreenToggle isFullScreen={isFullScreen} onToggle={toggleFullScreen}>
-            <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
               
               {/* JSON OUTPUT SECTION */}
               <div className="json-output-section">
@@ -888,7 +937,8 @@ const App = () => {
                       <select
                         value={aspectRatio}
                         onChange={(e) => setAspectRatio(e.target.value)}
-                        className="text-xs px-2 py-1 bg-white dark:bg-cinema-panel border border-gray-300 dark:border-cinema-border rounded text-gray-700 dark:text-cinema-text h-6"
+                        className="text-xs px-2 py-1 bg-white dark:bg-cinema-panel border border-gray-300 dark:border-cinema-border rounded text-gray-700 dark:text-cinema-text h-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        aria-label="Select aspect ratio for video output"
                       >
                         <option value="1:1">🔳 1:1</option>
                         <option value="16:9">🖥️ 16:9</option>
@@ -900,23 +950,43 @@ const App = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                     <button
                       onClick={copyToClipboard}
-                      className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center ${
+                      disabled={copyLoading}
+                      className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${
                         copySuccess 
                           ? 'bg-green-500 text-white' 
+                          : copyLoading
+                          ? 'bg-gray-400 text-white'
                           : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
                       }`}
+                      aria-label="Copy JSON to clipboard"
                     >
-                      {copySuccess ? 'Copied!' : 'Copy to Clipboard'}
+                      {copyLoading ? (
+                        <div className="flex items-center space-x-1">
+                          <div className="animate-spin h-3 w-3 border border-white border-t-transparent rounded-full"></div>
+                          <span>Copying...</span>
+                        </div>
+                      ) : copySuccess ? 'Copied!' : 'Copy to Clipboard'}
                     </button>
                     
                     <button
                       onClick={() => setShowSaveModal(true)}
-                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center"
+                      disabled={saveLoading}
+                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Save current scene"
                     >
-                      💾 Save
+                      {saveLoading ? (
+                        <div className="flex items-center space-x-1">
+                          <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full"></div>
+                          <span>Saving...</span>
+                        </div>
+                      ) : (
+                        <>
+                          💾 Save
+                        </>
+                      )}
                     </button>
                     
                     <button
@@ -929,7 +999,8 @@ const App = () => {
                         }
                       }}
                       disabled={undoStack.length === 0}
-                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      aria-label="Undo last action"
                       title="Undo last action"
                     >
                       ↶ Undo
@@ -937,16 +1008,29 @@ const App = () => {
                     
                     <button
                       onClick={handleClearAllClick}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center"
+                      disabled={clearLoading}
+                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Clear all scene data"
                     >
-                      Clear All
+                      {clearLoading ? (
+                        <div className="flex items-center space-x-1">
+                          <div className="animate-spin h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
+                          <span>Clearing...</span>
+                        </div>
+                      ) : 'Clear All'}
                     </button>
                   </div>
                 </div>
                 
                 {/* JSON Container */}
-                <div className="bg-gray-900 dark:bg-cinema-black rounded-lg p-4 h-40 md:h-64 max-h-[50vh] overflow-auto border border-gray-700 dark:border-cinema-border relative">
-                  <pre className="text-green-400 dark:text-cinema-teal text-sm font-mono whitespace-pre-wrap">
+                <div 
+                  className="bg-gray-900 dark:bg-cinema-black rounded-lg p-3 sm:p-4 h-32 sm:h-40 md:h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-gray-700 dark:border-cinema-border relative"
+                  role="textbox"
+                  aria-readonly="true"
+                  aria-label="Generated JSON output"
+                  tabIndex="0"
+                >
+                  <pre className="text-green-400 dark:text-cinema-teal text-xs sm:text-sm font-mono whitespace-pre-wrap" aria-live="polite">
                     {getJsonOutput() || '{}'}
                     <span className="animate-cursor-blink text-cinema-teal">▊</span>
                   </pre>
@@ -988,13 +1072,12 @@ const App = () => {
               {/* AI SCENE OPTIONS */}
               {renderSceneOptions()}
 
-            </div>
-          </FullScreenToggle>
-        </div>
+          </div>
+        </main>
 
         {/* FOOTER */}
-        <footer className="mt-12 pt-8 pb-6 border-t border-gray-200 dark:border-cinema-border">
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
+        <footer className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 pb-4 sm:pb-6 border-t border-gray-200 dark:border-cinema-border" role="contentinfo">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-3 lg:space-x-4 mb-4 sm:mb-6">
             <a 
               href="/privacy-policy.html" 
               target="_blank" 
@@ -1064,6 +1147,8 @@ const App = () => {
                 value={saveCategory}
                 onChange={(e) => setSaveCategory(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 mb-3 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text"
+                required
+                aria-required="true"
               >
                 <option value="">Select category...</option>
                 <option value="scene">Complete Scene</option>
@@ -1073,20 +1158,37 @@ const App = () => {
                 <option value="style">Style Only</option>
                 <option value="audio">Audio Only</option>
               </select>
+              {!saveCategory && (
+                <p className="text-xs text-red-500 mb-2">Please select a category</p>
+              )}
+              <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text mb-2">
+                Name:
+              </label>
               <input
                 type="text"
                 value={saveName}
                 onChange={(e) => setSaveName(e.target.value)}
                 placeholder="Enter name for saved item..."
                 className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text"
-                onKeyPress={(e) => e.key === 'Enter' && saveCategory && saveName.trim() && document.querySelector('.save-modal-confirm-btn').click()}
+                onKeyPress={(e) => e.key === 'Enter' && saveCategory && saveName.trim() && !saveLoading && document.querySelector('.save-modal-confirm-btn').click()}
+                required
+                aria-required="true"
+                minLength="1"
+                maxLength="50"
                 autoFocus
               />
+              {!saveName.trim() && saveName.length > 0 && (
+                <p className="text-xs text-red-500 mt-1">Name cannot be empty</p>
+              )}
+              {saveName.length > 50 && (
+                <p className="text-xs text-red-500 mt-1">Name must be 50 characters or less</p>
+              )}
             </div>
             <div className="flex space-x-3">
               <button
-                onClick={() => {
-                  if (saveCategory && saveName.trim()) {
+                onClick={async () => {
+                  if (saveCategory && saveName.trim() && !saveLoading) {
+                    setSaveLoading(true);
                     try {
                       // Call the appropriate save function based on category
                       switch(saveCategory) {
@@ -1118,13 +1220,20 @@ const App = () => {
                     } catch (error) {
                       console.error('Save error:', error);
                       showError(`Failed to save: ${error.message}`);
+                    } finally {
+                      setSaveLoading(false);
                     }
                   }
                 }}
-                disabled={!saveCategory || !saveName.trim()}
-                className="save-modal-confirm-btn flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-cinema-border text-white rounded-md transition-all duration-300"
+                disabled={!saveCategory || !saveName.trim() || saveLoading}
+                className="save-modal-confirm-btn flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-cinema-border disabled:cursor-not-allowed text-white rounded-md transition-all duration-300"
               >
-                Save
+                {saveLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : 'Save'}
               </button>
               <button
                 onClick={() => {
