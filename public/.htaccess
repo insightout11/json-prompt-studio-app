@@ -55,7 +55,11 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
-    # Handle React Router (SPA routing)
+    # Handle /app route - serve React application
+    RewriteRule ^app/?$ /app.html [L]
+    RewriteRule ^app/(.*)$ /app.html [L]
+    
+    # Handle React Router (SPA routing) - serve landing page for other routes
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.html [L]
