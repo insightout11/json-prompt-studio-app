@@ -1,5 +1,6 @@
 // Vercel serverless function for Groq API proxy
 export default async function handler(req, res) {
+  try {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -29,6 +30,14 @@ export default async function handler(req, res) {
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ 
         error: 'Groq API key not configured on server' 
+      });
+    }
+
+    // Check if fetch is available
+    if (typeof fetch === 'undefined') {
+      return res.status(500).json({ 
+        error: 'fetch is not available in this environment',
+        nodeVersion: process.version
       });
     }
 
@@ -62,6 +71,14 @@ export default async function handler(req, res) {
     res.status(500).json({ 
       error: 'Internal server error',
       details: error.message 
+    });
+  }
+  } catch (globalError) {
+    console.error('Global function error:', globalError);
+    res.status(500).json({ 
+      error: 'Global function error',
+      details: globalError.message,
+      stack: globalError.stack
     });
   }
 }
