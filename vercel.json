@@ -6,16 +6,16 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/(privacy-policy|terms-of-service|success|cancel)",
-      "destination": "/$1.html"
-    },
-    {
-      "source": "/app$",
+      "source": "/app",
       "destination": "/react-app.html"
     },
     {
       "source": "/app/(.*)",
       "destination": "/react-app.html"
+    },
+    {
+      "source": "/(privacy-policy|terms-of-service|success|cancel)",
+      "destination": "/$1.html"
     },
     {
       "source": "/",
