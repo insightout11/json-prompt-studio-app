@@ -9,22 +9,30 @@
       "runtime": "nodejs18.x"
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/app",
-      "destination": "/react-app.html"
+      "src": "/app",
+      "dest": "/app.html"
     },
     {
-      "source": "/app/(.*)",
-      "destination": "/react-app.html"
+      "src": "/app/(.*)",
+      "dest": "/app.html"
     },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
-      "source": "/((?!api|app|assets|favicon|logo|android-icon|apple-icon|ms-icon|browserconfig|manifest|robots|sitemap|privacy|terms|success|cancel).+)",
-      "destination": "/index.html"
+      "src": "/(.*\\.(css|js|ico|svg|png|jpg|jpeg|gif|woff|woff2|ttf|eot|map|json))",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(privacy-policy|terms-of-service|success|cancel)",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
     }
   ]
 }
