@@ -757,12 +757,12 @@ Return only the enhanced JSON object, properly formatted.`;
         className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-7xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <div className="flex items-center space-x-2 lg:space-x-3">
-            <span className="text-2xl lg:text-3xl">🔥</span>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          <div className="flex items-center space-x-3">
+            <span className="text-3xl">🔥</span>
             <div>
-              <h2 className="text-lg lg:text-2xl font-bold">Viral Video Generator</h2>
-              <p className="text-xs lg:text-sm text-purple-100 hidden sm:block">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
+              <h2 className="text-2xl font-bold">Viral Video Generator</h2>
+              <p className="text-sm text-purple-100">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -805,9 +805,9 @@ Return only the enhanced JSON object, properly formatted.`;
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row h-auto lg:h-[75vh]">
+        <div className="flex flex-row h-[75vh]">
           {/* Left Panel - Format Selection */}
-          <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
+          <div className="w-1/3 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
             <div className="p-4">
               <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-4">🎬 Viral Formats</h3>
               
@@ -841,7 +841,7 @@ Return only the enhanced JSON object, properly formatted.`;
           </div>
 
           {/* Middle Panel - Input Fields */}
-          <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
+          <div className="w-1/3 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
             <div className="p-4">
               {selectedFormat ? (
                 <div className="space-y-4">
@@ -979,7 +979,7 @@ Return only the enhanced JSON object, properly formatted.`;
           </div>
 
           {/* Right Panel - JSON Preview */}
-          <div className="w-full lg:w-1/3 overflow-y-auto bg-gray-50 dark:bg-cinema-card">
+          <div className="w-1/3 overflow-y-auto bg-gray-50 dark:bg-cinema-card">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 dark:text-cinema-text">

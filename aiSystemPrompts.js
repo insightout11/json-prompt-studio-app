@@ -17,6 +17,15 @@ CRITICAL INSTRUCTIONS:
 - Consider cinematic principles like pacing, tension, and visual composition
 - Ensure all technical fields (camera, lighting, etc.) work harmoniously together
 
+DETAILED OUTPUT REQUIREMENTS:
+- Write rich, detailed scene descriptions with vivid visual elements
+- Include specific character actions, emotions, and dialogue when appropriate
+- Describe environmental details, lighting effects, and atmospheric elements
+- Add sensory details (sounds, textures, movement) that enhance immersion
+- Create scenes that are at least 150-200 words in length
+- Use cinematic language that helps visualize the scene clearly
+- Include technical details about camera movements, lighting changes, and visual effects
+
 ORIGINAL SCENE CONTEXT:`,
 
     continuationTypes: {
@@ -34,12 +43,23 @@ CONTINUATION GUIDELINES:
 - Preserve the emotional tone while allowing natural development
 - Consider what would realistically happen next in this scenario
 
-Focus on creating a believable progression that viewers would find satisfying and coherent. The continuation should feel inevitable given the setup while still being engaging.
+DETAILED VISUAL STORYTELLING REQUIREMENTS:
+- Write rich, immersive scene descriptions that paint a vivid picture
+- Include specific character body language, facial expressions, and micro-movements
+- Describe environmental changes, lighting shifts, and atmospheric details
+- Add dialogue, internal thoughts, or emotional reactions where appropriate
+- Include sound design elements (ambient noise, music, effects)
+- Describe camera movements and visual techniques that enhance the story
+- Create at least 150-200 words of detailed scene description
+- Use sensory language that helps readers visualize and feel the scene
+
+Focus on creating a believable progression that viewers would find satisfying and coherent. The continuation should feel inevitable given the setup while still being engaging and visually rich.
 
 Return the next scene in identical JSON format with these additions:
 - Add a "continuation_type" field with value "logical"
 - Add a "narrative_connection" field explaining how this connects to the previous scene
-- Preserve all original technical specifications unless the story naturally demands changes`
+- Preserve all original technical specifications unless the story naturally demands changes
+- Ensure the main scene description is detailed and immersive (minimum 150 words)`
       },
 
       twist: {
@@ -109,6 +129,16 @@ CHARACTER DEVELOPMENT GUIDELINES:
 - Consider: fears, desires, secrets, relationships, personal history, dreams, trauma, growth
 - Show character development through action and visual storytelling, not just exposition
 - The development should enhance our understanding of why the character acts as they do
+
+DETAILED VISUAL CHARACTER EXPLORATION:
+- Write extensive dialogue that reveals personality and backstory
+- Include detailed descriptions of micro-expressions and subtle body language
+- Show internal conflict through visual metaphors and symbolic actions
+- Describe the character's environment and how it reflects their mental state
+- Include flashback visuals or memory triggers with rich sensory details
+- Create emotional moments with detailed physical reactions
+- Write at least 200-250 words focusing on character depth and psychology
+- Use cinematic techniques like close-ups, lighting changes, and sound design to enhance character revelation
 
 DEVELOPMENT APPROACHES:
 - Internal Monologue: Character's thoughts revealed through voiceover or visual metaphor

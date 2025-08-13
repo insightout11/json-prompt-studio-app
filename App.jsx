@@ -25,6 +25,7 @@ import TutorialOverlay from './TutorialOverlay';
 import { ToastContainer } from './Toast';
 import { useToast } from './useToast';
 import IntegratedHeader from './IntegratedHeader';
+import EditableJsonOutput from './EditableJsonOutput';
 
 const App = () => {
   const { 
@@ -160,6 +161,11 @@ const App = () => {
     setClearLoading(true);
     try {
       clearAll();
+      // Trigger reset for SceneBuilderChecklist counters
+      setResetSceneBuilderTrigger(prev => {
+        console.log('🔄 Triggering SceneBuilder reset, old value:', prev, 'new value:', prev + 1);
+        return prev + 1;
+      });
       showSuccess('All data cleared successfully!');
     } catch (error) {
       showError('Failed to clear data');
@@ -282,6 +288,7 @@ const App = () => {
   const [copyLoading, setCopyLoading] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [resetSceneBuilderTrigger, setResetSceneBuilderTrigger] = useState(0);
   
   const copyToClipboard = async () => {
     if (copyLoading) return;
@@ -536,6 +543,7 @@ const App = () => {
       }, 3000);
     }
   };
+
 
   // Show loading screen first
   if (isLoading) {
@@ -823,6 +831,7 @@ const App = () => {
                   isAdvancedMode={isAdvancedMode}
                   setIsAdvancedMode={setIsAdvancedMode}
                   showToast={{ showSuccess, showError, showWarning, showInfo }}
+                  resetTrigger={resetSceneBuilderTrigger}
                   onProjectChange={(data) => {
                     if (data && data.type === 'switchToAdvanced') {
                       setIsAdvancedMode(true);
@@ -1022,19 +1031,8 @@ const App = () => {
                   </div>
                 </div>
                 
-                {/* JSON Container */}
-                <div 
-                  className="bg-gray-900 dark:bg-cinema-black rounded-lg p-3 sm:p-4 h-32 sm:h-40 md:h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-gray-700 dark:border-cinema-border relative"
-                  role="textbox"
-                  aria-readonly="true"
-                  aria-label="Generated JSON output"
-                  tabIndex="0"
-                >
-                  <pre className="text-green-400 dark:text-cinema-teal text-xs sm:text-sm font-mono whitespace-pre-wrap" aria-live="polite">
-                    {getJsonOutput() || '{}'}
-                    <span className="animate-cursor-blink text-cinema-teal">▊</span>
-                  </pre>
-                </div>
+                {/* JSON Editor */}
+                <EditableJsonOutput showToast={{ showSuccess, showError, showWarning, showInfo }} />
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}

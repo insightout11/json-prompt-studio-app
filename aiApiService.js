@@ -5,17 +5,16 @@ import { buildPrompt } from './aiSystemPrompts.js';
 
 class AIApiService {
   constructor() {
+    // API keys are now handled server-side
     this.groqApiKey = null;
     this.openaiApiKey = null;
-    this.groqBaseURL = 'https://api.groq.com/openai/v1/chat/completions';
-    this.openaiBaseURL = 'https://api.openai.com/v1/chat/completions';
     this.maxRetries = 3;
     this.retryDelay = 1000; // ms
     this.timeout = 30000; // 30 seconds
     this.rateLimitDelay = 2000; // ms between requests
     this.lastRequestTime = 0;
     
-    // Initialize API keys from environment or localStorage
+    // Keep for backward compatibility, but server handles API keys
     this.initializeApiKeys();
   }
 
@@ -88,16 +87,16 @@ class AIApiService {
   }
 
   hasGroqApiKey() {
-    return !!this.groqApiKey;
+    return true; // Server handles Groq API key
   }
 
   hasOpenaiApiKey() {
-    return !!this.openaiApiKey;
+    return true; // Server handles OpenAI API key
   }
 
-  // Legacy method for backward compatibility
+  // Legacy method for backward compatibility - always return true for server-side mode
   hasApiKey() {
-    return this.hasGroqApiKey() || this.hasOpenaiApiKey();
+    return true; // Server handles API keys, so always available
   }
 
   // Rate limiting to prevent API abuse
@@ -116,26 +115,98 @@ class AIApiService {
   // Helper function to clean and parse JSON responses
   parseJsonResponse(content) {
     try {
+      console.log('🔍 Raw AI Response (first 500 chars):', content.substring(0, 500));
+      console.log('🔍 Full response length:', content.length);
+      
       // Clean the response to extract JSON
       let cleanedResponse = content.trim();
       
-      // Remove markdown code blocks if present
-      cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '');
-      cleanedResponse = cleanedResponse.replace(/```\s*/gi, '');
+      // Remove markdown code blocks if present - more aggressive
+      cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '');
+      cleanedResponse = cleanedResponse.replace(/```\s*$/gi, ''); 
+      cleanedResponse = cleanedResponse.replace(/```[\s\S]*$/gi, ''); // Remove any trailing markdown
+      cleanedResponse = cleanedResponse.replace(/^[\s\S]*?```json\s*/gi, ''); // Remove leading content before ```json
       
-      // Find JSON object boundaries
-      const jsonStart = cleanedResponse.indexOf('{');
-      const jsonEnd = cleanedResponse.lastIndexOf('}');
+      // Remove any leading explanatory text before the JSON
+      const jsonPatterns = [
+        /.*?(\{[\s\S]*\})/,  // Find everything from first { to last }
+        /.*?(\[[\s\S]*\])/   // Or from first [ to last ]
+      ];
       
-      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+      for (const pattern of jsonPatterns) {
+        const match = cleanedResponse.match(pattern);
+        if (match && match[1]) {
+          cleanedResponse = match[1];
+          console.log('🔍 Extracted JSON with pattern matching:', cleanedResponse.substring(0, 200) + '...');
+          break;
+        }
       }
       
-      return JSON.parse(cleanedResponse);
+      // Find JSON object boundaries as fallback - with balance checking
+      const jsonStart = cleanedResponse.indexOf('{');
+      if (jsonStart !== -1) {
+        let braceCount = 0;
+        let jsonEnd = -1;
+        
+        for (let i = jsonStart; i < cleanedResponse.length; i++) {
+          if (cleanedResponse[i] === '{') {
+            braceCount++;
+          } else if (cleanedResponse[i] === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              jsonEnd = i;
+              break;
+            }
+          }
+        }
+        
+        if (jsonEnd !== -1) {
+          cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+          console.log('🔍 Using balanced brace extraction, cleaned response length:', cleanedResponse.length);
+        } else {
+          // Fallback to simple last brace if balance check fails
+          const lastBrace = cleanedResponse.lastIndexOf('}');
+          if (lastBrace > jsonStart) {
+            cleanedResponse = cleanedResponse.substring(jsonStart, lastBrace + 1);
+            console.log('🔍 Using fallback extraction, cleaned response length:', cleanedResponse.length);
+          }
+        }
+      }
+      
+      // Additional cleaning for common AI response issues
+      cleanedResponse = cleanedResponse
+        .replace(/^\s*Here's the.*?:\s*/i, '') // Remove "Here's the JSON:" type text
+        .replace(/^\s*```.*?\n/g, '') // Remove any remaining code block markers
+        .replace(/\n```\s*$/g, '') // Remove trailing code block markers
+        .trim();
+      
+      console.log('🔍 Final cleaned response (first 300 chars):', cleanedResponse.substring(0, 300));
+      
+      const result = JSON.parse(cleanedResponse);
+      console.log('✅ Successfully parsed JSON:', Object.keys(result));
+      return result;
+      
     } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      console.error('Original content:', content);
-      throw new Error('AI returned invalid JSON format. Please try again.');
+      console.error('❌ JSON parsing error:', parseError.message);
+      console.error('📝 Original content length:', content.length);
+      console.error('📝 Original content (first 1000 chars):', content.substring(0, 1000));
+      console.error('📝 Content ends with:', content.slice(-200));
+      console.error('🔧 Parse error details:', parseError);
+      
+      // Try one more desperate attempt to find valid JSON
+      try {
+        const desperateMatch = content.match(/\{[\s\S]*"formFields"[\s\S]*\}/);
+        if (desperateMatch) {
+          console.log('🚨 Attempting desperate JSON extraction...');
+          const desperateResult = JSON.parse(desperateMatch[0]);
+          console.log('🎯 Desperate extraction succeeded!');
+          return desperateResult;
+        }
+      } catch (desperateError) {
+        console.error('💥 Even desperate extraction failed:', desperateError.message);
+      }
+      
+      throw new Error('AI returned invalid JSON format. Raw response: ' + content.substring(0, 500) + '...');
     }
   }
 
@@ -147,7 +218,7 @@ class AIApiService {
     
     // Enhanced debug logging for testing
     if (import.meta?.env?.DEV) {
-      console.log(`🤖 AI Provider: ${provider.toUpperCase()}`);
+      console.log(`🤖 AI Provider: ${provider.toUpperCase()} via server proxy`);
       console.log(`📝 Request: ${messages[0]?.content?.substring(0, 100)}...`);
       console.log(`⚙️ Options:`, { 
         model: options.model, 
@@ -155,21 +226,12 @@ class AIApiService {
         temperature: options.temperature 
       });
     }
-    
-    // Check if we have the required API key
-    if (useOpenAI && !this.hasOpenaiApiKey()) {
-      throw new Error('OpenAI API key is required for this operation. Please set your OpenAI API key in settings.');
-    }
-    if (!useOpenAI && !this.hasGroqApiKey()) {
-      throw new Error('Groq API key is required. Please set your Groq API key in settings.');
-    }
 
     await this.enforceRateLimit();
 
-    // Select appropriate model and API details
-    const baseURL = useOpenAI ? this.openaiBaseURL : this.groqBaseURL;
-    const apiKey = useOpenAI ? this.openaiApiKey : this.groqApiKey;
-    const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'gemma2-9b-it';
+    // Use local server endpoints instead of direct API calls
+    const baseURL = useOpenAI ? '/api/openai' : '/api/groq';
+    const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant';
 
     const requestPayload = {
       model: options.model || defaultModel,
@@ -185,8 +247,7 @@ class AIApiService {
     const requestOptions = {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestPayload),
       signal: AbortSignal.timeout(options.timeout || this.timeout)
@@ -196,7 +257,7 @@ class AIApiService {
     
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        if (import.meta?.env?.DEV) console.log(`${provider.toUpperCase()} API Request attempt ${attempt}/${this.maxRetries}`);
+        if (import.meta?.env?.DEV) console.log(`${provider.toUpperCase()} API Request via server proxy attempt ${attempt}/${this.maxRetries}`);
         
         const response = await fetch(baseURL, requestOptions);
         
@@ -204,8 +265,8 @@ class AIApiService {
           const errorData = await response.json().catch(() => ({}));
           throw new APIError(
             response.status,
-            errorData.error?.message || `HTTP ${response.status}`,
-            errorData.error?.type,
+            errorData.error || `HTTP ${response.status}`,
+            errorData.details,
             attempt === this.maxRetries // isLastAttempt
           );
         }
@@ -218,7 +279,7 @@ class AIApiService {
 
         // Success logging
         if (import.meta?.env?.DEV) {
-          console.log(`✅ ${provider.toUpperCase()} Success:`, {
+          console.log(`✅ ${provider.toUpperCase()} Success via server:`, {
             model: data.model,
             usage: data.usage,
             responseLength: data.choices[0].message.content.length
@@ -276,7 +337,7 @@ class AIApiService {
 
       const response = await this.makeRequest(messages, {
         temperature: this.getTemperatureForContinuationType(continuationType),
-        maxTokens: 2500,
+        maxTokens: 4000, // Increased for more detailed scene descriptions with 8B model
         timeout: 90000 // 90 seconds for complex scene extensions
       });
 
@@ -365,7 +426,7 @@ class AIApiService {
 
       const response = await this.makeRequest(messages, {
         temperature: 0.8,
-        maxTokens: 2500,
+        maxTokens: 4000, // Increased for more detailed scene options with 8B model
         timeout: 90000 // 90 seconds for generating multiple scene options
       });
 
@@ -802,7 +863,7 @@ EXAMPLE:
 
       const response = await this.makeRequest(messages, {
         // Use Groq by default (user's existing API key)
-        model: 'llama-3.1-70b-versatile', // Good Groq model for structured output
+        model: 'llama-3.1-8b-instant', // Good Groq model for structured output
         temperature: 0.3, // Lower temperature for consistent JSON
         maxTokens: 800    // Reduced tokens for focused response
       });
@@ -858,12 +919,28 @@ EXAMPLE:
     }
   }
 
-  async generateStoryboard(currentScene, sceneCount, narrativeStructure) {
+  async generateStoryboard(currentScene, sceneCount, narrativeStructure, contextData = {}) {
     try {
+      // Build context section if available
+      let contextSection = '';
+      if (Object.keys(contextData).length > 0) {
+        contextSection = '\n\nADDITIONAL CONTEXT FROM BUILDERS:\n';
+        if (contextData.character) {
+          contextSection += `\nCharacter Context:\n${JSON.stringify(contextData.character, null, 2)}`;
+        }
+        if (contextData.world) {
+          contextSection += `\nWorld Context:\n${JSON.stringify(contextData.world, null, 2)}`;
+        }
+        if (contextData.style) {
+          contextSection += `\nStyle Context:\n${JSON.stringify(contextData.style, null, 2)}`;
+        }
+        contextSection += '\n\nUSE THIS CONTEXT to create more cohesive, detailed scenes that align with the established character, world, and style elements.';
+      }
+
       const systemPrompt = `You are an expert storyboard creator and narrative designer. Create a compelling ${sceneCount}-scene sequence using ${narrativeStructure} structure, building from the provided starting scene.
 
 Starting Scene:
-${JSON.stringify(currentScene, null, 2)}
+${JSON.stringify(currentScene, null, 2)}${contextSection}
 
 Create ${sceneCount} scenes that form a complete narrative arc using ${narrativeStructure} structure.
 
@@ -928,6 +1005,327 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
       return {
         success: false,
         error: error.message || 'Failed to generate storyboard',
+        storyboard: null
+      };
+    }
+  }
+
+  // Progressive scene-by-scene generation with per-scene configuration
+  async generateProgressiveScene(currentSceneData, sceneNumber, totalScenes, narrativeStructure, sceneConfig, contextData = {}, previousScenes = []) {
+    try {
+      // Build context section if available
+      let contextSection = '';
+      if (Object.keys(contextData).length > 0) {
+        contextSection = '\n\nADDITIONAL CONTEXT FROM BUILDERS:\n';
+        if (contextData.character) {
+          contextSection += `\nCharacter Context:\n${JSON.stringify(contextData.character, null, 2)}`;
+        }
+        if (contextData.world) {
+          contextSection += `\nWorld Context:\n${JSON.stringify(contextData.world, null, 2)}`;
+        }
+        if (contextData.style) {
+          contextSection += `\nStyle Context:\n${JSON.stringify(contextData.style, null, 2)}`;
+        }
+        contextSection += '\n\nUSE THIS CONTEXT to create more cohesive, detailed scenes that align with the established character, world, and style elements.';
+      }
+
+      // Build previous scenes context
+      let previousScenesSection = '';
+      if (previousScenes.length > 0) {
+        previousScenesSection = '\n\nPREVIOUS SCENES:\n';
+        previousScenes.forEach((scene, index) => {
+          previousScenesSection += `\nScene ${index + 1}:\n${JSON.stringify(scene.sceneData || scene, null, 2)}`;
+        });
+        previousScenesSection += '\n\nENSURE CONTINUITY and narrative flow from these previous scenes.';
+      }
+
+      const systemPrompt = `You are an expert scene creator and narrative designer. Generate Scene ${sceneNumber} of ${totalScenes} using ${narrativeStructure} structure.
+
+Current Scene Data (starting point):
+${JSON.stringify(currentSceneData, null, 2)}${contextSection}${previousScenesSection}
+
+SCENE ${sceneNumber} CONFIGURATION:
+- Tone: ${sceneConfig.tone}
+- Event Type: ${sceneConfig.eventType} 
+- Location: ${sceneConfig.location}
+
+Create Scene ${sceneNumber} that:
+1. Follows naturally from the current scene
+2. Matches the specified tone (${sceneConfig.tone})
+3. Contains the specified event type (${sceneConfig.eventType})
+4. Uses the specified location approach (${sceneConfig.location})
+5. Fits the ${narrativeStructure} narrative structure position for scene ${sceneNumber} of ${totalScenes}
+
+Return your response in this EXACT JSON format:
+{
+  "title": "Scene ${sceneNumber} title",
+  "position": "opening|development|climax|resolution|transition",
+  "description": "Detailed scene description for video production",
+  "context": "How this scene connects to the overall story",
+  "sceneData": {
+    "scene": "Complete scene description",
+    "setting": "Location/environment details",
+    "character_action": "What characters are doing",
+    "mood": "Emotional tone matching ${sceneConfig.tone}",
+    "camera_work": "Suggested camera angles/movements",
+    "lighting": "Lighting suggestions",
+    "pacing": "Scene rhythm and timing",
+    "tone": "${sceneConfig.tone}",
+    "event_type": "${sceneConfig.eventType}",
+    "location_type": "${sceneConfig.location}"
+  }
+}
+
+Make the scene visually distinct, emotionally engaging, and suitable for video production.`;
+
+      const messages = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: `Generate Scene ${sceneNumber} with ${sceneConfig.tone} tone, ${sceneConfig.eventType} event, and ${sceneConfig.location} location.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8,
+        maxTokens: 2000
+      });
+
+      const scene = this.parseJsonResponse(response.content);
+      
+      return {
+        success: true,
+        scene: scene,
+        title: scene.title,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Progressive scene generation error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to generate scene',
+        scene: null
+      };
+    }
+  }
+
+  // Progressive storyboard question generation - following same pattern as character/world
+  async generateProgressiveStoryboardQuestion({ originalDescription, currentTopic, stepNumber, totalSteps, previousResponses, builderContexts = {}, currentJson = {} }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build context from previous responses
+      const responseContext = Object.entries(previousResponses)
+        .map(([topic, response]) => topic + ': "' + (response.selectedOption.title || response.selectedOption) + '"')
+        .join('\n');
+
+      // Build builder context section if available
+      let builderContextSection = '';
+      if (Object.keys(builderContexts).length > 0) {
+        builderContextSection = '\n\nAVAILABLE BUILDER CONTEXTS:\n';
+        if (builderContexts.character) {
+          builderContextSection += `Character: ${JSON.stringify(builderContexts.character.data, null, 2)}\n`;
+        }
+        if (builderContexts.world) {
+          builderContextSection += `World: ${JSON.stringify(builderContexts.world.data, null, 2)}\n`;
+        }
+        if (builderContexts.style) {
+          builderContextSection += `Style: ${JSON.stringify(builderContexts.style.data, null, 2)}\n`;
+        }
+        builderContextSection += '\nUSE THESE CONTEXTS to make questions more specific and relevant to the established elements.\n';
+      }
+
+      let systemPrompt = 'You are an expert storyboard development AI that creates contextual follow-up questions to build rich, detailed storyboards progressively. This is for a VIDEO PROMPT GENERATOR, so focus heavily on visual storytelling and cinematic elements.\n\n';
+      systemPrompt += 'CURRENT TASK: Generate a targeted question about "' + currentTopic.name + '" for storyboard development.\n\n';
+      systemPrompt += 'ORIGINAL STORY CONCEPT: "' + originalDescription + '"\n\n';
+      systemPrompt += 'PREVIOUS RESPONSES:\n';
+      systemPrompt += (responseContext || 'None yet - this is the first question') + '\n\n';
+      systemPrompt += builderContextSection;
+      systemPrompt += '\nCONTEXT:\n';
+      systemPrompt += '- This is question ' + stepNumber + ' of ' + totalSteps + ' total questions\n';
+      systemPrompt += '- Topic focus: ' + currentTopic.name + ' - ' + currentTopic.description + '\n';
+      systemPrompt += '- Build upon the original concept and previous responses\n';
+      systemPrompt += '- Make this question feel natural and conversational\n';
+      systemPrompt += '- STORYBOARD-FIRST APPROACH: Questions should focus on visual narrative structure\n';
+      systemPrompt += '- Questions 1-2 establish premise and protagonist journey\n';
+      systemPrompt += '- Questions 3-4 define structure and key scenes\n';
+      systemPrompt += '- Questions 5-6 refine tone, style, and production details\n\n';
+      systemPrompt += 'RESPONSE FORMAT (JSON only, no markdown):\n';
+      systemPrompt += '{\n';
+      systemPrompt += '  "question": "A natural, conversational question that builds on previous responses",\n';
+      systemPrompt += '  "options": [\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 1 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 2 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 3 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 4 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 5 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 6 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    }\n';
+      systemPrompt += '  ]\n';
+      systemPrompt += '}\n\n';
+      systemPrompt += 'Make the question highly relevant to storyboard creation and visual storytelling. Ensure options are distinct and meaningful for video production.';
+
+      const messages = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: `Generate question ${stepNumber} about "${currentTopic.name}" for my storyboard.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8,
+        maxTokens: 1000
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      return {
+        success: true,
+        question: result.question,
+        options: result.options,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Progressive storyboard question generation error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to generate storyboard question',
+        question: null,
+        options: []
+      };
+    }
+  }
+
+  // Generate final storyboard from all responses
+  async generateFinalStoryboardFromResponses({ originalDescription, responses, builderContexts = {}, currentJson = {} }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build response summary
+      const responseSummary = Object.entries(responses)
+        .map(([topic, response]) => `${response.topic}: ${response.selectedOption.title || response.selectedOption}`)
+        .join('\n');
+
+      // Build builder context section if available
+      let builderContextSection = '';
+      if (Object.keys(builderContexts).length > 0) {
+        builderContextSection = '\n\nBUILDER CONTEXTS TO INTEGRATE:\n';
+        if (builderContexts.character) {
+          builderContextSection += `Character: ${JSON.stringify(builderContexts.character.data, null, 2)}\n`;
+        }
+        if (builderContexts.world) {
+          builderContextSection += `World: ${JSON.stringify(builderContexts.world.data, null, 2)}\n`;
+        }
+        if (builderContexts.style) {
+          builderContextSection += `Style: ${JSON.stringify(builderContexts.style.data, null, 2)}\n`;
+        }
+        builderContextSection += '\nINTEGRATE these elements into the storyboard to create cohesive narrative.\n';
+      }
+
+      const systemPrompt = `You are an expert storyboard creator. Generate a comprehensive storyboard based on the story concept and user responses.
+
+ORIGINAL STORY CONCEPT: "${originalDescription}"
+
+USER RESPONSES:
+${responseSummary}
+${builderContextSection}
+
+Create a detailed storyboard that combines all these elements into a cohesive visual narrative. Focus on:
+- Scene-by-scene breakdown
+- Visual storytelling elements
+- Character actions and emotions
+- Setting and atmosphere details
+- Camera work and cinematography
+- Pacing and narrative flow
+
+Return your response in this EXACT JSON format:
+{
+  "title": "Compelling storyboard title",
+  "description": "Brief overview of the storyboard",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "title": "Scene title",
+      "description": "Detailed scene description",
+      "setting": "Location and environment",
+      "characters": "Characters present and their actions",
+      "mood": "Emotional tone and atmosphere",
+      "camera_work": "Camera angles and movements",
+      "duration": "Estimated scene duration",
+      "key_elements": ["Visual element 1", "Visual element 2"]
+    }
+  ],
+  "overall_tone": "Overall mood and style",
+  "target_duration": "Estimated total duration",
+  "production_notes": "Important notes for production",
+  "formFields": {
+    "scene": "First scene detailed description",
+    "setting": "Primary setting",
+    "character": "Main character details",
+    "mood": "Overall mood",
+    "style": "Visual style notes",
+    "storyboard_title": "Storyboard title",
+    "scene_count": "Number of scenes"
+  }
+}
+
+Make the storyboard cinematic, detailed, and ready for video production.`;
+
+      const messages = [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: `Create my complete storyboard based on these specifications.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.7,
+        maxTokens: 3000
+      });
+
+      const storyboard = this.parseJsonResponse(response.content);
+      
+      return {
+        success: true,
+        storyboard: storyboard,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Final storyboard generation error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to generate final storyboard',
         storyboard: null
       };
     }
@@ -1094,15 +1492,15 @@ Make each scene visually distinct, emotionally engaging, and suitable for video 
     };
   }
 
-  // Get appropriate temperature for different continuation types
+  // Get appropriate temperature for different continuation types (optimized for 8B model)
   getTemperatureForContinuationType(type) {
     const temperatures = {
-      logical: 0.5,        // More deterministic for logical progression
-      twist: 0.9,          // Higher creativity for unexpected twists
+      logical: 0.7,        // Increased for more detailed logical progression with 8B model
+      twist: 0.9,          // High creativity for unexpected twists
       genreShift: 0.8,     // High creativity for genre changes
-      characterDevelopment: 0.6, // Moderate creativity for character work
+      characterDevelopment: 0.8, // Increased creativity for character work and detail
       flashback: 0.7,      // Creative but grounded in character history
-      timeSkip: 0.6,       // Moderate creativity for consequence exploration
+      timeSkip: 0.7,       // Increased creativity for consequence exploration
       alternateReality: 0.9, // High creativity for parallel possibilities
       environmentalEscalation: 0.8 // Creative environmental storytelling
     };
@@ -1525,18 +1923,222 @@ JSON FORMAT:
     }
   }
 
+  // Progressive Character Question Generation API
+  async generateProgressiveCharacterQuestion({ originalDescription, currentTopic, stepNumber, totalSteps, previousResponses }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build context from previous responses
+      const responseContext = Object.entries(previousResponses)
+        .map(([topic, response]) => topic + ': "' + (response.selectedOption.title || response.selectedOption) + '"')
+        .join('\n');
+
+      let systemPrompt = 'You are an expert character development AI that creates contextual follow-up questions to build rich, detailed characters progressively. This is for a VIDEO PROMPT GENERATOR, so focus heavily on visual and observable elements.\n\n';
+      systemPrompt += 'CURRENT TASK: Generate a targeted question about "' + currentTopic.name + '" for character development.\n\n';
+      systemPrompt += 'ORIGINAL CHARACTER CONCEPT: "' + originalDescription + '"\n\n';
+      systemPrompt += 'PREVIOUS RESPONSES:\n';
+      systemPrompt += (responseContext || 'None yet - this is the first question') + '\n\n';
+      systemPrompt += 'CONTEXT:\n';
+      systemPrompt += '- This is question ' + stepNumber + ' of ' + totalSteps + ' total questions\n';
+      systemPrompt += '- Topic focus: ' + currentTopic.name + ' - ' + currentTopic.description + '\n';
+      systemPrompt += '- Build upon the original concept and previous responses\n';
+      systemPrompt += '- Make this question feel natural and conversational\n';
+      systemPrompt += '- VISUAL-FIRST APPROACH: Questions 1-3 should focus on what you can see on screen\n';
+      systemPrompt += '- Questions 4-5 add behavioral elements (movement, voice)\n';
+      systemPrompt += '- Question 6 is for deeper psychological background\n\n';
+      systemPrompt += 'RESPONSE FORMAT (JSON only, no markdown):\n';
+      systemPrompt += '{\n';
+      systemPrompt += '  "question": "A natural, conversational question that builds on previous responses",\n';
+      systemPrompt += '  "options": [\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 1 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 2 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 3 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 4 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 5 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 6 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    }\n';
+      systemPrompt += '  ]\n';
+      systemPrompt += '}\n\n';
+      systemPrompt += 'GUIDELINES:\n';
+      systemPrompt += '- Question should be conversational and build naturally from previous responses\n';
+      systemPrompt += '- Provide exactly 6 distinct options that offer meaningful character development choices\n';
+      systemPrompt += '- Each option should be specific and evocative, not generic\n';
+      systemPrompt += '- Options should feel like natural extensions of the character concept\n';
+      systemPrompt += '- Focus on the specific topic: ' + currentTopic.name + '\n';
+      systemPrompt += '- Make options feel like genuine character choices, not multiple choice test answers\n\n';
+      systemPrompt += 'TOPIC-SPECIFIC FOCUS:\n';
+      systemPrompt += '- Physical Traits: Age range, gender, ethnicity, body type, height - foundation elements\n';
+      systemPrompt += '- Facial Features: Face shape, eyes, hair, expression, facial hair - what you see up close\n';
+      systemPrompt += '- Clothing & Style: Fashion sense, colors, accessories, overall aesthetic - visual presentation\n';
+      systemPrompt += '- Movement & Presence: Posture, gestures, energy level, confidence - how they carry themselves\n';
+      systemPrompt += '- Voice & Communication: Tone, accent, speaking style, vocabulary - how they sound\n';
+      systemPrompt += '- Background & Depth: History, motivations, psychology - deeper character elements';
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: 'Generate a ' + currentTopic.name.toLowerCase() + ' question for this character. Make it feel natural and build on what we know so far.'
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8, // Higher creativity for diverse options
+        maxTokens: 1200,
+        timeout: 60000 // 60 seconds for question generation
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate the response structure
+      if (!result.question || !result.options || !Array.isArray(result.options) || result.options.length !== 6) {
+        throw new Error('Invalid response format from AI service');
+      }
+
+      return {
+        success: true,
+        question: result.question,
+        options: result.options,
+        topic: currentTopic.name,
+        stepNumber,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Progressive character question generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate character question',
+        question: '',
+        options: []
+      };
+    }
+  }
+
+  // Generate Final Character from Progressive Responses
+  async generateFinalCharacterFromResponses({ originalDescription, responses }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build comprehensive response summary
+      const responsesSummary = Object.entries(responses)
+        .map(([topic, response]) => {
+          return `${response.topic}: ${response.selectedOption.title || response.selectedOption}${
+            response.selectedOption.description ? ` - ${response.selectedOption.description}` : ''
+          }`;
+        })
+        .join('\n');
+
+      const responseCount = Object.keys(responses).length;
+      let systemPrompt = "You are an expert character synthesis AI specialized in creating visually-rich characters for video production. ";
+      systemPrompt += "Create a complete, cohesive character from the user's original concept and their progressive question responses.\n\n";
+      systemPrompt += 'ORIGINAL CHARACTER CONCEPT: "' + originalDescription + '"\n\n';
+      systemPrompt += 'PROGRESSIVE RESPONSES (' + responseCount + ' questions answered):\n' + responsesSummary + '\n\n';
+      systemPrompt += 'IMPORTANT: This is for VIDEO PROMPT GENERATION - prioritize visual and observable characteristics. ';
+      systemPrompt += 'The user has answered ' + responseCount + ' out of 6 possible questions. Create a unified character ';
+      systemPrompt += "that weaves together all available elements into a compelling, cohesive persona. ";
+      systemPrompt += "If certain aspects aren't covered by the responses, infer logical visual and behavioral characteristics ";
+      systemPrompt += "that fit the original concept and answered questions.\n\n";
+      systemPrompt += "VISUAL-FIRST PRIORITY:\n";
+      systemPrompt += "- Physical appearance and clothing details are most critical\n";
+      systemPrompt += "- Behavioral elements (movement, voice) are secondary but important\n";
+      systemPrompt += "- Background/psychology should inform but not overshadow visual elements\n\n";
+      systemPrompt += "RESPONSE FORMAT (JSON only, no markdown):\n";
+      systemPrompt += "{\n";
+      systemPrompt += '  "name": "Character\'s full name",\n';
+      systemPrompt += '  "summary": "2-3 sentence character overview that captures their essence",\n';
+      systemPrompt += '  "appearance": "Detailed physical description incorporating visual elements from responses",\n';
+      systemPrompt += '  "personality": "Rich personality description that integrates all personality-related responses",\n';
+      systemPrompt += '  "background": "Character backstory and history that explains who they are",\n';
+      systemPrompt += '  "uniqueTraits": "Special characteristics, quirks, or abilities that make them distinctive",\n';
+      systemPrompt += '  "formFields": {\n';
+      systemPrompt += '    "character": "Primary character description for the main field",\n';
+      systemPrompt += '    "character_type": "person/animal/robot/etc",\n';
+      systemPrompt += '    "age": "Character age or age range",\n';
+      systemPrompt += '    "gender": "Character gender",\n';
+      systemPrompt += '    "clothing": "Main clothing description",\n';
+      systemPrompt += '    "emotions": "Primary emotional state",\n';
+      systemPrompt += '    "actions": "Typical character actions/activities",\n';
+      systemPrompt += '    "character_motivation": "What drives this character",\n';
+      systemPrompt += '    "visual_style": "Overall visual aesthetic"\n';
+      systemPrompt += "  }\n";
+      systemPrompt += "}\n\n";
+      systemPrompt += "REQUIREMENTS:\n";
+      systemPrompt += "- Synthesize all available responses into one cohesive character optimized for video production\n";
+      systemPrompt += "- PRIORITIZE VISUAL DETAILS: Physical appearance, clothing, and style should be extremely detailed and specific\n";
+      systemPrompt += "- For missing visual aspects, infer characteristics that logically fit the established visual persona\n";
+      systemPrompt += "- Behavioral elements (movement, voice) should be observable and actionable for video creation\n";
+      systemPrompt += "- Background should inform but not overshadow the visual character elements\n";
+      systemPrompt += "- Create formFields that translate directly to video prompt generation needs\n";
+      systemPrompt += "- Make the character visually compelling and cinematically interesting\n";
+      systemPrompt += "- Keep the original concept as the visual foundation and fill gaps with video-appropriate details";
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: 'Synthesize these responses into a complete, cohesive character.' 
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.7, // Balanced creativity for synthesis
+        maxTokens: 2000,
+        timeout: 90000 // 90 seconds for character synthesis
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate required fields
+      if (!result.name || !result.summary || !result.formFields) {
+        throw new Error('Invalid character response format');
+      }
+
+      return {
+        success: true,
+        character: result,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Final character generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate final character',
+        character: null
+      };
+    }
+  }
+
   // Category-specific AI suggestions with user seed ideas
   async generateCategorySuggestions(categoryKey, currentScene = {}, userSeedIdea = '', isProgressive = false) {
     try {
-      if (!this.hasApiKey()) {
-        throw new Error('API key required for category suggestions');
-      }
+      // Server-side API handling - no client-side API key validation needed
 
       const categoryPrompts = {
         characters: {
           systemPrompt: `You are an expert character designer for video content. Generate compelling character suggestions that would work well in video scenes.`,
           fieldMap: {
-            character: ['user input preserved as main character description'],
+            characters: ['elegant person with expressive features and thoughtful demeanor'],
             character_type: ['person', 'animal', 'robot', 'fantasy creature', 'stylized character'],
             age: ['child (5-12)', 'teenager (13-19)', 'young adult (20-35)', 'middle-aged (36-55)', 'elderly (55+)'],
             gender: ['male', 'female', 'non-binary'],
@@ -1549,7 +2151,7 @@ JSON FORMAT:
         actions: {
           systemPrompt: `You are an expert in video storytelling and action direction. Suggest compelling actions and movements for video scenes.`,
           fieldMap: {
-            actions: ['user input preserved as main action description'],
+            actions: ['graceful movements with purposeful energy and natural flow'],
             emotions: ['joyful', 'determined', 'peaceful', 'energetic', 'focused', 'playful'],
             dialogue: ['friendly conversation', 'important announcement', 'quiet reflection', 'animated discussion'],
             performance_style: ['natural', 'theatrical', 'subtle', 'expressive', 'comedic', 'dramatic']
@@ -1558,7 +2160,7 @@ JSON FORMAT:
         settings: {
           systemPrompt: `You are an expert location scout and set designer. Suggest visually compelling settings for video content.`,
           fieldMap: {
-            setting: ['user input preserved as main setting description'],
+            setting: ['atmospheric environment with compelling visual elements'],
             time_of_day: ['golden hour', 'blue hour', 'midday', 'night', 'dawn', 'dusk'],
             weather: ['sunny', 'partly cloudy', 'overcast', 'light rain', 'dramatic clouds'],
             environment: ['indoor', 'outdoor', 'mixed indoor/outdoor'],
@@ -1568,7 +2170,7 @@ JSON FORMAT:
         style: {
           systemPrompt: `You are a cinematographer and visual style expert. Suggest camera angles, lighting, and visual styles for compelling video content.`,
           fieldMap: {
-            style: ['user input preserved as main style description'],
+            style: ['cinematic visual approach with artistic composition and mood'],
             camera_angle: ['eye level', 'low angle', 'high angle', 'dutch angle', 'over shoulder'],
             camera_distance: ['close-up', 'medium shot', 'wide shot', 'establishing shot'],
             lighting_type: ['soft natural', 'dramatic side', 'rim lighting', 'golden hour', 'blue hour'],
@@ -1578,8 +2180,7 @@ JSON FORMAT:
         audio: {
           systemPrompt: `You are an audio designer and music supervisor. Suggest audio elements that enhance video storytelling.`,
           fieldMap: {
-            audio: ['user input preserved as main audio description'],
-            ambient_sound: ['city ambiance', 'nature sounds', 'indoor atmosphere', 'quiet background'],
+            ambient_sound: ['layered atmospheric audio with complementary background sounds'],
             music_style: ['subtle instrumental', 'upbeat', 'emotional', 'minimal', 'cinematic'],
             sound_effects: ['subtle', 'realistic', 'enhanced', 'minimal'],
             audio_mood: ['uplifting', 'contemplative', 'energetic', 'peaceful', 'inspiring']
@@ -1608,67 +2209,65 @@ JSON FORMAT:
         categoryConfig.fieldMap[key] && existingFields[key] && existingFields[key].trim() !== ''
       );
       
-      const userPrompt = isExpansion 
-        ? (isProgressive && hasExistingContent 
-          ? `Given the current scene context: ${sceneContext}
-
-PROGRESSIVE EXPANSION: Enhance existing ${categoryKey} details with more depth and specificity.
-
-Original input: "${userSeedIdea.trim()}"
-
-Current field values to enhance:
-${Object.entries(existingFields)
-  .filter(([key, value]) => categoryConfig.fieldMap[key] && value && value.trim() !== '')
-  .map(([key, value]) => `- ${key}: "${value}"`)
-  .join('\n')}
-
-INSTRUCTIONS:
-1. Keep all existing content but make it MORE detailed and specific
-2. Add new complementary fields that weren't filled before  
-3. Preserve the original concept "${userSeedIdea.trim()}" in the primary field
-4. Focus on adding layers of detail, specificity, and richness
-
-Available fields to enhance or add:
-${Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
-  const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
-  const currentValue = existingFields[field];
-  if (primaryFieldNames.includes(field)) {
-    return `- ${field}: ${currentValue ? `Enhance "${currentValue}" with more detail` : `MUST be exactly "${userSeedIdea.trim()}"`}`;
-  }
-  return `- ${field}: ${currentValue ? `Enhance "${currentValue}" with more specificity` : `(choose from: ${options.join(', ')} or suggest similar)`}`;
-}).join('\n')}
-
-Return enhanced JSON with richer, more detailed descriptions. Don't remove existing content - build upon it.`
-          : `Given the current scene context: ${sceneContext}
-
-Expand this ${categoryKey} idea: "${userSeedIdea.trim()}"
-
-CRITICAL INSTRUCTION: You must preserve the user's exact input "${userSeedIdea.trim()}" as the primary field value. Do not change or interpret it - use it exactly as provided.
-
-Then add complementary details that enhance and describe this specific concept.
-
-Respond with a JSON object containing field suggestions. Use these available fields:
-${Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
-  const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
-  if (primaryFieldNames.includes(field)) {
-    return `- ${field}: MUST be exactly "${userSeedIdea.trim()}" (preserve user input exactly)`;
-  }
-  return `- ${field}: (choose from: ${options.join(', ')} or suggest similar that fits "${userSeedIdea.trim()}")`;
-}).join('\n')}
-
-Example: If user says "scarecrow", the primary field should be "scarecrow" and other fields should describe scarecrow-specific attributes (straw hair, burlap clothing, etc.).
-
-Focus on expanding "${userSeedIdea.trim()}" while preserving it as the core value. Return only the JSON object, no explanation.`)
-        : `Given the current scene context: ${sceneContext}
-
-Please suggest appropriate values for a ${categoryKey} category that would complement the existing scene elements. 
-
-Respond with a JSON object containing field suggestions. Use these available fields and choose values that work well together:
-${Object.entries(categoryConfig.fieldMap).map(([field, options]) => 
-  `- ${field}: (choose from: ${options.join(', ')} or suggest similar)`
-).join('\n')}
-
-Focus on creating cohesive suggestions that enhance the overall scene. Return only the JSON object, no explanation.`;
+      let userPrompt;
+      if (isExpansion) {
+        if (isProgressive && hasExistingContent) {
+          // Build current fields description
+          const currentFieldsDesc = Object.entries(existingFields)
+            .filter(([key, value]) => categoryConfig.fieldMap[key] && value && value.trim() !== '')
+            .map(([key, value]) => '- ' + key + ': "' + value + '"')
+            .join('\n');
+          
+          // Build available fields description
+          const availableFieldsDesc = Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
+            const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+            const currentValue = existingFields[field];
+            if (primaryFieldNames.includes(field)) {
+              return '- ' + field + ': ' + (currentValue ? 'Enhance "' + currentValue + '" with more detail' : 'MUST be exactly "' + userSeedIdea.trim() + '"');
+            }
+            return '- ' + field + ': ' + (currentValue ? 'Enhance "' + currentValue + '" with more specificity' : '(choose from: ' + options.join(', ') + ' or suggest similar)');
+          }).join('\n');
+          
+          userPrompt = 'Given the current scene context: ' + sceneContext + '\n\n' +
+            'PROGRESSIVE EXPANSION: Enhance existing ' + categoryKey + ' details with more depth and specificity.\n\n' +
+            'Original input: "' + userSeedIdea.trim() + '"\n\n' +
+            'Current field values to enhance:\n' + currentFieldsDesc + '\n\n' +
+            'INSTRUCTIONS:\n' +
+            '1. Keep all existing content but make it MORE detailed and specific\n' +
+            '2. Add new complementary fields that were not filled before\n' +
+            '3. Preserve the original concept "' + userSeedIdea.trim() + '" in the primary field\n' +
+            '4. Focus on adding layers of detail, specificity, and richness\n\n' +
+            'Available fields to enhance or add:\n' + availableFieldsDesc + '\n\n' +
+            'Return enhanced JSON with richer, more detailed descriptions. Don\'t remove existing content - build upon it.';
+        } else {
+          // Build available fields description
+          const availableFieldsDesc = Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
+            const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+            if (primaryFieldNames.includes(field)) {
+              return '- ' + field + ': MUST be exactly "' + userSeedIdea.trim() + '" (preserve user input exactly)';
+            }
+            return '- ' + field + ': (choose from: ' + options.join(', ') + ' or suggest similar that fits "' + userSeedIdea.trim() + '")';
+          }).join('\n');
+          
+          userPrompt = 'Given the current scene context: ' + sceneContext + '\n\n' +
+            'Expand this ' + categoryKey + ' idea: "' + userSeedIdea.trim() + '"\n\n' +
+            'CRITICAL INSTRUCTION: You must preserve the user\'s exact input "' + userSeedIdea.trim() + '" as the primary field value. Do not change or interpret it - use it exactly as provided.\n\n' +
+            'Then add complementary details that enhance and describe this specific concept.\n\n' +
+            'Respond with a JSON object containing field suggestions. Use these available fields:\n' + availableFieldsDesc + '\n\n' +
+            'Example: If user says "scarecrow", the primary field should be "scarecrow" and other fields should describe scarecrow-specific attributes (straw hair, burlap clothing, etc.).\n\n' +
+            'Focus on expanding "' + userSeedIdea.trim() + '" while preserving it as the core value. Return only the JSON object, no explanation.';
+        }
+      } else {
+        // Build available fields description
+        const availableFieldsDesc = Object.entries(categoryConfig.fieldMap).map(([field, options]) => 
+          '- ' + field + ': (choose from: ' + options.join(', ') + ' or suggest similar)'
+        ).join('\n');
+        
+        userPrompt = 'Given the current scene context: ' + sceneContext + '\n\n' +
+          'Please suggest appropriate values for a ' + categoryKey + ' category that would complement the existing scene elements.\n\n' +
+          'Respond with a JSON object containing field suggestions. Use these available fields and choose values that work well together:\n' + availableFieldsDesc + '\n\n' +
+          'Focus on creating cohesive suggestions that enhance the overall scene. Return only the JSON object, no explanation.';
+      }
 
       const messages = [
         { role: 'system', content: categoryConfig.systemPrompt },
@@ -1713,6 +2312,438 @@ Focus on creating cohesive suggestions that enhance the overall scene. Return on
     }
   }
 
+  // Generate Related Character API - with DNA inheritance logic
+  async generateRelatedCharacter(baseSpec, relationship, tweaks) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build context from base character
+      const baseContext = JSON.stringify(baseSpec, null, 2);
+
+      const systemPrompt = `You are an expert character designer specializing in creating related characters with DNA inheritance. Your job is to generate 3-5 related characters that inherit the original character's "DNA" (core style, tone, visual palette) while varying role-appropriate traits based on the relationship type.
+
+RELATIONSHIP: ${relationship}
+ORIGINAL CHARACTER:
+${baseContext}
+
+DNA INHERITANCE SYSTEM:
+- CORE DNA (always inherit): Visual style, color palette, art direction, world setting, genre tone
+- SIMILARITY LEVEL: ${tweaks.similarity}% (how much to inherit vs. vary)
+- TONE SHIFT: ${tweaks.toneShift}
+- PALETTE SHIFT: ${tweaks.paletteShift}  
+- AGE SHIFT: ${tweaks.ageShift}
+
+RELATIONSHIP-SPECIFIC VARIATIONS:
+- SIBLING: Shared family traits but different personality/role, similar age range
+- ALLY: Complementary abilities/skills, supportive personality traits
+- RIVAL: Contrasting personality, opposing goals, similar skill level
+- MENTOR: Older/wiser version, refined characteristics, guiding nature
+- SIDEKICK: Younger/smaller, supporting role traits, loyal personality
+- ALT VERSION: Same core identity but different outfit/age/timeline/circumstances
+
+VARIATION GUIDELINES:
+- At ${tweaks.similarity}% similarity: Keep ${Math.floor(tweaks.similarity/10)} out of 10 base traits
+- Tone shift "${tweaks.toneShift}": ${tweaks.toneShift === 'darker' ? 'Make personality more serious/dramatic' : tweaks.toneShift === 'lighter' ? 'Make personality more upbeat/positive' : 'Keep same emotional tone'}
+- Palette shift "${tweaks.paletteShift}": ${tweaks.paletteShift === 'warmer' ? 'Shift colors toward reds/oranges/yellows' : tweaks.paletteShift === 'cooler' ? 'Shift colors toward blues/greens/purples' : 'Keep same color scheme'}
+- Age shift "${tweaks.ageShift}": ${tweaks.ageShift === 'younger' ? 'Make noticeably younger' : tweaks.ageShift === 'older' ? 'Make noticeably older' : 'Keep similar age'}
+
+Return EXACTLY 3-5 character options in this JSON format:
+{
+  "options": [
+    {
+      "name": "Character name",
+      "summary": "2-3 sentence character description",
+      "appearance": "Physical description with inherited visual DNA",
+      "personality": "Personality traits fitting the relationship",
+      "background": "Brief history explaining the relationship",
+      "keyDifferences": ["Major difference 1", "Major difference 2", "Major difference 3"],
+      "inheritedTraits": ["Inherited trait 1", "Inherited trait 2", "Inherited trait 3"],
+      "formFields": {
+        "character": "Main character description",
+        "character_type": "person/animal/robot/etc",
+        "age": "Character age",
+        "personality": "Key personality traits",
+        "clothing": "Outfit description",
+        "emotions": "Primary emotional state"
+      }
+    }
+  ]
+}
+
+CRITICAL REQUIREMENTS:
+- Generate exactly 3-5 distinct options (not just 3)
+- Each must have clear relationship connection to original
+- Maintain visual DNA inheritance while varying appropriately
+- Include specific keyDifferences and inheritedTraits lists
+- Make each option genuinely different from the others
+- Ensure formFields are complete and production-ready`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: `Generate ${relationship} characters related to the provided base character. Apply the specified tweaks and maintain DNA inheritance.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8, // Higher creativity for character variations
+        maxTokens: 2500,
+        timeout: 90000 // 90 seconds for multiple character generation
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate response structure
+      if (!result.options || !Array.isArray(result.options) || result.options.length < 3) {
+        throw new Error('Invalid response format - expected 3-5 character options');
+      }
+
+      return {
+        success: true,
+        options: result.options,
+        relationship,
+        tweaks,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Related character generation error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to generate related characters',
+        options: []
+      };
+    }
+  }
+
+  // Generate Related World API - with DNA inheritance logic
+  async generateRelatedWorld(baseSpec, relationship, tweaks) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build context from base world
+      const baseContext = JSON.stringify(baseSpec, null, 2);
+
+      const systemPrompt = `You are an expert world builder specializing in creating related locations with DNA inheritance. Your job is to generate 3-5 related world locations that inherit the original world's "DNA" (core style, tone, visual palette, architectural elements) while varying location-appropriate traits based on the relationship type.
+
+RELATIONSHIP: ${relationship}
+ORIGINAL WORLD/LOCATION:
+${baseContext}
+
+DNA INHERITANCE SYSTEM:
+- CORE DNA (always inherit): Architectural style, color palette, cultural elements, technology level, genre atmosphere
+- SIMILARITY LEVEL: ${tweaks.similarity}% (how much to inherit vs. vary)
+- TONE SHIFT: ${tweaks.toneShift}
+- PALETTE SHIFT: ${tweaks.paletteShift}
+- DANGER LEVEL: ${tweaks.difficultyShift}
+
+RELATIONSHIP-SPECIFIC VARIATIONS:
+- ADJACENT LOCATION: Nearby place with same culture but different function (market vs temple in same city)
+- HIDDEN AREA: Secret location within the same world (hidden chamber, concealed garden, underground passage)
+- RUIN/ECHO: Decayed or abandoned version (ruins of the same building type, post-apocalyptic version)
+- SEASONAL VARIANT: Same location in different season/weather (winter palace, storm-battered harbor)
+- TIME PERIOD VARIANT: Same geography in different historical era (ancient vs modern version)
+
+VARIATION GUIDELINES:
+- At ${tweaks.similarity}% similarity: Keep ${Math.floor(tweaks.similarity/10)} out of 10 base environmental traits
+- Tone shift "${tweaks.toneShift}": ${tweaks.toneShift === 'darker' ? 'Make atmosphere more ominous/dangerous' : tweaks.toneShift === 'lighter' ? 'Make atmosphere more welcoming/peaceful' : 'Keep same emotional tone'}
+- Palette shift "${tweaks.paletteShift}": ${tweaks.paletteShift === 'warmer' ? 'Shift colors toward reds/oranges/earth tones' : tweaks.paletteShift === 'cooler' ? 'Shift colors toward blues/greens/stone tones' : 'Keep same color scheme'}
+- Danger level "${tweaks.difficultyShift}": ${tweaks.difficultyShift === 'more_dangerous' ? 'Add hazards/threats/hostile elements' : tweaks.difficultyShift === 'safer' ? 'Make more peaceful/protected/welcoming' : 'Keep same danger level'}
+
+Return EXACTLY 3-5 location options in this JSON format:
+{
+  "options": [
+    {
+      "name": "Location name",
+      "summary": "2-3 sentence location description",
+      "description": "Detailed environmental description with inherited visual DNA",
+      "atmosphere": "Mood and feeling of this place",
+      "purpose": "What this location is used for",
+      "keyDifferences": ["Major difference 1", "Major difference 2", "Major difference 3"],
+      "inheritedTraits": ["Inherited trait 1", "Inherited trait 2", "Inherited trait 3"],
+      "formFields": {
+        "setting": "Main setting description", 
+        "location": "Specific location details",
+        "atmosphere": "Environmental mood",
+        "time_of_day": "Lighting conditions",
+        "weather": "Weather/climate",
+        "environmental_details": "Specific environmental elements"
+      }
+    }
+  ]
+}
+
+CRITICAL REQUIREMENTS:
+- Generate exactly 3-5 distinct location options (not just 3)
+- Each must have clear relationship connection to original location
+- Maintain architectural/cultural DNA inheritance while varying appropriately
+- Include specific keyDifferences and inheritedTraits lists
+- Make each option genuinely different from the others
+- Ensure formFields are complete and production-ready`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: `Generate ${relationship} world locations related to the provided base world. Apply the specified tweaks and maintain DNA inheritance.`
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8, // Higher creativity for world variations
+        maxTokens: 2500,
+        timeout: 90000 // 90 seconds for multiple world generation
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate response structure
+      if (!result.options || !Array.isArray(result.options) || result.options.length < 3) {
+        throw new Error('Invalid response format - expected 3-5 world options');
+      }
+
+      return {
+        success: true,
+        options: result.options,
+        relationship,
+        tweaks,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Related world generation error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to generate related worlds',
+        options: []
+      };
+    }
+  }
+
+  // Progressive World Question Generation API
+  async generateProgressiveWorldQuestion({ originalDescription, currentTopic, stepNumber, totalSteps, previousResponses }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build context from previous responses
+      const responseContext = Object.entries(previousResponses)
+        .map(([topic, response]) => topic + ': "' + (response.selectedOption.title || response.selectedOption) + '"')
+        .join('\n');
+
+      let systemPrompt = 'You are an expert world-building AI that creates contextual follow-up questions to build rich, detailed worlds progressively. This is for a VIDEO PROMPT GENERATOR, so focus heavily on visual and observable environmental elements.\n\n';
+      systemPrompt += 'CURRENT TASK: Generate a targeted question about "' + currentTopic.name + '" for world development.\n\n';
+      systemPrompt += 'ORIGINAL WORLD CONCEPT: "' + originalDescription + '"\n\n';
+      systemPrompt += 'PREVIOUS RESPONSES:\n';
+      systemPrompt += (responseContext || 'None yet - this is the first question') + '\n\n';
+      systemPrompt += 'CRITICAL REQUIREMENT - CONTEXTUAL CONSISTENCY:\n';
+      systemPrompt += '⚠️ ALL 6 OPTIONS MUST STAY WITHIN THE SAME WORLD TYPE AND ENVIRONMENT AS THE ORIGINAL CONCEPT\n';
+      systemPrompt += '⚠️ If original concept is "city street" → ALL options must be variations of city streets\n';
+      systemPrompt += '⚠️ If original concept is "forest" → ALL options must be variations of forests\n';
+      systemPrompt += '⚠️ If original concept is "space station" → ALL options must be variations of space stations\n';
+      systemPrompt += '⚠️ NEVER change to completely different environments (city street ≠ floating market ≠ enchanted woodland)\n\n';
+      systemPrompt += 'CONCRETE EXAMPLES OF CONTEXTUAL CONSISTENCY:\n';
+      systemPrompt += 'Original Concept: "city street" ✅ Good options: "Busy commercial avenue", "Quiet residential street", "Industrial back alley"\n';
+      systemPrompt += 'Original Concept: "city street" ❌ Bad options: "Floating market", "Enchanted woodland", "Space station corridor"\n\n';
+      systemPrompt += 'Original Concept: "mystical forest" ✅ Good options: "Ancient grove with glowing mushrooms", "Dense thicket with twisted vines", "Moonlit clearing with fairy rings"\n';
+      systemPrompt += 'Original Concept: "mystical forest" ❌ Bad options: "Cyberpunk city", "Desert oasis", "Underwater cave"\n\n';
+      systemPrompt += 'Original Concept: "space station" ✅ Good options: "Command bridge with holographic displays", "Engineering bay with plasma conduits", "Observation deck overlooking Earth"\n';
+      systemPrompt += 'Original Concept: "space station" ❌ Bad options: "Medieval castle", "Tropical beach", "Underground cavern"\n\n';
+      systemPrompt += 'CONTEXT:\n';
+      systemPrompt += '- This is question ' + stepNumber + ' of ' + totalSteps + ' total questions\n';
+      systemPrompt += '- Topic focus: ' + currentTopic.name + ' - ' + currentTopic.description + '\n';
+      systemPrompt += '- Build upon the original concept and previous responses\n';
+      systemPrompt += '- Make this question feel natural and conversational\n';
+      systemPrompt += '- VISUAL-FIRST APPROACH: Questions 1-3 should focus on what you can see in this environment\n';
+      systemPrompt += '- Questions 4-5 add cultural/technological elements (systems, society)\n';
+      systemPrompt += '- Question 6 is for deeper historical/atmospheric background\n\n';
+      systemPrompt += 'RESPONSE FORMAT (JSON only, no markdown):\n';
+      systemPrompt += '{\n';
+      systemPrompt += '  "question": "A natural, conversational question that builds on previous responses",\n';
+      systemPrompt += '  "options": [\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 1 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 2 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 3 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 4 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 5 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    },\n';
+      systemPrompt += '    {\n';
+      systemPrompt += '      "title": "Option 6 title",\n';
+      systemPrompt += '      "description": "Brief description of what this choice represents"\n';
+      systemPrompt += '    }\n';
+      systemPrompt += '  ]\n';
+      systemPrompt += '}\n\n';
+      systemPrompt += 'GUIDELINES:\n';
+      systemPrompt += '- Question should be conversational and build naturally from previous responses\n';
+      systemPrompt += '- Provide exactly 6 distinct options that offer meaningful world-building development choices\n';
+      systemPrompt += '- Each option must be a VARIATION of the original concept, never a different environment\n';
+      systemPrompt += '- Each option should be specific and evocative, not generic\n';
+      systemPrompt += '- Options should feel like natural VARIATIONS within the same world type\n';
+      systemPrompt += '- Focus on the specific topic: ' + currentTopic.name + '\n';
+      systemPrompt += '- Maintain the same basic setting type while varying specific characteristics\n';
+      systemPrompt += '- If original is [X], provide different types/aspects/styles of [X], never [Y] or [Z]\n';
+      systemPrompt += '- Make options feel like genuine world-building choices within the established environment\n\n';
+      systemPrompt += 'TOPIC-SPECIFIC FOCUS (ALWAYS WITHIN ORIGINAL WORLD TYPE):\n';
+      systemPrompt += '- Geography & Scale: Different AREAS/REGIONS within the same environment type (if city→different districts, if forest→different groves)\n';
+      systemPrompt += '- Architecture & Structures: Different BUILDING STYLES/AGES within the same setting type (if medieval→different castle styles, if modern→different building eras)\n';
+      systemPrompt += '- Culture & Society: Different GROUPS/FACTIONS within the same world (if urban→different social classes, if fantasy→different magical traditions)\n';
+      systemPrompt += '- Technology & Systems: Different TECH LEVELS/SYSTEMS within the same genre (if sci-fi→different tech approaches, if fantasy→different magic types)\n';
+      systemPrompt += '- History & Atmosphere: Different TIME PERIODS/MOODS within the same setting (if ancient→different historical eras, if dark→different sources of darkness)\n';
+      systemPrompt += '- Economy & Conflicts: Different RESOURCE TYPES/TENSIONS within the same world (if trading→different goods/markets, if war-torn→different conflicts)';
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: 'Generate a ' + currentTopic.name.toLowerCase() + ' question for this world. CRITICAL: Keep all 6 options as variations within the "' + originalDescription + '" concept - never change to different environment types. Make it feel natural and build on what we know so far.'
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8, // Higher creativity for diverse options
+        maxTokens: 1200,
+        timeout: 60000 // 60 seconds for question generation
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate the response structure
+      if (!result.question || !result.options || !Array.isArray(result.options) || result.options.length !== 6) {
+        throw new Error('Invalid response format from AI service');
+      }
+
+      return {
+        success: true,
+        question: result.question,
+        options: result.options,
+        topic: currentTopic.name,
+        stepNumber,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Progressive world question generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate world question',
+        question: null,
+        options: []
+      };
+    }
+  }
+
+  // Generate Final World from Progressive Responses
+  async generateFinalWorldFromResponses({ originalDescription, responses }) {
+    try {
+      await this.enforceRateLimit();
+
+      // Build comprehensive response summary
+      const responsesSummary = Object.entries(responses)
+        .map(([topic, response]) => {
+          return `${response.topic}: ${response.selectedOption.title || response.selectedOption}${
+            response.selectedOption.description ? ` - ${response.selectedOption.description}` : ''
+          }`;
+        })
+        .join('\n');
+
+      const responseCount = Object.keys(responses).length;
+      let systemPrompt = "You are an expert world synthesis AI specialized in creating visually-rich environments for video production. ";
+      systemPrompt += "Create a complete, cohesive world from the user's original concept and their progressive question responses.\n\n";
+      systemPrompt += 'ORIGINAL WORLD CONCEPT: "' + originalDescription + '"\n\n';
+      systemPrompt += 'PROGRESSIVE RESPONSES (' + responseCount + ' questions answered):\n' + responsesSummary + '\n\n';
+      systemPrompt += 'IMPORTANT: This is for VIDEO PROMPT GENERATION - prioritize visual and observable environmental characteristics. ';
+      systemPrompt += 'The user has answered ' + responseCount + ' out of 6 possible questions. Create a unified world ';
+      systemPrompt += "that weaves together all available elements into a compelling, cohesive environment. ";
+      systemPrompt += "If certain aspects aren't covered by the responses, infer logical visual and environmental characteristics ";
+      systemPrompt += "that fit the original concept and answered questions.\n\n";
+      systemPrompt += "VISUAL-FIRST PRIORITY:\n";
+      systemPrompt += "- Physical geography and architecture details are most critical\n";
+      systemPrompt += "- Cultural/technological elements should be observable and visible\n";
+      systemPrompt += "- History/atmosphere should inform but not overshadow visual elements\n\n";
+      systemPrompt += "RESPONSE FORMAT (JSON only, no markdown):\n";
+      systemPrompt += "{\n";
+      systemPrompt += '  "name": "World\'s distinctive name",\n';
+      systemPrompt += '  "summary": "2-3 sentence world overview that captures its essence",\n';
+      systemPrompt += '  "geography": "Detailed physical description incorporating terrain and scale elements",\n';
+      systemPrompt += '  "architecture": "Rich architectural description integrating building style and structural responses",\n';
+      systemPrompt += '  "culture": "Cultural and society description that integrates all social-related responses",\n';
+      systemPrompt += '  "atmosphere": "Environmental mood and historical feeling that explains the world\'s character",\n';
+      systemPrompt += '  "uniqueFeatures": "Special characteristics, systems, or elements that make this world distinctive",\n';
+      systemPrompt += '  "formFields": {\n';
+      systemPrompt += '    "setting": "Primary setting description for the main field",\n';
+      systemPrompt += '    "location": "Specific location details",\n';
+      systemPrompt += '    "atmosphere": "Environmental mood",\n';
+      systemPrompt += '    "time_of_day": "Lighting conditions that fit this world",\n';
+      systemPrompt += '    "weather": "Weather/climate that matches the world",\n';
+      systemPrompt += '    "environmental_details": "Specific environmental elements",\n';
+      systemPrompt += '    "world_type": "Fantasy/sci-fi/modern/historical/etc",\n';
+      systemPrompt += '    "architectural_style": "Building and structural aesthetic",\n';
+      systemPrompt += '    "cultural_context": "Social and cultural elements"\n';
+      systemPrompt += "  }\n";
+      systemPrompt += "}\n\n";
+      systemPrompt += "REQUIREMENTS:\n";
+      systemPrompt += "- Synthesize all available responses into one cohesive world optimized for video production\n";
+      systemPrompt += "- PRIORITIZE VISUAL DETAILS: Physical geography, architecture, and environmental elements should be extremely detailed and specific\n";
+      systemPrompt += "- For missing visual aspects, infer characteristics that logically fit the established environmental persona\n";
+      systemPrompt += "- Cultural/technological elements should be observable and actionable for video creation\n";
+      systemPrompt += "- Atmosphere/history should inform but not overshadow the visual world elements\n";
+      systemPrompt += "- Create formFields that translate directly to video prompt generation needs\n";
+      systemPrompt += "- Make the world visually compelling and cinematically interesting\n";
+      systemPrompt += "- Keep the original concept as the environmental foundation and fill gaps with video-appropriate details";
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { 
+          role: 'user', 
+          content: 'Synthesize these responses into a complete, cohesive world.' 
+        }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.7, // Balanced creativity for synthesis
+        maxTokens: 2000,
+        timeout: 90000 // 90 seconds for world synthesis
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate required fields
+      if (!result.name || !result.summary || !result.formFields) {
+        throw new Error('Invalid world response format');
+      }
+
+      return {
+        success: true,
+        world: result,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Final world generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate final world',
+        world: null
+      };
+    }
+  }
+
   // Health check for API connectivity
   async healthCheck() {
     try {
@@ -1737,6 +2768,153 @@ Focus on creating cohesive suggestions that enhance the overall scene. Return on
       return {
         healthy: false,
         error: error.message
+      };
+    }
+  }
+
+  // Progressive Style Question Generation API
+  async generateProgressiveStyleQuestion({ originalDescription, currentTopic, stepNumber, totalSteps, previousResponses }) {
+    try {
+      await this.enforceRateLimit();
+
+      const responsesList = Object.entries(previousResponses)
+        .map(([topic, response]) => `${topic}: "${response}"`)
+        .join('\n');
+
+      const systemPrompt = `You are an expert cinematographer and visual style designer. Your job is to help users develop their perfect visual style through targeted questions. You must generate EXACTLY 6 diverse, compelling options that explore different aspects of the current topic.
+
+CRITICAL INSTRUCTIONS:
+- Generate exactly 6 options, no more, no less
+- Keep each option under 100 characters
+- Make options distinct and diverse within the topic
+- Focus on visual, technical, and aesthetic aspects
+- Build upon the original description: "${originalDescription}"
+- Consider previous responses but don't repeat them`;
+
+      const userPrompt = `Original style description: "${originalDescription}"
+
+Current topic: ${currentTopic.name} - ${currentTopic.description}
+Step ${stepNumber} of ${totalSteps}
+
+Previous responses:
+${responsesList || 'None yet'}
+
+Generate a ${currentTopic.name.toLowerCase()} question for this style. CRITICAL: Keep all 6 options as variations within the "${originalDescription}" concept - never change to different style types. Make it feel natural and build on what we know so far.
+
+Return JSON format:
+{
+  "question": "What kind of [topic aspect] should this style have?",
+  "options": [
+    "Option 1 (specific to original concept)",
+    "Option 2 (specific to original concept)",  
+    "Option 3 (specific to original concept)",
+    "Option 4 (specific to original concept)",
+    "Option 5 (specific to original concept)",
+    "Option 6 (specific to original concept)"
+  ]
+}`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.8, // Higher creativity for diverse options
+        maxTokens: 1200,
+        timeout: 60000 // 60 seconds for question generation
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate the response structure
+      if (!result.question || !result.options || !Array.isArray(result.options) || result.options.length !== 6) {
+        throw new Error('Invalid response format from AI service');
+      }
+
+      return {
+        success: true,
+        question: result.question,
+        options: result.options,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Progressive style question generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate style question'
+      };
+    }
+  }
+
+  // Generate Final Style from Progressive Responses
+  async generateFinalStyleFromResponses({ originalDescription, responses }) {
+    try {
+      await this.enforceRateLimit();
+
+      const responsesList = Object.entries(responses)
+        .map(([topic, response]) => `- ${topic}: "${response}"`)
+        .join('\n');
+
+      const systemPrompt = `You are a master cinematographer and visual style designer. Your task is to synthesize user preferences into a complete, cohesive visual style specification.
+
+Create a style that combines all the user's choices into a unified, professional visual approach. The style should be detailed enough for a cinematographer or director to implement.`;
+
+      const userPrompt = `Original style concept: "${originalDescription}"
+
+User's detailed preferences:
+${responsesList}
+
+Synthesize these responses into a complete, cohesive style specification. Return JSON format:
+
+{
+  "name": "Descriptive style name (3-5 words)",
+  "summary": "2-3 sentence overview of the complete style",
+  "formFields": {
+    "style": "Main style description combining all elements",
+    "camera_angle": "Specific camera work and angles",
+    "lighting_type": "Lighting approach and mood",
+    "color_palette": "Color scheme and treatment", 
+    "cinematography": "Overall cinematography approach",
+    "mood": "Visual and emotional tone",
+    "technical_quality": "Production quality and characteristics",
+    "visual_references": "Director/film influences and inspirations"
+  }
+}`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ];
+
+      const response = await this.makeRequest(messages, {
+        temperature: 0.7, // Balanced creativity for synthesis
+        maxTokens: 2000,
+        timeout: 90000 // 90 seconds for style synthesis
+      });
+
+      const result = this.parseJsonResponse(response.content);
+      
+      // Validate required fields
+      if (!result.name || !result.summary || !result.formFields) {
+        throw new Error('Invalid style response format');
+      }
+
+      return {
+        success: true,
+        style: result,
+        usage: response.usage
+      };
+
+    } catch (error) {
+      console.error('Final style generation error:', error);
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to generate final style',
+        style: null
       };
     }
   }

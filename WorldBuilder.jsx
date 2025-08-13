@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
+import RelatedGeneratorModal from './RelatedGeneratorModal';
 
 const WorldBuilder = ({ currentJson, onResult }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [worldData, setWorldData] = useState(null);
   const [error, setError] = useState(null);
   const [selectedExpansionType, setSelectedExpansionType] = useState('full');
+  const [showRelatedModal, setShowRelatedModal] = useState(false);
 
   const expansionTypes = [
     { 
@@ -108,6 +110,20 @@ const WorldBuilder = ({ currentJson, onResult }) => {
       onResult(updatedJson);
       setWorldData(null);
     }
+  };
+
+  const handleRelatedResult = (relatedWorld) => {
+    if (relatedWorld && onResult) {
+      // Apply the related world's form fields to the scene
+      const updatedJson = {
+        ...currentJson || {},
+        ...relatedWorld.formFields || relatedWorld
+      };
+      onResult(updatedJson);
+    }
+    // Close the related modal and dismiss world data
+    setShowRelatedModal(false);
+    setWorldData(null);
   };
 
   const getExpansionIcon = (type) => {
@@ -317,19 +333,34 @@ const WorldBuilder = ({ currentJson, onResult }) => {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
-            <button
-              onClick={applyFullWorldToScene}
-              className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
-            >
-              Apply All to Scene
-            </button>
-            <button
-              onClick={() => setWorldData(null)}
-              className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
-            >
-              Dismiss
-            </button>
+          <div className="space-y-3 mt-4">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                onClick={applyFullWorldToScene}
+                className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
+              >
+                Apply All to Scene
+              </button>
+              <button
+                onClick={() => setWorldData(null)}
+                className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+            
+            {/* Make Related Button */}
+            <div className="border-t border-gray-200 dark:border-cinema-border pt-3">
+              <button
+                onClick={() => setShowRelatedModal(true)}
+                className="w-full px-3 py-2 bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 font-medium rounded-md transition-all duration-300 border-2 border-purple-300 dark:border-purple-600 hover:border-purple-400 dark:hover:border-purple-500 text-sm"
+              >
+                🌟 Make Related Worlds
+              </button>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                Generate adjacent locations, hidden areas, variants and more that share this world's DNA
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -361,6 +392,15 @@ const WorldBuilder = ({ currentJson, onResult }) => {
           </button>
         </div>
       )}
+      
+      {/* Related Generator Modal */}
+      <RelatedGeneratorModal
+        isOpen={showRelatedModal}
+        onClose={() => setShowRelatedModal(false)}
+        baseSpec={worldData}
+        specType="world"
+        onResult={handleRelatedResult}
+      />
     </div>
   );
 };

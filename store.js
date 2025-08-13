@@ -20,6 +20,15 @@ const usePromptStore = create((set, get) => ({
   // Aspect ratio for video generation
   aspectRatio: '16:9',
 
+  // Builder completion tracking and context for Storyboard Generator
+  builderContext: {
+    character: null,      // Completed character data from Character Builder
+    world: null,          // Completed world data from World Builder  
+    style: null,          // Completed style data from Style Builder
+    scene: null,          // Current scene from Scene Builder
+    lastUpdated: {},      // Track when each context was last updated
+  },
+
   toggleCategory: (categoryId) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
     if (newExpanded.has(categoryId)) {
@@ -1059,8 +1068,8 @@ const usePromptStore = create((set, get) => ({
   projects: JSON.parse(localStorage.getItem('projects') || '[]'),
   currentProject: JSON.parse(localStorage.getItem('currentProject') || 'null'),
 
-  saveCharacter: (name) => {
-    const { fieldValues, savedCharacters } = get();
+  saveCharacter: (name, projectIds = []) => {
+    const { fieldValues, savedCharacters, currentProject } = get();
     
     // Extract character-related fields
     const characterFields = {};
@@ -1075,11 +1084,17 @@ const usePromptStore = create((set, get) => ({
       }
     });
 
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
+
     const newCharacter = {
       id: Date.now().toString(),
       name: name || `Character ${savedCharacters.length + 1}`,
       timestamp: Date.now(),
-      data: characterFields
+      data: characterFields,
+      projectIds: finalProjectIds
     };
 
     const updatedCharacters = [...savedCharacters, newCharacter].slice(-20); // Keep last 20
@@ -1089,14 +1104,20 @@ const usePromptStore = create((set, get) => ({
     return newCharacter.id;
   },
 
-  saveScene: (name) => {
-    const { fieldValues, savedScenes } = get();
+  saveScene: (name, projectIds = []) => {
+    const { fieldValues, savedScenes, currentProject } = get();
+    
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
     
     const newScene = {
       id: Date.now().toString(),
       name: name || `Scene ${savedScenes.length + 1}`,
       timestamp: Date.now(),
-      data: { ...fieldValues }
+      data: { ...fieldValues },
+      projectIds: finalProjectIds
     };
 
     const updatedScenes = [...savedScenes, newScene].slice(-20); // Keep last 20
@@ -1149,6 +1170,70 @@ const usePromptStore = create((set, get) => ({
     }
   },
 
+  // Add character to scene (append to existing characters)
+  addCharacterToScene: (characterId) => {
+    const { savedCharacters, fieldValues, setFieldValue } = get();
+    const character = savedCharacters.find(c => c.id === characterId);
+    
+    if (!character) return;
+    
+    // Get character's key information for secondary subjects
+    const characterInfo = [];
+    if (character.data.character_name) {
+      characterInfo.push(character.data.character_name);
+    }
+    if (character.data.character_type && character.data.character_type !== 'custom...') {
+      characterInfo.push(character.data.character_type);
+    }
+    if (character.data.age_range && character.data.age_range !== 'custom...') {
+      characterInfo.push(character.data.age_range);
+    }
+    if (character.data.gender && character.data.gender !== 'custom...') {
+      characterInfo.push(character.data.gender);
+    }
+    
+    // Create character description
+    const newCharacterDesc = characterInfo.length > 0 ? characterInfo.join(', ') : character.name;
+    
+    // Add to secondary_subjects field
+    const currentSecondary = fieldValues.secondary_subjects || '';
+    const updatedSecondary = currentSecondary 
+      ? `${currentSecondary}, ${newCharacterDesc}`
+      : newCharacterDesc;
+    
+    setFieldValue('secondary_subjects', updatedSecondary);
+    
+    // Update number_of_subjects if it exists
+    const currentSubjects = fieldValues.secondary_subjects || '';
+    const totalSubjects = currentSubjects.split(',').filter(s => s.trim()).length + 1; // +1 for main character
+    setFieldValue('number_of_subjects', totalSubjects);
+    
+    // Enable relevant fields
+    const newEnabledFields = new Set(get().enabledFields);
+    newEnabledFields.add('secondary_subjects');
+    newEnabledFields.add('number_of_subjects');
+    
+    // Expand character category
+    const newExpandedCategories = new Set(get().expandedCategories);
+    newExpandedCategories.add('characters');
+    
+    set({
+      enabledFields: newEnabledFields,
+      expandedCategories: newExpandedCategories
+    });
+  },
+
+  // New method for character loading with merge options
+  loadCharacterWithMergeMode: (characterId, mode = 'replace') => {
+    if (mode === 'add') {
+      // Use existing addCharacterToScene logic
+      get().addCharacterToScene(characterId);
+    } else {
+      // Use existing loadCharacter logic (replace mode)
+      get().loadCharacter(characterId);
+    }
+  },
+
   loadScene: (sceneId) => {
     const { savedScenes } = get();
     const scene = savedScenes.find(s => s.id === sceneId);
@@ -1192,8 +1277,8 @@ const usePromptStore = create((set, get) => ({
   },
 
   // Actions Category Management
-  saveAction: (name) => {
-    const { fieldValues, savedActions } = get();
+  saveAction: (name, projectIds = []) => {
+    const { fieldValues, savedActions, currentProject } = get();
     
     // Extract action-related fields
     const actionFields = {};
@@ -1205,11 +1290,17 @@ const usePromptStore = create((set, get) => ({
       }
     });
 
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
+
     const newAction = {
       id: Date.now().toString(),
       name: name || `Action ${savedActions.length + 1}`,
       timestamp: Date.now(),
-      data: actionFields
+      data: actionFields,
+      projectIds: finalProjectIds
     };
 
     const updatedActions = [...savedActions, newAction].slice(-20);
@@ -1253,8 +1344,8 @@ const usePromptStore = create((set, get) => ({
   },
 
   // Settings Category Management
-  saveSetting: (name) => {
-    const { fieldValues, savedSettings } = get();
+  saveSetting: (name, projectIds = []) => {
+    const { fieldValues, savedSettings, currentProject } = get();
     
     // Extract setting-related fields
     const settingFields = {};
@@ -1266,11 +1357,17 @@ const usePromptStore = create((set, get) => ({
       }
     });
 
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
+
     const newSetting = {
       id: Date.now().toString(),
       name: name || `Setting ${savedSettings.length + 1}`,
       timestamp: Date.now(),
-      data: settingFields
+      data: settingFields,
+      projectIds: finalProjectIds
     };
 
     const updatedSettings = [...savedSettings, newSetting].slice(-20);
@@ -1314,8 +1411,8 @@ const usePromptStore = create((set, get) => ({
   },
 
   // Styles Category Management
-  saveStyle: (name) => {
-    const { fieldValues, savedStyles } = get();
+  saveStyle: (name, projectIds = []) => {
+    const { fieldValues, savedStyles, currentProject } = get();
     
     // Extract style-related fields
     const styleFields = {};
@@ -1327,11 +1424,17 @@ const usePromptStore = create((set, get) => ({
       }
     });
 
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
+
     const newStyle = {
       id: Date.now().toString(),
       name: name || `Style ${savedStyles.length + 1}`,
       timestamp: Date.now(),
-      data: styleFields
+      data: styleFields,
+      projectIds: finalProjectIds
     };
 
     const updatedStyles = [...savedStyles, newStyle].slice(-20);
@@ -1375,8 +1478,8 @@ const usePromptStore = create((set, get) => ({
   },
 
   // Audio Category Management
-  saveAudio: (name) => {
-    const { fieldValues, savedAudio } = get();
+  saveAudio: (name, projectIds = []) => {
+    const { fieldValues, savedAudio, currentProject } = get();
     
     // Extract audio-related fields
     const audioFields = {};
@@ -1388,11 +1491,17 @@ const usePromptStore = create((set, get) => ({
       }
     });
 
+    // Auto-assign to current project if no projects specified and current project exists
+    const finalProjectIds = projectIds.length === 0 && currentProject 
+      ? [currentProject.id] 
+      : projectIds;
+
     const newAudio = {
       id: Date.now().toString(),
       name: name || `Audio ${savedAudio.length + 1}`,
       timestamp: Date.now(),
-      data: audioFields
+      data: audioFields,
+      projectIds: finalProjectIds
     };
 
     const updatedAudio = [...savedAudio, newAudio].slice(-20);
@@ -1843,7 +1952,258 @@ const usePromptStore = create((set, get) => ({
       
       return;
     }
+  },
+
+  // JSON validation and editing functions for EditableJsonOutput
+  validateJsonInput: (jsonString) => {
+    // Handle empty or whitespace-only strings
+    if (!jsonString || jsonString.trim() === '') {
+      return { valid: true, error: '' }; // Empty JSON is valid (will become {})
+    }
+
+    try {
+      JSON.parse(jsonString);
+      return { valid: true, error: '' };
+    } catch (error) {
+      // Provide more descriptive error messages based on common JSON errors
+      let errorMessage = error.message;
+      
+      if (errorMessage.includes('Unexpected token')) {
+        const match = errorMessage.match(/Unexpected token (.+?) in JSON at position (\d+)/);
+        if (match) {
+          const [, token, position] = match;
+          errorMessage = `Unexpected character '${token}' at position ${position}`;
+        }
+      } else if (errorMessage.includes('Expected property name')) {
+        errorMessage = 'Missing property name (key) - keys must be in quotes';
+      } else if (errorMessage.includes('Unterminated string')) {
+        errorMessage = 'Unterminated string - missing closing quote';
+      } else if (errorMessage.includes('Unexpected end of JSON')) {
+        errorMessage = 'Incomplete JSON - missing closing brace or bracket';
+      }
+      
+      return { valid: false, error: errorMessage };
+    }
+  },
+
+  getJsonDiff: (newJsonString) => {
+    try {
+      const currentJson = JSON.parse(get().getJsonOutput() || '{}');
+      const newJson = JSON.parse(newJsonString);
+      
+      const changes = {
+        added: [],
+        modified: [],
+        removed: []
+      };
+      
+      // Check for added and modified fields
+      Object.entries(newJson).forEach(([key, value]) => {
+        if (!currentJson.hasOwnProperty(key)) {
+          changes.added.push({ key, value });
+        } else if (JSON.stringify(currentJson[key]) !== JSON.stringify(value)) {
+          changes.modified.push({ key, oldValue: currentJson[key], newValue: value });
+        }
+      });
+      
+      // Check for removed fields
+      Object.entries(currentJson).forEach(([key, value]) => {
+        if (!newJson.hasOwnProperty(key)) {
+          changes.removed.push({ key, value });
+        }
+      });
+      
+      return { valid: true, changes };
+    } catch (error) {
+      return { valid: false, error: error.message };
+    }
+  },
+
+  setJsonFromText: (jsonString) => {
+    try {
+      const newJson = JSON.parse(jsonString);
+      const { setFieldValue } = get();
+      
+      // Save state for undo
+      get().saveStateForUndo();
+      
+      // Clear existing field values
+      set((state) => ({
+        fieldValues: {},
+        enabledFields: new Set()
+      }));
+      
+      // Apply new JSON values
+      Object.entries(newJson).forEach(([key, value]) => {
+        setFieldValue(key, value);
+      });
+      
+      return { 
+        success: true, 
+        message: `Applied ${Object.keys(newJson).length} fields from JSON edit` 
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: `Invalid JSON: ${error.message}` 
+      };
+    }
+  },
+
+  // Asset-Project Relationship Management
+  assignAssetToProject: (assetType, assetId, projectId) => {
+    const state = get();
+    const assetKey = `saved${assetType.charAt(0).toUpperCase() + assetType.slice(1)}s`;
+    const assets = state[assetKey];
+    
+    if (!assets) return false;
+    
+    const assetIndex = assets.findIndex(asset => asset.id === assetId);
+    if (assetIndex === -1) return false;
+    
+    const asset = assets[assetIndex];
+    const currentProjectIds = asset.projectIds || [];
+    
+    // Add project if not already assigned
+    if (!currentProjectIds.includes(projectId)) {
+      const updatedProjectIds = [...currentProjectIds, projectId];
+      const updatedAsset = { ...asset, projectIds: updatedProjectIds };
+      const updatedAssets = [...assets];
+      updatedAssets[assetIndex] = updatedAsset;
+      
+      // Save to localStorage and update state
+      localStorage.setItem(assetKey, JSON.stringify(updatedAssets));
+      set({ [assetKey]: updatedAssets });
+      
+      return true;
+    }
+    
+    return false;
+  },
+
+  removeAssetFromProject: (assetType, assetId, projectId) => {
+    const state = get();
+    const assetKey = `saved${assetType.charAt(0).toUpperCase() + assetType.slice(1)}s`;
+    const assets = state[assetKey];
+    
+    if (!assets) return false;
+    
+    const assetIndex = assets.findIndex(asset => asset.id === assetId);
+    if (assetIndex === -1) return false;
+    
+    const asset = assets[assetIndex];
+    const currentProjectIds = asset.projectIds || [];
+    
+    // Remove project if assigned
+    if (currentProjectIds.includes(projectId)) {
+      const updatedProjectIds = currentProjectIds.filter(id => id !== projectId);
+      const updatedAsset = { ...asset, projectIds: updatedProjectIds };
+      const updatedAssets = [...assets];
+      updatedAssets[assetIndex] = updatedAsset;
+      
+      // Save to localStorage and update state
+      localStorage.setItem(assetKey, JSON.stringify(updatedAssets));
+      set({ [assetKey]: updatedAssets });
+      
+      return true;
+    }
+    
+    return false;
+  },
+
+  // Get assets for a specific project
+  getAssetsForProject: (projectId) => {
+    const state = get();
+    const assetTypes = ['Characters', 'Scenes', 'Actions', 'Settings', 'Styles', 'Audio'];
+    const projectAssets = {};
+    
+    assetTypes.forEach(type => {
+      const assetKey = `saved${type}`;
+      const assets = state[assetKey] || [];
+      projectAssets[type.toLowerCase()] = assets.filter(asset => 
+        asset.projectIds && asset.projectIds.includes(projectId)
+      );
+    });
+    
+    return projectAssets;
+  },
+
+  // Check if asset belongs to project
+  isAssetInProject: (assetType, assetId, projectId) => {
+    const state = get();
+    const assetKey = `saved${assetType.charAt(0).toUpperCase() + assetType.slice(1)}s`;
+    const assets = state[assetKey] || [];
+    const asset = assets.find(a => a.id === assetId);
+    
+    return asset && asset.projectIds && asset.projectIds.includes(projectId);
+  },
+
+  // Builder Context Management for Storyboard Generator
+  setBuilderContext: (type, data) => set((state) => ({
+    builderContext: {
+      ...state.builderContext,
+      [type]: data,
+      lastUpdated: {
+        ...state.builderContext.lastUpdated,
+        [type]: Date.now()
+      }
+    }
+  })),
+
+  getBuilderContext: (type) => {
+    const state = get();
+    return state.builderContext[type];
+  },
+
+  hasBuilderContext: (type) => {
+    const state = get();
+    return !!state.builderContext[type];
+  },
+
+  clearBuilderContext: (type) => set((state) => ({
+    builderContext: {
+      ...state.builderContext,
+      [type]: null,
+      lastUpdated: {
+        ...state.builderContext.lastUpdated,
+        [type]: null
+      }
+    }
+  })),
+
+  // Get all available builder contexts for storyboard generation
+  getAvailableContexts: () => {
+    const state = get();
+    const contexts = {};
+    
+    ['character', 'world', 'style', 'scene'].forEach(type => {
+      if (state.builderContext[type]) {
+        contexts[type] = {
+          data: state.builderContext[type],
+          lastUpdated: state.builderContext.lastUpdated[type]
+        };
+      }
+    });
+    
+    return contexts;
+  },
+
+  // Auto-detect current scene context from field values
+  getCurrentSceneContext: () => {
+    const state = get();
+    const { fieldValues, enabledFields } = state;
+    
+    // Only include enabled fields in the scene context
+    const sceneData = {};
+    enabledFields.forEach(fieldKey => {
+      if (fieldValues[fieldKey]) {
+        sceneData[fieldKey] = fieldValues[fieldKey];
+      }
+    });
+    
+    return Object.keys(sceneData).length > 0 ? sceneData : null;
   }
 }));
 
 export default usePromptStore;
+export { usePromptStore as useStore };

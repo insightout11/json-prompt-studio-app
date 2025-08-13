@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import CharacterEngine from './CharacterEngine';
-import WorldBuilder from './WorldBuilder';
+import ProgressiveCharacterModal from './ProgressiveCharacterModal';
+import ProgressiveWorldModal from './ProgressiveWorldModal';
+import ProgressiveStyleModal from './ProgressiveStyleModal';
+import StoryboardGeneratorModal from './StoryboardGeneratorModal';
+import SceneExtenderModal from './SceneExtenderModal';
 import StoryboardGenerator from './StoryboardGenerator';
 import StyleGenerator from './StyleGenerator';
 import SceneExtender from './SceneExtender';
@@ -14,36 +17,61 @@ import { userService } from './userService';
 
 const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSceneExtenderClick, sceneOptions, onApplySceneOption, onDismissSceneOptions, extensionLoading, extensionError, compact = false }) => {
   const [activeFeature, setActiveFeature] = useState(null);
+  const [showCharacterModal, setShowCharacterModal] = useState(false);
+  const [showWorldModal, setShowWorldModal] = useState(false);
+  const [showStyleModal, setShowStyleModal] = useState(false);
+  const [showStoryboardModal, setShowStoryboardModal] = useState(false);
+  const [showSceneExtenderModal, setShowSceneExtenderModal] = useState(false);
   const { trackFeatureUsage, getUsageStats } = useSubscription();
   const { isAuthenticated, isEmailVerified, user } = useAuth();
+
+  // Listen for storyboard integration events from builders
+  React.useEffect(() => {
+    const handleOpenStoryboard = (event) => {
+      const { detail } = event;
+      // Open the storyboard modal when triggered from builders
+      setShowStoryboardModal(true);
+    };
+
+    window.addEventListener('openStoryboard', handleOpenStoryboard);
+    
+    return () => {
+      window.removeEventListener('openStoryboard', handleOpenStoryboard);
+    };
+  }, []);
+
+  // Debug: Log every render (remove after testing)
+  // console.log('🎭 ProFeaturesHub render: showCharacterModal =', showCharacterModal, 'compact =', compact);
+
+  // Legacy button components removed - all functionality moved to modal components
 
   const proFeatures = [
     {
       id: 'character-engine',
-      name: 'AI Character Engine',
+      name: 'Character Builder',
       icon: '🎭',
-      description: 'Generate detailed characters with backstories and traits',
-      benefits: ['Consistent character details', 'Rich backstories', 'Reusable character templates'],
-      sampleOutput: '{\n  "character": "Elena_Martinez",\n  "age": 28,\n  "background": "Former marine biologist",\n  "personality": "Determined yet empathetic",\n  "motivation": "Save ocean ecosystems"\n}',
-      component: CharacterEngine
+      description: 'Generate detailed characters with progressive AI questioning',
+      benefits: ['Visual-first approach', 'Progressive questioning', 'Early completion option', 'Rich character details'],
+      sampleOutput: '{\n  "character": "Elena Martinez, street-smart mechanic",\n  "age": "28",\n  "clothing": "Oil-stained coveralls, welding goggles",\n  "personality": "Determined yet empathetic",\n  "actions": "Fixing vintage motorcycles"\n}',
+      component: null
     },
     {
       id: 'world-builder',
-      name: 'AI World Builder',
+      name: 'World Builder',
       icon: '🌍',
-      description: 'Create immersive environments with consistent lore',
-      benefits: ['Detailed world-building', 'Consistent environments', 'Rich atmospheric details'],
+      description: 'Create immersive environments with progressive AI expansion',
+      benefits: ['Progressive world building', 'Multiple expansion types', 'Rich environmental details', 'Related world generation'],
       sampleOutput: '{\n  "setting": "Neo_Tokyo_2087",\n  "atmosphere": "Neon-lit cyberpunk metropolis",\n  "weather": "Perpetual rain",\n  "landmarks": ["Digital_Shrine", "Corporate_Towers"]\n}',
-      component: WorldBuilder
+      component: null
     },
     {
       id: 'style-generator',
-      name: 'Style Generator',
+      name: 'Style Builder',
       icon: '🎥',
       description: 'Apply cinematic styles, camera angles, and director aesthetics',
       benefits: ['Preset style library', 'Camera angle guides', 'Director style combos', 'Smart AI suggestions'],
       sampleOutput: 'Applied Wes Anderson style:\nSymmetrical framing, pastel colors, whimsical storytelling...',
-      component: StyleGenerator
+      component: null
     },
     {
       id: 'storyboard-generator',
@@ -52,7 +80,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
       description: 'Break a script or JSON into a full storyboard sequence',
       benefits: ['Multi-scene planning', 'Shot-by-shot breakdown', 'Visual continuity'],
       sampleOutput: 'Scene 1: Wide establishing shot\nScene 2: Medium close-up\nScene 3: Dramatic reveal...',
-      component: StoryboardGenerator
+      component: null
     },
     {
       id: 'scene-extender',
@@ -61,7 +89,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
       description: 'Extend existing scenes with AI-generated variations',
       benefits: ['Multiple scene options', 'Creative variations', 'Smart merging'],
       sampleOutput: 'Generated 5 scene variations:\n1. Action sequence\n2. Dialogue focus\n3. Environmental details...',
-      component: SceneExtender
+      component: null
     },
   ];
 
@@ -97,7 +125,33 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
   };
 
   const handleFeatureClick = (featureId) => {
-    // All users can now use features
+    // All AI features now use modal-based approach
+    if (featureId === 'character-engine') {
+      setShowCharacterModal(true);
+      return;
+    }
+    
+    if (featureId === 'world-builder') {
+      setShowWorldModal(true);
+      return;
+    }
+    
+    if (featureId === 'style-generator') {
+      setShowStyleModal(true);
+      return;
+    }
+    
+    if (featureId === 'storyboard-generator') {
+      setShowStoryboardModal(true);
+      return;
+    }
+    
+    if (featureId === 'scene-extender') {
+      setShowSceneExtenderModal(true);
+      return;
+    }
+    
+    // Fallback for any remaining inline features
     setActiveFeature(activeFeature === featureId ? null : featureId);
   };
 
@@ -127,84 +181,64 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
           ))}
         </div>
         
-        {/* Active Feature Content - Inline */}
-        {activeFeature && (
-          <div className="mt-2 p-2 bg-cinema-teal/5 rounded border border-cinema-teal/20">
-            {(() => {
-              const feature = proFeatures.find(f => f.id === activeFeature);
-              if (!feature) return null;
-              
-              if (activeFeature === 'scene-extender') {
-                return (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-cinema-text">{feature.name}</span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={onSceneExtenderClick}
-                        disabled={extensionLoading}
-                        className="px-3 py-1 bg-cinema-teal text-white rounded text-xs font-medium hover:bg-cinema-teal/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {extensionLoading ? 'Generating...' : 'Generate'}
-                      </button>
-                      <button
-                        onClick={() => setActiveFeature(null)}
-                        className="text-gray-400 hover:text-gray-600 text-sm"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                );
-              }
-              
-              // For other features, show full component in compact mode
-              return (
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-cinema-text font-medium">{feature.name}</span>
-                    <button
-                      onClick={() => setActiveFeature(null)}
-                      className="text-gray-400 hover:text-gray-600 text-sm"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  
-                  {/* Render the actual AI tool component */}
-                  <div className="bg-white dark:bg-cinema-card rounded-lg p-3 border border-cinema-border">
-                    {activeFeature === 'character-engine' && (
-                      <CharacterEngine currentJson={currentJson} onResult={handleCharacterGenerated} />
-                    )}
-                    {activeFeature === 'world-builder' && (
-                      <WorldBuilder currentJson={currentJson} onResult={handleWorldGenerated} />
-                    )}
-                    {activeFeature === 'storyboard-generator' && (
-                      <StoryboardGenerator currentJson={currentJson} onResult={handleStoryboardGenerated} />
-                    )}
-                    {activeFeature === 'style-generator' && (
-                      <StyleGenerator currentJson={currentJson} onResult={handleStyleGenerated} />
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-            {extensionError && (
-              <p className="text-red-500 text-xs mt-1">{extensionError}</p>
-            )}
-            {extensionLoading && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mt-2 border border-blue-200 dark:border-blue-700">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-                  <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">Generating 5 scene options...</span>
-                </div>
-                <div className="text-xs text-blue-600 dark:text-blue-300 mt-2 flex items-center space-x-1">
-                  <span>⬇️</span>
-                  <span>Options will appear below - we'll scroll you there automatically</span>
-                </div>
-              </div>
-            )}
+        {/* Extension Loading/Error States for legacy Scene Extender fallback */}
+        {extensionError && (
+          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-700">
+            <p className="text-red-600 dark:text-red-400 text-xs">{extensionError}</p>
           </div>
         )}
+        {extensionLoading && (
+          <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+              <span className="text-sm text-blue-800 dark:text-blue-200 font-medium">Generating 5 scene options...</span>
+            </div>
+            <div className="text-xs text-blue-600 dark:text-blue-300 mt-2 flex items-center space-x-1">
+              <span>⬇️</span>
+              <span>Options will appear below - we'll scroll you there automatically</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Progressive Character Modal - Add to compact mode */}
+        <ProgressiveCharacterModal 
+          isOpen={showCharacterModal}
+          onClose={() => setShowCharacterModal(false)}
+          onResult={handleCharacterGenerated}
+          currentJson={currentJson}
+        />
+        
+        {/* Progressive World Modal - Add to compact mode */}
+        <ProgressiveWorldModal 
+          isOpen={showWorldModal}
+          onClose={() => setShowWorldModal(false)}
+          onResult={handleWorldGenerated}
+          currentJson={currentJson}
+        />
+        
+        {/* Style Generator Modal - Add to compact mode */}
+        <ProgressiveStyleModal
+          isOpen={showStyleModal}
+          onClose={() => setShowStyleModal(false)}
+          onResult={handleStyleGenerated}
+          currentJson={currentJson}
+        />
+        
+        {/* Storyboard Generator Modal - Add to compact mode */}
+        <StoryboardGeneratorModal
+          isOpen={showStoryboardModal}
+          onClose={() => setShowStoryboardModal(false)}
+          onResult={handleStoryboardGenerated}
+          currentJson={currentJson}
+        />
+        
+        {/* Scene Extender Modal - Add to compact mode */}
+        <SceneExtenderModal
+          isOpen={showSceneExtenderModal}
+          onClose={() => setShowSceneExtenderModal(false)}
+          onResult={handleJsonGenerated}
+          currentJson={currentJson}
+        />
       </div>
     );
   }
@@ -255,42 +289,66 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
           })}
         </div>
         
-        {/* Active Feature Panel */}
-        {activeFeature && (
-          <div className="mt-4">
-            {activeFeature === 'character-engine' && (
-              <CharacterEngine currentJson={currentJson} onResult={handleCharacterGenerated} />
-            )}
-            {activeFeature === 'world-builder' && (
-              <WorldBuilder currentJson={currentJson} onResult={handleWorldGenerated} />
-            )}
-            {activeFeature === 'storyboard-generator' && (
-              <StoryboardGenerator currentJson={currentJson} onResult={handleStoryboardGenerated} />
-            )}
-            {activeFeature === 'style-generator' && (
-              <StyleGenerator currentJson={currentJson} onResult={handleStyleGenerated} />
-            )}
-            {activeFeature === 'scene-extender' && sceneOptions && (
-              <div className="space-y-4">
-                {sceneOptions.map((option, index) => (
-                  <div key={index} className="bg-cinema-card rounded-lg p-4 border border-cinema-border">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-cinema-text">{option.type}</h4>
-                      <button
-                        onClick={() => onApplySceneOption(option, index)}
-                        className="bg-cinema-teal text-white px-3 py-1 rounded text-sm hover:bg-cinema-teal-bright transition-colors"
-                      >
-                        Apply
-                      </button>
-                    </div>
-                    <p className="text-sm text-cinema-text-muted">{option.summary}</p>
-                  </div>
-                ))}
+        {/* Legacy Scene Extender Options Display - for backwards compatibility */}
+        {sceneOptions && (
+          <div className="mt-4 space-y-4">
+            {sceneOptions.map((option, index) => (
+              <div key={index} className="bg-cinema-card rounded-lg p-4 border border-cinema-border">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-cinema-text">{option.type}</h4>
+                  <button
+                    onClick={() => onApplySceneOption(option, index)}
+                    className="bg-cinema-teal text-white px-3 py-1 rounded text-sm hover:bg-cinema-teal-bright transition-colors"
+                  >
+                    Apply
+                  </button>
+                </div>
+                <p className="text-sm text-cinema-text-muted">{option.summary}</p>
               </div>
-            )}
+            ))}
           </div>
         )}
       </div>
+      
+      {/* Progressive Character Modal */}
+      <ProgressiveCharacterModal 
+        isOpen={showCharacterModal}
+        onClose={() => setShowCharacterModal(false)}
+        onResult={handleCharacterGenerated}
+        currentJson={currentJson}
+      />
+      
+      {/* Progressive World Modal */}
+      <ProgressiveWorldModal 
+        isOpen={showWorldModal}
+        onClose={() => setShowWorldModal(false)}
+        onResult={handleWorldGenerated}
+        currentJson={currentJson}
+      />
+      
+      {/* Style Generator Modal */}
+      <ProgressiveStyleModal
+        isOpen={showStyleModal}
+        onClose={() => setShowStyleModal(false)}
+        onResult={handleStyleGenerated}
+        currentJson={currentJson}
+      />
+      
+      {/* Storyboard Generator Modal */}
+      <StoryboardGeneratorModal
+        isOpen={showStoryboardModal}
+        onClose={() => setShowStoryboardModal(false)}
+        onResult={handleStoryboardGenerated}
+        currentJson={currentJson}
+      />
+      
+      {/* Scene Extender Modal */}
+      <SceneExtenderModal
+        isOpen={showSceneExtenderModal}
+        onClose={() => setShowSceneExtenderModal(false)}
+        onResult={handleJsonGenerated}
+        currentJson={currentJson}
+      />
     </div>
   );
 };

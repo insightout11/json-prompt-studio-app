@@ -6,7 +6,7 @@ import ToggleSwitch from './ToggleSwitch';
 import LoadingButton from './LoadingButton';
 import aiApiService from './aiApiService';
 
-const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMode, setIsAdvancedMode, showToast }) => {
+const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMode, setIsAdvancedMode, showToast, resetTrigger }) => {
   const { 
     enabledFields, 
     fieldValues, 
@@ -20,6 +20,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     currentProject,
     toggleCategory,
     loadCharacter,
+    loadCharacterWithMergeMode,
     loadScene,
     loadAction,
     loadSetting,
@@ -48,6 +49,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   const [expandSparkles, setExpandSparkles] = useState(new Set());
   const [loadGlowEffects, setLoadGlowEffects] = useState(new Set());
   const [previousSavedCounts, setPreviousSavedCounts] = useState({});
+  const [enhanceButtonCounts, setEnhanceButtonCounts] = useState({
+    characters: 0,
+    actions: 0,
+    settings: 0,
+    style: 0,
+    audio: 0
+  });
   const [categoryInputs, setCategoryInputs] = useState({
     characters: '',
     actions: '',
@@ -91,6 +99,21 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     
     setPreviousSavedCounts(currentCounts);
   }, [savedCharacters.length, savedActions.length, savedSettings.length, savedScenes.length, savedStyles.length, savedAudio.length]);
+
+  // Reset enhance button counters when Clear All is triggered
+  useEffect(() => {
+    console.log('🎯 SceneBuilder resetTrigger changed:', resetTrigger);
+    if (resetTrigger) {
+      console.log('✅ Resetting enhance button counters to 0');
+      setEnhanceButtonCounts({
+        characters: 0,
+        actions: 0,
+        settings: 0,
+        style: 0,
+        audio: 0
+      });
+    }
+  }, [resetTrigger]);
 
   // Loading state helpers
   const setLoading = (key, isLoading) => {
@@ -363,17 +386,26 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   };
 
   // Handle selection from load modal
-  const handleLoadSelection = (itemId) => {
+  const handleLoadSelection = (itemId, mode = 'replace') => {
     if (loadCategory && loadCategory.loader) {
       const loadedItem = loadCategory.data.find(item => item.id === itemId);
-      loadCategory.loader(itemId);
+      
+      // Handle character loading with merge mode
+      if (loadCategory.label === 'Characters' && mode) {
+        loadCharacterWithMergeMode(itemId, mode);
+        const modeText = mode === 'add' ? 'added to scene' : 'replaced main character';
+        if (showToast?.showSuccess && loadedItem) {
+          showToast.showSuccess(`Character "${loadedItem.name}" ${modeText}!`);
+        }
+      } else {
+        loadCategory.loader(itemId);
+        if (showToast?.showSuccess && loadedItem) {
+          showToast.showSuccess(`${loadCategory.label.slice(0, -1)} "${loadedItem.name}" loaded successfully!`);
+        }
+      }
+      
       setShowLoadModal(false);
       setLoadCategory(null);
-      
-      // Show success feedback
-      if (showToast?.showSuccess && loadedItem) {
-        showToast.showSuccess(`${loadCategory.label.slice(0, -1)} "${loadedItem.name}" loaded successfully!`);
-      }
     }
   };
 
@@ -415,23 +447,46 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
           
           <div className="space-y-2">
             {loadCategory.data.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleLoadSelection(item.id)}
-                className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="font-medium text-gray-900 dark:text-white">
+              <div key={item.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div className="font-medium text-gray-900 dark:text-white mb-2">
                   {item.name || `${loadCategory.label.slice(0, -1)} ${item.id}`}
                 </div>
                 {item.description && (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                     {item.description}
                   </div>
                 )}
-                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <div className="text-xs text-gray-400 dark:text-gray-500 mb-3">
                   Created: {new Date(item.timestamp).toLocaleDateString()}
                 </div>
-              </button>
+                
+                {/* Action Buttons - Special handling for characters */}
+                {loadCategory.label === 'Characters' ? (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleLoadSelection(item.id, 'replace')}
+                      className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-all"
+                      title="Replace main character with this one"
+                    >
+                      Replace
+                    </button>
+                    <button
+                      onClick={() => handleLoadSelection(item.id, 'add')}
+                      className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-all"
+                      title="Add this character to the scene"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleLoadSelection(item.id)}
+                    className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-md transition-all"
+                  >
+                    Load
+                  </button>
+                )}
+              </div>
             ))}
           </div>
 
@@ -638,6 +693,12 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     // For progressive expansion, we need either input OR existing content
     if ((!input || !input.trim()) && !hasExistingContent) return;
     
+    // Increment enhance button counter
+    setEnhanceButtonCounts(prev => ({
+      ...prev,
+      [categoryKey]: prev[categoryKey] + 1
+    }));
+    
     // Trigger sparkle effect
     setExpandSparkles(prev => new Set([...prev, categoryKey]));
     setTimeout(() => {
@@ -674,8 +735,10 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
       if (response.success) {
         // Apply expanded suggestions to the store
         Object.entries(response.suggestions).forEach(([field, value]) => {
-          if (value && value.trim() !== '') {
-            setFieldValue(field, value);
+          // Handle both string values and arrays from AI response
+          const stringValue = Array.isArray(value) ? value[0] : value;
+          if (stringValue && typeof stringValue === 'string' && stringValue.trim() !== '') {
+            setFieldValue(field, stringValue);
           }
         });
         
@@ -806,7 +869,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           const hasExistingContent = categoryFields.some(field => 
                             fieldValues[field] && fieldValues[field].trim() !== ''
                           );
-                          return hasExistingContent ? "Enhance with even more detail" : "Let AI add creative details";
+                          const count = enhanceButtonCounts[categoryKey];
+                          const baseTitle = hasExistingContent ? "Enhance with even more detail" : "Let AI add creative details";
+                          return count > 0 ? `${baseTitle} (Used ${count} time${count === 1 ? '' : 's'})` : baseTitle;
                         })()}
                         loadingText="..."
                       >
@@ -816,7 +881,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           const hasExistingContent = categoryFields.some(field => 
                             fieldValues[field] && fieldValues[field].trim() !== ''
                           );
-                          return hasExistingContent ? "Enhance" : "Expand";
+                          const count = enhanceButtonCounts[categoryKey];
+                          const buttonText = hasExistingContent ? "Enhance" : "Expand";
+                          return count > 0 ? `${buttonText} (${count})` : buttonText;
                         })()}
                       </LoadingButton>
                       </div>

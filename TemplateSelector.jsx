@@ -267,7 +267,7 @@ const TemplateSelector = () => {
 
             {/* Tab Navigation */}
             <div className="border-b border-gray-200 dark:border-cinema-border">
-              <nav className="flex flex-wrap sm:space-x-8 px-6" aria-label="Tabs">
+              <nav className="flex space-x-8 px-6" aria-label="Tabs">
                 {Object.entries(TAB_LABELS).map(([tabKey, label]) => {
                   const templateCount = tabKey === 'experimental' 
                     ? TEMPLATE_CATEGORIES[tabKey].length 
@@ -276,15 +276,14 @@ const TemplateSelector = () => {
                     <button
                       key={tabKey}
                       onClick={() => handleTabChange(tabKey)}
-                      className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm transition-all duration-300 whitespace-nowrap ${
+                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-300 whitespace-nowrap ${
                         activeTab === tabKey
                           ? 'border-indigo-500 text-indigo-600 dark:border-cinema-teal dark:text-cinema-teal'
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text hover:border-gray-300 dark:hover:border-cinema-border'
                       }`}
                     >
-                      <span className="hidden sm:inline">{label}</span>
-                      <span className="sm:hidden">{label.split(' ')[0]}</span>
-                      <span className="ml-1 sm:ml-2 bg-gray-100 text-gray-900 dark:bg-cinema-card dark:text-cinema-text py-0.5 px-1.5 sm:px-2.5 rounded-full text-xs transition-colors duration-300">
+                      <span>{label}</span>
+                      <span className="ml-2 bg-gray-100 text-gray-900 dark:bg-cinema-card dark:text-cinema-text py-0.5 px-2.5 rounded-full text-xs transition-colors duration-300">
                         {templateCount}
                       </span>
                     </button>
@@ -297,7 +296,7 @@ const TemplateSelector = () => {
               {/* Template Grid */}
               <div className="flex-1 p-6 overflow-y-auto bg-white dark:bg-cinema-panel/30 transition-colors duration-300">
                 {getFilteredTemplates().length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     {getFilteredTemplates().map((templateKey) => {
                       // Handle experimental formats differently
                       if (activeTab === 'experimental') {

@@ -11,6 +11,7 @@ const UniversalInput = ({ className = "", aiFeatures = null }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [hasConverted, setHasConverted] = useState(false);
   const [lastConvertedInput, setLastConvertedInput] = useState('');
+  const [enhanceCount, setEnhanceCount] = useState(0);
   const { setFieldValue, fieldValues } = usePromptStore();
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -159,6 +160,9 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
   const handleTextEnhancement = async () => {
     setIsConverting(true);
     setError(null);
+
+    // Increment enhance counter
+    setEnhanceCount(prev => prev + 1);
 
     try {
       // Build current scene context from existing field values
@@ -380,7 +384,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
   return (
     <div className={`bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-cinema-border ${className}`}>
       <div className="p-4">
-        <div className="flex flex-col md:flex-row md:items-start space-y-3 md:space-y-0 md:space-x-3">
+        <div className="flex flex-row items-start space-x-3">
           {/* Input area - changes based on mode */}
           <div className="flex-1">
             {inputMode === 'image-to-json' ? (
@@ -463,8 +467,8 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
             )}
           </div>
 
-          {/* Mode toggle and Convert button - stack on mobile */}
-          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 md:flex-shrink-0">
+          {/* Mode toggle and Convert button */}
+          <div className="flex flex-row space-x-3 flex-shrink-0">
             {/* Toggle Switch */}
             <div className="flex items-center space-x-2 bg-gray-100 dark:bg-cinema-border rounded-md p-1">
               <button
@@ -499,7 +503,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
               disabled={isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)}
               title={
                 inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput
-                  ? 'Enhance existing fields with more detail'
+                  ? `Enhance existing fields with more detail${enhanceCount > 0 ? ` (Enhanced ${enhanceCount} time${enhanceCount === 1 ? '' : 's'})` : ''}`
                   : inputMode === 'text-to-json'
                   ? 'Convert text description to JSON fields'
                   : 'Analyze image and extract scene details'
@@ -523,7 +527,12 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
               ) : (
                 <>
                   <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? '🎨' : currentMode?.icon}</span>
-                  <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Enhance' : 'Convert'}</span>
+                  <span>
+                    {inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput 
+                      ? `Enhance${enhanceCount > 0 ? ` (${enhanceCount})` : ''}` 
+                      : 'Convert'
+                    }
+                  </span>
                 </>
               )}
             </button>
