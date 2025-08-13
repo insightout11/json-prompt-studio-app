@@ -10,6 +10,10 @@
       "destination": "/react-app.html"
     },
     {
+      "source": "/app/",
+      "destination": "/react-app.html"
+    },
+    {
       "source": "/app/(.*)",
       "destination": "/react-app.html"
     },
