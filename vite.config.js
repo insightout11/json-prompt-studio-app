@@ -7,17 +7,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: 'react-app.html',
+      output: {
+        // Add timestamp to force cache invalidation
+        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`,
+      }
     },
     // Enable source maps for debugging
     sourcemap: true,
-    
-    // Optimize chunks for better caching (simplified to ensure app code is included)
-    // output: {
-    //   manualChunks: {
-    //     vendor: ['react', 'react-dom'],
-    //     utils: ['zustand'],
-    //   },
-    // },
     
     // Ensure public files are copied
     copyPublicDir: true,
