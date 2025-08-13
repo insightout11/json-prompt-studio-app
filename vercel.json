@@ -6,7 +6,11 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/app",
+      "source": "/(privacy-policy|terms-of-service|success|cancel)",
+      "destination": "/$1.html"
+    },
+    {
+      "source": "/app$",
       "destination": "/app.html"
     },
     {
@@ -14,11 +18,7 @@
       "destination": "/app.html"
     },
     {
-      "source": "/(privacy-policy|terms-of-service|success|cancel)",
-      "destination": "/$1.html"
-    },
-    {
-      "source": "/((?!api|_next|assets|favicon|logo|android-icon|apple-icon|ms-icon|browserconfig|manifest|robots|sitemap).*)",
+      "source": "/",
       "destination": "/index.html"
     }
   ]
