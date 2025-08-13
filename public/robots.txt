@@ -16,6 +16,9 @@ Allow: /templates/
 Allow: /docs/
 Allow: /features/
 
-# Block potential duplicate content or query parameters
-Disallow: /*?*
-Disallow: /*#*
+# Block only sensitive API endpoints and admin areas
+# Disallow: /api/admin*
+# Disallow: /admin/
+
+# Allow query parameters for better indexing of dynamic content
+# Note: Only block specific problematic parameters if needed
