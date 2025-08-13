@@ -15,11 +15,15 @@
       "destination": "/react-app.html"
     },
     {
-      "source": "/app/*",
+      "source": "/app/(.*)",
       "destination": "/react-app.html"
     },
     {
-      "source": "/((?!api).*)",
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/((?!api|app|assets|favicon|logo|android-icon|apple-icon|ms-icon|browserconfig|manifest|robots|sitemap|privacy|terms|success|cancel).+)",
       "destination": "/index.html"
     }
   ]
