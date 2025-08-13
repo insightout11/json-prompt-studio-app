@@ -6,10 +6,10 @@ const CharacterEngine = ({ currentJson, onResult }) => {
 
   return (
     <div className="text-center">
-      <h4 className="text-lg font-semibold text-gray-800 dark:text-cinema-text mb-2">
+      <h4 className="text-lg font-semibold text-light-text dark:text-cinema-text mb-2">
         AI Character Engine
       </h4>
-      <p className="text-sm text-gray-600 dark:text-cinema-text-muted mb-4">
+      <p className="text-sm text-light-text-muted dark:text-cinema-text-muted mb-4">
         Create characters using progressive AI questioning with visual-first approach
       </p>
       
@@ -22,7 +22,7 @@ const CharacterEngine = ({ currentJson, onResult }) => {
         </p>
       </div>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-light-text-muted dark:text-cinema-text-muted">
         This will open in a modal overlay for the best experience
       </p>
     </div>

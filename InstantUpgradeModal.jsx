@@ -66,7 +66,7 @@ const InstantUpgradeModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 lg:p-4">
-      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl max-w-2xl w-full max-h-[95vh] lg:max-h-[90vh] overflow-y-auto">
+      <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-xl max-w-2xl w-full max-h-[95vh] lg:max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
         <div className={`bg-gradient-to-r ${currentPlan.color} text-white p-4 lg:p-6 rounded-t-lg`}>
@@ -121,7 +121,7 @@ const InstantUpgradeModal = ({
           {/* Pro Plan Details */}
           <div className="mb-6">
             <div className="flex items-center justify-center space-x-1 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-cinema-text">
+              <h3 className="text-lg font-semibold text-light-text dark:text-cinema-text">
                 Pro Plan Features
               </h3>
             </div>
@@ -135,7 +135,7 @@ const InstantUpgradeModal = ({
                   >
                   <div className="text-center mb-4">
                     <div className="flex items-center justify-center mb-2">
-                      <h4 className="text-xl font-bold text-gray-800 dark:text-cinema-text mr-3">
+                      <h4 className="text-xl font-bold text-light-text dark:text-cinema-text mr-3">
                         {plan.name}
                       </h4>
                       {plan.highlight && (
@@ -145,17 +145,17 @@ const InstantUpgradeModal = ({
                       )}
                     </div>
                     
-                    <div className="text-3xl font-bold text-gray-800 dark:text-cinema-text">
+                    <div className="text-3xl font-bold text-light-text dark:text-cinema-text">
                       ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                      <span className="text-lg font-normal text-gray-500 ml-1">
+                      <span className="text-lg font-normal text-light-text-muted ml-1">
                         /{isYearly ? 'year' : 'month'}
                       </span>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <h5 className="text-center font-semibold text-gray-800 dark:text-cinema-text mb-3">What's Included:</h5>
-                    <ul className="space-y-2 text-sm text-gray-700 dark:text-cinema-text">
+                    <h5 className="text-center font-semibold text-light-text dark:text-cinema-text mb-3">What's Included:</h5>
+                    <ul className="space-y-2 text-sm text-light-text dark:text-cinema-text">
                     {/* Always show first 3 features */}
                     {plan.features.slice(0, 3).map((feature, index) => (
                       <li key={index} className="flex items-start space-x-2">
@@ -209,13 +209,13 @@ const InstantUpgradeModal = ({
 
             {/* Billing Cycle Toggle */}
             <div className="flex items-center justify-center mb-6">
-              <div className="bg-gray-100 dark:bg-cinema-border rounded-lg p-1 flex">
+              <div className="bg-light-card dark:bg-cinema-border rounded-lg p-1 flex">
                 <button
                   onClick={() => setBillingCycle('monthly')}
                   className={`px-4 py-2 rounded text-sm font-medium transition-all duration-300 ${
                     billingCycle === 'monthly'
-                      ? 'bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text shadow-sm'
-                      : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-900 dark:hover:text-cinema-text'
+                      ? 'bg-light-panel dark:bg-cinema-card text-light-text dark:text-cinema-text shadow-light-card'
+                      : 'text-light-text-muted dark:text-cinema-text-muted hover:text-light-text dark:hover:text-cinema-text'
                   }`}
                 >
                   Monthly
@@ -224,8 +224,8 @@ const InstantUpgradeModal = ({
                   onClick={() => setBillingCycle('yearly')}
                   className={`px-4 py-2 rounded text-sm font-medium transition-all duration-300 flex items-center space-x-1 ${
                     billingCycle === 'yearly'
-                      ? 'bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text shadow-sm'
-                      : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-900 dark:hover:text-cinema-text'
+                      ? 'bg-light-panel dark:bg-cinema-card text-light-text dark:text-cinema-text shadow-light-card'
+                      : 'text-light-text-muted dark:text-cinema-text-muted hover:text-light-text dark:hover:text-cinema-text'
                   }`}
                 >
                   <span>Yearly</span>

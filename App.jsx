@@ -558,13 +558,13 @@ const App = () => {
 
   // Render randomize dropdown
   const renderRandomizeDropdown = () => (
-    <div className="header-dropdown top-full mt-1 right-0 bg-white dark:bg-cinema-panel border border-gray-200 dark:border-cinema-border rounded-md shadow-lg dark:shadow-glow-soft min-w-[220px]">
+    <div className="header-dropdown top-full mt-1 right-0 bg-light-panel dark:bg-cinema-panel border border-light-border dark:border-cinema-border rounded-md shadow-light-elevated dark:shadow-glow-soft min-w-[220px]">
       <button
         onClick={() => {
           randomizeCharacterFields();
           setShowRandomizeDropdown(false);
         }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300 rounded-t-md"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 rounded-t-md"
       >
         👤 Character
       </button>
@@ -573,7 +573,7 @@ const App = () => {
           randomizeLocationBased();
           setShowRandomizeDropdown(false);
         }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
       >
         📍 Setting
       </button>
@@ -586,7 +586,7 @@ const App = () => {
           });
           setShowRandomizeDropdown(false);
         }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
       >
         🎵 Audio
       </button>
@@ -599,7 +599,7 @@ const App = () => {
           });
           setShowRandomizeDropdown(false);
         }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
       >
         🎬 Action
       </button>
@@ -608,13 +608,13 @@ const App = () => {
           randomizeCinematicStyle();
           setShowRandomizeDropdown(false);
         }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
       >
         🎨 Style
       </button>
       <button
         onClick={handleFullSceneRandomizeClick}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border transition-colors duration-300"
+        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
       >
         🎲 Full Scene
       </button>
@@ -626,7 +626,7 @@ const App = () => {
     if (!sceneOptions || sceneOptions.length === 0) return null;
 
     return (
-      <div data-scene-options className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+      <div data-scene-options className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-4 lg:p-6 border border-light-border dark:border-cinema-border transition-all duration-300">
         {/* Success indicator */}
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-4">
           <div className="flex items-center space-x-2">
@@ -639,13 +639,13 @@ const App = () => {
         </div>
         
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-cinema-text flex items-center">
+          <h3 className="text-lg font-semibold text-light-text dark:text-cinema-text flex items-center">
             <span className="mr-2">🎬</span>
             AI Scene Options
           </h3>
           <button
             onClick={handleDismissSceneOptions}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm"
+            className="text-light-text-muted hover:text-light-text dark:text-cinema-text-muted dark:hover:text-cinema-text text-sm"
           >
             ✕ Close
           </button>
@@ -653,7 +653,7 @@ const App = () => {
         
         <div className="space-y-3">
           {sceneOptions.map((option, index) => (
-            <div key={index} className="bg-gray-50 dark:bg-cinema-card rounded-lg p-3 border border-gray-200 dark:border-cinema-border">
+            <div key={index} className="bg-light-card dark:bg-cinema-card rounded-lg p-3 border border-light-border dark:border-cinema-border">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -666,7 +666,7 @@ const App = () => {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-cinema-text mb-2">
+                  <p className="text-sm text-light-text dark:text-cinema-text mb-2">
                     {option.summary}
                   </p>
                 </div>
@@ -691,11 +691,11 @@ const App = () => {
 
   // Main app render
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-cinema-black transition-colors duration-300">
+    <div className="min-h-screen bg-light-surface dark:bg-cinema-black transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
         
         {/* HEADER SECTION */}
-        <header className="header-base mb-4 sm:mb-6 bg-white/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-cinema-border rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" role="banner">
+        <header className="header-base mb-4 sm:mb-6 bg-light-panel/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-light-border dark:border-cinema-border rounded-xl shadow-light-elevated dark:shadow-glow-soft hover:shadow-light-primary dark:hover:shadow-xl transition-all duration-300" role="banner">
           {/* Desktop Header - 3 Section Grid */}
           <div className="hidden md:grid md:grid-cols-12 md:gap-4 items-center py-3 px-4 transition-all duration-300">
             
@@ -854,16 +854,16 @@ const App = () => {
             
             {/* Advanced Mode: Configuration Panel Only */}
             {isAdvancedMode && (
-              <div data-tutorial="form-fields" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-500 ease-in-out transform">
+              <div data-tutorial="form-fields" className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-4 lg:p-6 border border-light-border dark:border-cinema-border transition-all duration-500 ease-in-out transform">
                 <div className="mb-4 lg:mb-6">
                   <div className="mb-3 lg:mb-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-lg lg:text-xl font-semibold text-gray-800 dark:text-cinema-text">
+                        <h2 className="text-lg lg:text-xl font-semibold text-light-text dark:text-cinema-text">
                           Configure Your Prompt
                         </h2>
                         {isAdvancedMode && (
-                          <p className="text-xs text-gray-600 dark:text-cinema-text-muted mt-1">
+                          <p className="text-xs text-light-text-muted dark:text-cinema-text-muted mt-1">
                             Detailed manual configuration for all scene elements
                           </p>
                         )}
@@ -874,17 +874,17 @@ const App = () => {
                 
                   <div className="space-y-4 transition-all duration-300">
                     {schema.categories.map((category) => (
-                      <div key={category.id} data-category={category.id} className="border border-gray-200 dark:border-cinema-border rounded-lg transition-colors duration-300">
+                      <div key={category.id} data-category={category.id} className="border border-light-border dark:border-cinema-border rounded-lg transition-colors duration-300">
                         <button
                           onClick={() => toggleCategory(category.id)}
-                          className="w-full px-4 py-3 text-left bg-gray-50 dark:bg-cinema-card hover:bg-gray-100 dark:hover:bg-cinema-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal transition-all duration-300"
+                          className="w-full px-4 py-3 text-left bg-light-card dark:bg-cinema-card hover:bg-light-border dark:hover:bg-cinema-border rounded-lg focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-cinema-teal transition-all duration-300"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900 dark:text-cinema-text">
+                            <span className="font-medium text-light-text dark:text-cinema-text">
                               {category.label}
                             </span>
                             <svg
-                              className={`w-5 h-5 text-gray-500 dark:text-cinema-text-muted transition-all duration-300 ${
+                              className={`w-5 h-5 text-light-text-muted dark:text-cinema-text-muted transition-all duration-300 ${
                                 expandedCategories.has(category.id) ? 'rotate-180' : ''
                               }`}
                               fill="none"

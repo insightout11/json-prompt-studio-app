@@ -139,17 +139,17 @@ const WorldBuilder = ({ currentJson, onResult }) => {
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-cinema-text mb-2">
+        <h4 className="text-lg font-semibold text-light-text dark:text-cinema-text mb-2">
           Expand Your World
         </h4>
-        <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
+        <p className="text-sm text-light-text-muted dark:text-cinema-text-muted">
           Transform your scene setting into a rich, detailed world
         </p>
       </div>
 
       {/* Expansion Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text mb-2">
+        <label className="block text-sm font-medium text-light-text dark:text-cinema-text mb-2">
           Expansion Type
         </label>
         <div className="grid grid-cols-1 gap-2">
@@ -173,11 +173,11 @@ const WorldBuilder = ({ currentJson, onResult }) => {
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">{getExpansionIcon(type.value)}</span>
-                  <span className="font-medium text-gray-800 dark:text-cinema-text">
+                  <span className="font-medium text-light-text dark:text-cinema-text">
                     {type.label}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-cinema-text-muted mt-1">
+                <p className="text-sm text-light-text-muted dark:text-cinema-text-muted mt-1">
                   {type.description}
                 </p>
               </div>
@@ -279,9 +279,9 @@ const WorldBuilder = ({ currentJson, onResult }) => {
                 <strong className="text-green-700 dark:text-green-400">Related Locations:</strong>
                 <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 mt-2">
                   {worldData.locations.map((location, index) => (
-                    <div key={index} className="bg-white dark:bg-cinema-card p-3 rounded border border-green-200 dark:border-green-700/30">
+                    <div key={index} className="bg-light-panel dark:bg-cinema-card p-3 rounded border border-light-success dark:border-green-700/30">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-800 dark:text-cinema-text">
+                        <span className="font-medium text-light-text dark:text-cinema-text">
                           {location.name}
                         </span>
                         <button
@@ -291,7 +291,7 @@ const WorldBuilder = ({ currentJson, onResult }) => {
                           Use Setting
                         </button>
                       </div>
-                      <p className="text-gray-600 dark:text-cinema-text-muted text-xs">
+                      <p className="text-light-text-muted dark:text-cinema-text-muted text-xs">
                         {location.description}
                       </p>
                     </div>
@@ -343,7 +343,7 @@ const WorldBuilder = ({ currentJson, onResult }) => {
               </button>
               <button
                 onClick={() => setWorldData(null)}
-                className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors"
+                className="px-3 py-2 bg-light-text-muted hover:bg-light-text text-white text-sm font-medium rounded-md transition-colors"
               >
                 Dismiss
               </button>
@@ -357,7 +357,7 @@ const WorldBuilder = ({ currentJson, onResult }) => {
               >
                 🌟 Make Related Worlds
               </button>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+              <p className="text-xs text-light-text-muted dark:text-cinema-text-muted mt-1 text-center">
                 Generate adjacent locations, hidden areas, variants and more that share this world's DNA
               </p>
             </div>
