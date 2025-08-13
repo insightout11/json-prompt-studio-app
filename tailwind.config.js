@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// Light theme implementation - comprehensive styling
 export default {
   content: [
     "./index.html",
