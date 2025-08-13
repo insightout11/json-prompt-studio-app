@@ -48,17 +48,17 @@ const LoadingScreen = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-cinema-black dark:via-gray-900 dark:to-cinema-black flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-black flex items-center justify-center z-50 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-30 dark:opacity-20">
         {/* Floating Orbs */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-teal-400 to-blue-500 dark:from-cinema-teal dark:to-cinema-purple rounded-full blur-3xl animate-float-orb" />
-        <div className="absolute bottom-32 right-20 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-500 dark:from-cinema-purple dark:to-cinema-gold rounded-full blur-3xl animate-float-orb-delayed" />
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-r from-cyan-400 to-teal-500 dark:from-cinema-teal dark:to-cinema-success rounded-full blur-2xl animate-breathe" />
+        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-teal-400 to-blue-500 dark:from-teal-500 dark:to-purple-500 rounded-full blur-3xl animate-float-orb" />
+        <div className="absolute bottom-32 right-20 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-500 dark:from-purple-500 dark:to-amber-500 rounded-full blur-3xl animate-float-orb-delayed" />
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-r from-cyan-400 to-teal-500 dark:from-teal-500 dark:to-green-500 rounded-full blur-2xl animate-breathe" />
         
         {/* Geometric Shapes */}
-        <div className="absolute top-32 right-32 w-16 h-16 border-2 border-teal-400/30 dark:border-cinema-teal/30 animate-shape-morph" />
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-gradient-to-br from-purple-400/20 to-blue-500/20 dark:from-cinema-purple/20 dark:to-cinema-teal/20 animate-rotate-slow" />
+        <div className="absolute top-32 right-32 w-16 h-16 border-2 border-teal-400/30 dark:border-teal-500/30 animate-shape-morph" />
+        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-gradient-to-br from-purple-400/20 to-blue-500/20 dark:from-purple-500/20 dark:to-teal-500/20 animate-rotate-slow" />
       </div>
 
       {/* Main Content */}
@@ -67,7 +67,7 @@ const LoadingScreen = ({ onComplete }) => {
         <div className="flex justify-center">
           <div className="relative">
             {/* Glow effect behind logo */}
-            <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-purple-500 dark:from-cinema-teal dark:to-cinema-purple rounded-full blur-xl opacity-30 animate-glow-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-purple-500 dark:from-teal-500 dark:to-purple-500 rounded-full blur-xl opacity-30 animate-glow-pulse" />
             <div 
               className="relative transform transition-all duration-500 hover:scale-105"
               style={{
@@ -83,9 +83,9 @@ const LoadingScreen = ({ onComplete }) => {
         <div className="space-y-4">
           <div className="relative">
             {/* Progress bar background with glow */}
-            <div className="bg-gray-200 dark:bg-cinema-border rounded-full h-3 overflow-hidden relative shadow-inner">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden relative shadow-inner">
               <div 
-                className="bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500 dark:from-cinema-teal dark:via-cinema-purple dark:to-cinema-gold h-full rounded-full transition-all duration-500 ease-out relative"
+                className="bg-gradient-to-r from-teal-500 via-blue-500 to-purple-500 dark:from-teal-500 dark:via-purple-500 dark:to-amber-500 h-full rounded-full transition-all duration-500 ease-out relative"
                 style={{ 
                   width: `${progress}%`,
                   boxShadow: `0 0 ${Math.max(progress / 5, 5)}px rgba(20, 184, 166, 0.4)`
@@ -109,7 +109,7 @@ const LoadingScreen = ({ onComplete }) => {
                 {/* Progress trail particles */}
                 {progress > 10 && (
                   <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2">
-                    <div className="w-2 h-2 bg-teal-400 dark:bg-cinema-teal rounded-full animate-ping" />
+                    <div className="w-2 h-2 bg-teal-400 dark:bg-teal-500 rounded-full animate-ping" />
                   </div>
                 )}
               </div>
@@ -117,7 +117,7 @@ const LoadingScreen = ({ onComplete }) => {
             
             {/* Surrounding glow effect */}
             <div 
-              className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-purple-500/20 dark:from-cinema-teal/20 dark:to-cinema-purple/20 rounded-full blur-md -z-10 opacity-60"
+              className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-purple-500/20 dark:from-teal-500/20 dark:to-purple-500/20 rounded-full blur-md -z-10 opacity-60"
               style={{
                 transform: `scaleX(${progress / 100})`,
                 transformOrigin: 'left center'
@@ -127,7 +127,7 @@ const LoadingScreen = ({ onComplete }) => {
           
           {/* Progress percentage with animation */}
           <div className="text-sm font-medium">
-            <span className="bg-gradient-to-r from-teal-600 to-purple-600 dark:from-cinema-teal dark:to-cinema-purple bg-clip-text text-transparent animate-pulse-gentle">
+            <span className="bg-gradient-to-r from-teal-600 to-purple-600 dark:from-teal-500 dark:to-purple-500 bg-clip-text text-transparent animate-pulse-gentle">
               {progress}%
             </span>
           </div>
@@ -137,7 +137,7 @@ const LoadingScreen = ({ onComplete }) => {
         <div className="space-y-3">
           <div className="relative">
             <div 
-              className="text-lg font-medium bg-gradient-to-r from-gray-900 to-gray-700 dark:from-cinema-text dark:to-cinema-text-muted bg-clip-text text-transparent transition-all duration-500"
+              className="text-lg font-medium bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent transition-all duration-500"
               style={{
                 textShadow: '0 0 10px rgba(20, 184, 166, 0.2)'
               }}
@@ -145,21 +145,21 @@ const LoadingScreen = ({ onComplete }) => {
               {loadingText}
             </div>
             {/* Subtle accent line */}
-            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-teal-400 to-purple-500 dark:from-cinema-teal dark:to-cinema-purple rounded-full opacity-60" />
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-teal-400 to-purple-500 dark:from-teal-500 dark:to-purple-500 rounded-full opacity-60" />
           </div>
           
           {/* Enhanced animated dots */}
           <div className="flex justify-center space-x-2">
             <div 
-              className="w-2.5 h-2.5 bg-gradient-to-r from-teal-500 to-blue-500 dark:from-cinema-teal dark:to-cinema-purple rounded-full animate-bounce shadow-sm"
+              className="w-2.5 h-2.5 bg-gradient-to-r from-teal-500 to-blue-500 dark:from-teal-500 dark:to-purple-500 rounded-full animate-bounce shadow-sm"
               style={{ animationDelay: '0ms', animationDuration: '1.2s' }}
             />
             <div 
-              className="w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-cinema-purple dark:to-cinema-gold rounded-full animate-bounce shadow-sm"
+              className="w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-purple-500 dark:to-amber-500 rounded-full animate-bounce shadow-sm"
               style={{ animationDelay: '200ms', animationDuration: '1.2s' }}
             />
             <div 
-              className="w-2.5 h-2.5 bg-gradient-to-r from-purple-500 to-pink-500 dark:from-cinema-gold dark:to-cinema-success rounded-full animate-bounce shadow-sm"
+              className="w-2.5 h-2.5 bg-gradient-to-r from-purple-500 to-pink-500 dark:from-amber-500 dark:to-green-500 rounded-full animate-bounce shadow-sm"
               style={{ animationDelay: '400ms', animationDuration: '1.2s' }}
             />
           </div>
@@ -167,12 +167,12 @@ const LoadingScreen = ({ onComplete }) => {
         
         {/* Enhanced Brand tagline */}
         <div className="relative">
-          <div className="text-sm text-gray-600 dark:text-cinema-text-muted italic opacity-80 transition-all duration-700">
+          <div className="text-sm text-gray-600 dark:text-gray-400 italic opacity-80 transition-all duration-700">
             Empowering creativity through intelligent prompts
           </div>
           {/* Decorative elements */}
-          <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-teal-400 dark:bg-cinema-teal rounded-full animate-ping opacity-40" />
-          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-purple-400 dark:bg-cinema-purple rounded-full animate-ping opacity-40" style={{ animationDelay: '1s' }} />
+          <div className="absolute -left-8 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-teal-400 dark:bg-teal-500 rounded-full animate-ping opacity-40" />
+          <div className="absolute -right-8 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-purple-400 dark:bg-purple-500 rounded-full animate-ping opacity-40" style={{ animationDelay: '1s' }} />
         </div>
       </div>
       
