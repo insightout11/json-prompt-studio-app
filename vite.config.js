@@ -11,13 +11,13 @@ export default defineConfig({
     // Enable source maps for debugging
     sourcemap: true,
     
-    // Optimize chunks for better caching
-    output: {
-      manualChunks: {
-        vendor: ['react', 'react-dom'],
-        utils: ['zustand'],
-      },
-    },
+    // Optimize chunks for better caching (simplified to ensure app code is included)
+    // output: {
+    //   manualChunks: {
+    //     vendor: ['react', 'react-dom'],
+    //     utils: ['zustand'],
+    //   },
+    // },
     
     // Ensure public files are copied
     copyPublicDir: true,
