@@ -1,30 +1,32 @@
 // Vercel serverless function for Groq API proxy
 export default async function handler(req, res) {
   try {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Handle preflight OPTIONS request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    // Handle preflight OPTIONS request
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
 
-  // Handle GET requests for testing
-  if (req.method === 'GET') {
-    return res.status(200).json({ 
-      message: 'Groq API endpoint is working', 
-      timestamp: new Date().toISOString() 
-    });
-  }
+    // Handle GET requests for testing
+    if (req.method === 'GET') {
+      return res.status(200).json({ 
+        message: 'Groq API endpoint is working', 
+        timestamp: new Date().toISOString(),
+        hasApiKey: !!process.env.GROQ_API_KEY,
+        nodeVersion: process.version,
+        hasFetch: typeof fetch !== 'undefined'
+      });
+    }
 
-  // Only allow POST requests for actual API calls
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+    // Only allow POST requests for actual API calls
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-  try {
     const { messages, model, temperature, max_tokens } = req.body;
     
     if (!process.env.GROQ_API_KEY) {
@@ -33,15 +35,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check if fetch is available
-    if (typeof fetch === 'undefined') {
-      return res.status(500).json({ 
-        error: 'fetch is not available in this environment',
-        nodeVersion: process.version
-      });
-    }
+    // Import fetch for Node.js if needed
+    const fetchImpl = globalThis.fetch || (await import('node-fetch')).default;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetchImpl('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -70,15 +67,8 @@ export default async function handler(req, res) {
     console.error('Groq API proxy error:', error);
     res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message 
-    });
-  }
-  } catch (globalError) {
-    console.error('Global function error:', globalError);
-    res.status(500).json({ 
-      error: 'Global function error',
-      details: globalError.message,
-      stack: globalError.stack
+      details: error.message,
+      stack: error.stack
     });
   }
 }
