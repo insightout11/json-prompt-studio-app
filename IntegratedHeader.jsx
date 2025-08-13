@@ -37,8 +37,8 @@ const IntegratedHeader = ({ showToast }) => {
         onClick={() => setShowDropdown(!showDropdown)}
         className={`relative inline-flex items-center px-3 py-2 rounded-md font-medium text-sm transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cinema-teal ${
           showDropdown
-            ? 'bg-cinema-teal text-white shadow-glow-teal border border-cinema-teal'
-            : 'bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal'
+            ? 'bg-light-primary dark:bg-cinema-teal text-white shadow-light-primary dark:shadow-glow-teal border border-light-primary dark:border-cinema-teal'
+            : 'bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text border border-light-border dark:border-cinema-border hover:bg-light-card dark:hover:bg-cinema-card hover:shadow-light-primary dark:hover:shadow-glow-teal'
         }`}
         aria-label="Project and library menu"
         aria-expanded={showDropdown}
@@ -62,7 +62,7 @@ const IntegratedHeader = ({ showToast }) => {
       {/* Unified Dropdown Menu */}
       {showDropdown && (
         <div 
-          className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-cinema-panel border border-cinema-teal/20 rounded-lg shadow-xl dark:shadow-glow-soft z-50 overflow-hidden"
+          className="absolute top-full left-0 mt-2 w-72 bg-light-panel dark:bg-cinema-panel border border-light-primary/20 dark:border-cinema-teal/20 rounded-lg shadow-light-elevated dark:shadow-glow-soft z-50 overflow-hidden"
           role="menu"
           aria-labelledby="menu-button"
         >
@@ -72,18 +72,18 @@ const IntegratedHeader = ({ showToast }) => {
           <div className="p-4">
             <button
               onClick={handleOpenEnhancedLibrary}
-              className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-cinema-card rounded-lg transition-all duration-200"
+              className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-light-card dark:hover:bg-cinema-card rounded-lg transition-all duration-200"
             >
               <span className="text-xl">📚</span>
               <div className="flex-1">
-                <div className="font-medium text-gray-900 dark:text-cinema-text">
+                <div className="font-medium text-light-text dark:text-cinema-text">
                   Library
                 </div>
-                <div className="text-xs text-gray-500 dark:text-cinema-text-muted">
+                <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">
                   Manage projects, characters, scenes & more
                 </div>
               </div>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-light-text-muted dark:text-cinema-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>

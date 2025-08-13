@@ -553,7 +553,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                     className={`flex-shrink-0 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-200 flex items-center space-x-2 ${
                       activeSubcategory === subcategoryKey
                         ? 'border-green-500 text-green-600 dark:border-green-400 dark:text-green-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text hover:border-gray-300'
+                        : 'border-transparent text-gray-500 hover:text-light-text dark:text-cinema-text-muted dark:hover:text-cinema-text hover:border-gray-300'
                     }`}
                   >
                     <span className="text-base">{subcategory.icon}</span>
@@ -608,7 +608,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="text-4xl mb-4">🔍</div>
-                <h4 className="text-lg font-medium text-gray-700 dark:text-cinema-text mb-2">
+                <h4 className="text-lg font-medium text-light-text dark:text-cinema-text mb-2">
                   No templates found
                 </h4>
                 <p className="text-sm text-gray-500 dark:text-cinema-text-muted max-w-md">
@@ -789,13 +789,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
               const completion = getCategoryCompletion(categoryKey);
               
               return (
-                <div key={categoryKey} className="bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft p-4 border border-cinema-border transition-all duration-300">
+                <div key={categoryKey} className="bg-light-card dark:bg-cinema-card rounded-lg shadow-light-card dark:shadow-glow-soft p-4 border border-light-border dark:border-cinema-border transition-all duration-300">
                   {/* Full-width horizontal layout with proper alignment */}
                   <div className="flex items-center space-x-3">
                     {/* Left: Category Info - Fixed width */}
                     <div className="flex items-center space-x-2 w-28 flex-shrink-0">
                       <span className="text-base">{category.icon}</span>
-                      <span className="text-sm font-medium text-gray-700 dark:text-cinema-text">
+                      <span className="text-sm font-medium text-light-text dark:text-cinema-text">
                         {category.label}
                       </span>
                     </div>
@@ -984,7 +984,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{category.icon}</span>
                     <div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-cinema-text">
+                      <span className="text-sm font-medium text-light-text dark:text-cinema-text">
                         {category.label}
                       </span>
                       <div className="text-xs text-gray-500 dark:text-cinema-text-muted">
