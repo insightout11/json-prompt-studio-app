@@ -991,7 +991,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Save Modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>{libraryCategories[saveType]?.icon}</span>
@@ -1136,8 +1136,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Create Project Modal */}
       {showCreateProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-full max-w-md border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
             <h3 className="text-lg font-semibold mb-6 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>✨</span>
               <span>Create New Project</span>
