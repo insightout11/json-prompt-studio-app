@@ -184,7 +184,7 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
       };
       onResult(updatedJson);
       
-      // Save world context for Storyboard Generator
+      // Save world context for Storyboard Builder
       setBuilderContext('world', finalWorld.formFields || finalWorld);
     }
     onClose();
@@ -199,7 +199,7 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
       };
       onResult(updatedJson);
       
-      // Save world context for Storyboard Generator
+      // Save world context for Storyboard Builder
       setBuilderContext('world', relatedWorld.formFields || relatedWorld);
     }
     // Close both modals
@@ -562,7 +562,7 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
                       🎬 Create Storyboard with World
                     </button>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
-                      Jump to Storyboard Generator with this world automatically imported
+                      Jump to Storyboard Builder with this world automatically imported
                     </p>
                   </div>
                 </div>

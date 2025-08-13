@@ -167,7 +167,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
     if (finalStyle && onResult) {
       onResult(finalStyle);
       
-      // Save style context for Storyboard Generator
+      // Save style context for Storyboard Builder
       setBuilderContext('style', finalStyle);
       
       onClose();
@@ -447,7 +447,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
                     🎬 Create Storyboard with Style
                   </button>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
-                    Jump to Storyboard Generator with this style automatically imported
+                    Jump to Storyboard Builder with this style automatically imported
                   </p>
                 </div>
               </div>
@@ -466,7 +466,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
           onResult={(relatedStyle) => {
             if (onResult) {
               onResult(relatedStyle);
-              // Save style context for Storyboard Generator
+              // Save style context for Storyboard Builder
               setBuilderContext('style', relatedStyle);
             }
             setShowRelatedModal(false);

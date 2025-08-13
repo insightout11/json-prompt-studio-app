@@ -427,7 +427,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
             </div>
             <div className="flex items-center space-x-2 text-sm">
               <span className="w-6">🎬</span>
-              <span><strong>Storyboard Generator</strong> — Break scenes into sequences</span>
+              <span><strong>Storyboard Builder</strong> — Break scenes into sequences</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
               <span className="w-6">✨</span>

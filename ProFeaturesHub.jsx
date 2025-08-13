@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import ProgressiveCharacterModal from './ProgressiveCharacterModal';
 import ProgressiveWorldModal from './ProgressiveWorldModal';
 import ProgressiveStyleModal from './ProgressiveStyleModal';
-import StoryboardGeneratorModal from './StoryboardGeneratorModal';
+import StoryboardBuilderModal from './StoryboardBuilderModal';
 import SceneExtenderModal from './SceneExtenderModal';
-import StoryboardGenerator from './StoryboardGenerator';
+import StoryboardBuilder from './StoryboardBuilder';
 import StyleGenerator from './StyleGenerator';
 import SceneExtender from './SceneExtender';
 import SceneExtenderInterface from './SceneExtenderInterface';
@@ -75,7 +75,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
     },
     {
       id: 'storyboard-generator',
-      name: 'Storyboard Generator',
+      name: 'Storyboard Builder',
       icon: '🎬',
       description: 'Break a script or JSON into a full storyboard sequence',
       benefits: ['Multi-scene planning', 'Shot-by-shot breakdown', 'Visual continuity'],
@@ -224,8 +224,8 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
           currentJson={currentJson}
         />
         
-        {/* Storyboard Generator Modal - Add to compact mode */}
-        <StoryboardGeneratorModal
+        {/* Storyboard Builder Modal - Add to compact mode */}
+        <StoryboardBuilderModal
           isOpen={showStoryboardModal}
           onClose={() => setShowStoryboardModal(false)}
           onResult={handleStoryboardGenerated}
@@ -334,8 +334,8 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
         currentJson={currentJson}
       />
       
-      {/* Storyboard Generator Modal */}
-      <StoryboardGeneratorModal
+      {/* Storyboard Builder Modal */}
+      <StoryboardBuilderModal
         isOpen={showStoryboardModal}
         onClose={() => setShowStoryboardModal(false)}
         onResult={handleStoryboardGenerated}

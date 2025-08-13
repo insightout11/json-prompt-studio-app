@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
+import RelatedGeneratorModal from './RelatedGeneratorModal';
 
 const StyleGenerator = ({ currentJson, onResult }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [styleData, setStyleData] = useState(null);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('presets');
+  const [showRelatedModal, setShowRelatedModal] = useState(false);
 
   // Preset Styles
   const presetStyles = [
@@ -474,6 +476,19 @@ const StyleGenerator = ({ currentJson, onResult }) => {
                     Dismiss
                   </button>
                 </div>
+                
+                {/* Make Related Button */}
+                <div className="border-t border-gray-200 dark:border-cinema-border pt-3 mt-3">
+                  <button
+                    onClick={() => setShowRelatedModal(true)}
+                    className="w-full px-4 py-2 bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 font-medium rounded-lg transition-all duration-300 border-2 border-purple-300 dark:border-purple-600 hover:border-purple-400 dark:hover:border-purple-500"
+                  >
+                    🌟 Make Related Styles
+                  </button>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                    Generate style variations, complementary looks, and themed alternatives
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -506,6 +521,22 @@ const StyleGenerator = ({ currentJson, onResult }) => {
             Set Groq API Key
           </button>
         </div>
+      )}
+      
+      {/* Related Generator Modal */}
+      {showRelatedModal && styleData && (
+        <RelatedGeneratorModal
+          isOpen={showRelatedModal}
+          onClose={() => setShowRelatedModal(false)}
+          baseSpec={styleData}
+          generatorType="style"
+          onResult={(relatedStyle) => {
+            if (onResult) {
+              onResult(relatedStyle);
+            }
+            setShowRelatedModal(false);
+          }}
+        />
       )}
     </div>
   );

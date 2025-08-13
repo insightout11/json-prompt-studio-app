@@ -3,7 +3,7 @@ import aiApiService from './aiApiService';
 import { useStore } from './store';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 
-const StoryboardGeneratorModal = ({ isOpen, onClose, onResult, currentJson }) => {
+const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
   const getAvailableContexts = useStore(state => state.getAvailableContexts);
@@ -500,4 +500,4 @@ const StoryboardGeneratorModal = ({ isOpen, onClose, onResult, currentJson }) =>
   );
 };
 
-export default StoryboardGeneratorModal;
+export default StoryboardBuilderModal;

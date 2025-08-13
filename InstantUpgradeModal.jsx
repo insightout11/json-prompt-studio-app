@@ -43,7 +43,7 @@ const InstantUpgradeModal = ({
         'Email support',
         'Advanced templates',
         'Character Engine & World Builder',
-        'Storyboard Generator',
+        'Storyboard Builder',
         'Viral Video Templates'
       ],
       highlight: 'Everything You Need',

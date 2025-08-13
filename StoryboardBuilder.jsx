@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
+import RelatedGeneratorModal from './RelatedGeneratorModal';
 
-const StoryboardGenerator = ({ currentJson, onResult }) => {
+const StoryboardBuilder = ({ currentJson, onResult }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [storyboard, setStoryboard] = useState(null);
   const [error, setError] = useState(null);
   const [sceneCount, setSceneCount] = useState(3);
   const [narrativeStructure, setNarrativeStructure] = useState('three-act');
+  const [showRelatedModal, setShowRelatedModal] = useState(false);
 
   const narrativeStructures = [
     { 
@@ -322,7 +324,7 @@ const StoryboardGenerator = ({ currentJson, onResult }) => {
               onClick={applyFullStoryboard}
               className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
             >
-              Start with Scene 1
+              Apply Storyboard to Scene
             </button>
             <button
               onClick={() => setStoryboard(null)}
@@ -330,6 +332,19 @@ const StoryboardGenerator = ({ currentJson, onResult }) => {
             >
               Dismiss
             </button>
+          </div>
+          
+          {/* Make Related Button */}
+          <div className="border-t border-gray-200 dark:border-green-700/50 pt-3 mt-3">
+            <button
+              onClick={() => setShowRelatedModal(true)}
+              className="w-full px-4 py-2 bg-purple-100 dark:bg-purple-900/20 hover:bg-purple-200 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 font-medium rounded-lg transition-all duration-300 border-2 border-purple-300 dark:border-purple-600 hover:border-purple-400 dark:hover:border-purple-500"
+            >
+              🌟 Make Related Storyboards
+            </button>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+              Generate alternative story structures, prequels, sequels and variations
+            </p>
           </div>
         </div>
       )}
@@ -346,7 +361,7 @@ const StoryboardGenerator = ({ currentJson, onResult }) => {
             </span>
           </div>
           <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-            Storyboard Generator requires an OpenAI API key to create scene sequences.
+            Storyboard Builder requires an OpenAI API key to create scene sequences.
           </p>
           <button 
             onClick={() => {
@@ -361,8 +376,24 @@ const StoryboardGenerator = ({ currentJson, onResult }) => {
           </button>
         </div>
       )}
+      
+      {/* Related Generator Modal */}
+      {showRelatedModal && storyboard && (
+        <RelatedGeneratorModal
+          isOpen={showRelatedModal}
+          onClose={() => setShowRelatedModal(false)}
+          baseSpec={storyboard}
+          generatorType="storyboard"
+          onResult={(relatedStoryboard) => {
+            if (onResult) {
+              onResult(relatedStoryboard);
+            }
+            setShowRelatedModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };
 
-export default StoryboardGenerator;
+export default StoryboardBuilder;

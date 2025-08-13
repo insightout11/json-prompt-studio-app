@@ -151,7 +151,7 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
       };
       onResult(updatedJson);
       
-      // Save character context for Storyboard Generator
+      // Save character context for Storyboard Builder
       setBuilderContext('character', finalCharacter.formFields || finalCharacter);
     }
     onClose();
@@ -166,7 +166,7 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
       };
       onResult(updatedJson);
       
-      // Save character context for Storyboard Generator
+      // Save character context for Storyboard Builder
       setBuilderContext('character', relatedCharacter.formFields || relatedCharacter);
     }
     // Close both modals
@@ -506,7 +506,7 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
                     🎬 Create Storyboard with Character
                   </button>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
-                    Jump to Storyboard Generator with this character automatically imported
+                    Jump to Storyboard Builder with this character automatically imported
                   </p>
                 </div>
               </div>
