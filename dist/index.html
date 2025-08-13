@@ -18,25 +18,15 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     
-    <!-- Auto-redirect returning users and handle /app routing -->
+    <!-- Auto-redirect returning users (server-side routing handles /app) -->
     <script>
-        // Simple routing logic
-        const path = window.location.pathname;
-        
-        // If accessing /app, load the React app directly
-        if (path === '/app' || path.startsWith('/app/')) {
-            window.location.href = '/app.html';
-            // Don't execute the rest of the script
-            return;
-        }
-        
         // For landing page visits, check auto-redirect preference
         const hasUsedApp = localStorage.getItem('jsonPromptStudio_hasUsedApp') === 'true';
         const autoRedirect = localStorage.getItem('jsonPromptStudio_autoRedirect') === 'true';
         
         // If returning user has enabled auto-redirect, go straight to app
         if (hasUsedApp && autoRedirect) {
-            window.location.href = '/app.html';
+            window.location.href = '/app';
         }
     </script>
     
