@@ -11,11 +11,11 @@
     },
     {
       "source": "/app$",
-      "destination": "/app.html"
+      "destination": "/react-app.html"
     },
     {
       "source": "/app/(.*)",
-      "destination": "/app.html"
+      "destination": "/react-app.html"
     },
     {
       "source": "/",
