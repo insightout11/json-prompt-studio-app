@@ -82,7 +82,7 @@ const ApiKeyChecker = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg p-4 shadow-lg z-50 min-w-64">
+    <div className="fixed bottom-4 right-4 bg-light-panel dark:bg-cinema-panel border border-gray-300 dark:border-gray-600 rounded-lg p-4 shadow-lg z-50 min-w-64">
       <h3 className="text-sm font-bold mb-3 text-gray-800 dark:text-white">
         🔑 API Key Status
       </h3>

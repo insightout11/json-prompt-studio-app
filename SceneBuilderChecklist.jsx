@@ -426,8 +426,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     if (!showLoadModal || !loadCategory) return null;
     
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[60] p-4">
+        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Select {loadCategory.label.slice(0, -1)} to Load
@@ -515,8 +515,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     const categorizedTemplates = categorizeTemplates(activeCategory, activeSubcategory, category.templates);
     
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-xl max-w-4xl w-full max-h-[85vh] overflow-hidden">
           {/* Modal Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-cinema-border">
             <div>
@@ -770,7 +770,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   if (compact) {
     return (
       <>
-        <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300 mb-4">
+        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-4 lg:p-6 border border-light-border dark:border-cinema-border transition-all duration-300 mb-4">
           {/* Header - Matching JSON Output Style */}
           <div className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
             <div className="flex items-center space-x-2 lg:space-x-4">
@@ -821,7 +821,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         value={categoryInputs[categoryKey] || ''}
                         onChange={(e) => setCategoryInputs(prev => ({ ...prev, [categoryKey]: e.target.value }))}
                         placeholder={placeholderText[categoryKey] || `Describe your ${category.label.toLowerCase()}...`}
-                        className="w-full px-3 py-3 text-sm border border-gray-300 dark:border-cinema-border rounded bg-white dark:bg-cinema-panel text-gray-700 dark:text-cinema-text placeholder-gray-500 dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none"
+                        className="w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none"
                         style={{ height: '3.5rem' }}
                         rows={1}
                         onKeyPress={(e) => {

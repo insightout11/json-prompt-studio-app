@@ -838,7 +838,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
 
       {/* Tutorial tooltip */}
       <div
-        className={`absolute bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 p-6 max-w-md z-[10001] ${getArrowClass()}`}
+        className={`absolute bg-light-panel dark:bg-cinema-panel rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 p-6 max-w-md z-[10001] ${getArrowClass()}`}
         style={tooltipPosition}
       >
         {/* Header */}

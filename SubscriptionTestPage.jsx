@@ -30,7 +30,7 @@ const SubscriptionTestPage = () => {
 
         {/* Billing Cycle Toggle */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
+          <div className="bg-light-panel dark:bg-cinema-panel rounded-lg p-1 border border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2 rounded-md font-medium transition-all ${
@@ -66,7 +66,7 @@ const SubscriptionTestPage = () => {
         />
 
         {/* Feature Comparison */}
-        <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="mt-12 bg-light-panel dark:bg-cinema-panel rounded-xl border border-gray-200 dark:border-gray-700 p-6">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">
             Free vs Pro Comparison
           </h3>

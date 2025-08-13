@@ -130,8 +130,8 @@ const EditableJsonOutput = ({ showToast }) => {
     const { added, modified, removed } = pendingChanges;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-fluid-sm">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-50 p-fluid-sm">
+        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto">
           <div className="p-fluid-md">
             <h3 className="text-fluid-lg font-semibold text-gray-900 dark:text-white mb-fluid-sm">
               🔄 Confirm JSON Changes
@@ -222,7 +222,7 @@ const EditableJsonOutput = ({ showToast }) => {
         {!isEditing ? (
           // View Mode - Read-only formatted JSON
           <div 
-            className="bg-gray-900 dark:bg-cinema-black rounded-lg p-3 sm:p-4 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-gray-700 dark:border-cinema-border relative"
+            className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-light-border dark:border-cinema-border relative"
             role="textbox"
             aria-readonly="true"
             aria-label="Generated JSON output"
@@ -250,7 +250,7 @@ const EditableJsonOutput = ({ showToast }) => {
               value={editedJson}
               onChange={handleJsonChange}
               onKeyDown={handleKeyPress}
-              className={`w-full p-3 sm:p-4 bg-gray-900 dark:bg-cinema-black text-green-400 dark:text-cinema-teal text-xs sm:text-sm font-mono rounded-lg border ${
+              className={`w-full p-3 sm:p-4 bg-light-card dark:bg-cinema-black text-light-primary dark:text-cinema-teal text-xs sm:text-sm font-mono rounded-lg border ${
                 validationError 
                   ? 'border-red-500 focus:border-red-400' 
                   : 'border-gray-700 dark:border-cinema-border focus:border-blue-500'

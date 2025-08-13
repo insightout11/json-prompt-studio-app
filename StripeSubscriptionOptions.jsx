@@ -25,7 +25,7 @@ const StripeSubscriptionOptions = ({
   return (
     <div className={`stripe-subscription-options ${className}`}>
       {/* Main Subscription Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
+      <div className="bg-light-panel dark:bg-cinema-panel rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
         
         {/* Header */}
         <div className="text-center mb-6">
@@ -111,7 +111,7 @@ const StripeSubscriptionOptions = ({
               <select
                 value={trialDays}
                 onChange={(e) => setTrialDays(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
                 <option value={0}>No trial</option>
                 <option value={3}>3 days free</option>
@@ -132,7 +132,7 @@ const StripeSubscriptionOptions = ({
                   value={billingAnchor}
                   onChange={(e) => setBillingAnchor(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Set a specific date for billing to start (e.g., 1st of each month)
@@ -150,7 +150,7 @@ const StripeSubscriptionOptions = ({
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Pre-fill your email at checkout

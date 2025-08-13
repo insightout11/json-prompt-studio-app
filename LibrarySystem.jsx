@@ -664,7 +664,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9998] p-4 pt-8" ref={dropdownRef}>
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-start justify-center z-[9998] p-4 pt-8" ref={dropdownRef}>
       <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-6xl w-full max-h-[85vh] overflow-hidden border border-teal-200 dark:border-teal-700/50 mt-4">
         
         {/* Header */}
@@ -991,7 +991,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Save Modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>{libraryCategories[saveType]?.icon}</span>
@@ -1064,7 +1064,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Scene Pack Viewer Modal */}
       {showScenePackModal && selectedScenePack && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border">
             <div className="p-6 border-b border-gray-200 dark:border-cinema-border">
               <div className="flex items-center justify-between">
@@ -1136,7 +1136,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Create Project Modal */}
       {showCreateProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
           <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-full max-w-md border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
             <h3 className="text-lg font-semibold mb-6 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>✨</span>

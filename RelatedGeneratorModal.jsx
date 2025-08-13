@@ -150,8 +150,8 @@ const RelatedGeneratorModal = ({ isOpen, onClose, baseSpec, specType, onResult }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-6">
-      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl max-w-3xl w-full max-h-[75vh] overflow-y-auto mt-[15vh]">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-start justify-center z-[9999] p-6">
+      <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-xl max-w-3xl w-full max-h-[75vh] overflow-y-auto mt-[15vh]">
         
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-cinema-border">
@@ -245,7 +245,7 @@ const RelatedGeneratorModal = ({ isOpen, onClose, baseSpec, specType, onResult }
                       <select
                         value={tweaks.toneShift}
                         onChange={(e) => setTweaks(prev => ({ ...prev, toneShift: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
                       >
                         <option value="darker">Darker</option>
                         <option value="same">Same</option>
@@ -261,7 +261,7 @@ const RelatedGeneratorModal = ({ isOpen, onClose, baseSpec, specType, onResult }
                       <select
                         value={tweaks.paletteShift}
                         onChange={(e) => setTweaks(prev => ({ ...prev, paletteShift: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
                       >
                         <option value="warmer">Warmer</option>
                         <option value="same">Same</option>
@@ -278,7 +278,7 @@ const RelatedGeneratorModal = ({ isOpen, onClose, baseSpec, specType, onResult }
                         <select
                           value={tweaks.ageShift}
                           onChange={(e) => setTweaks(prev => ({ ...prev, ageShift: e.target.value }))}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
                         >
                           <option value="younger">Younger</option>
                           <option value="same">Same</option>
@@ -296,7 +296,7 @@ const RelatedGeneratorModal = ({ isOpen, onClose, baseSpec, specType, onResult }
                         <select
                           value={tweaks.difficultyShift}
                           onChange={(e) => setTweaks(prev => ({ ...prev, difficultyShift: e.target.value }))}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-light-panel dark:bg-cinema-panel text-gray-900 dark:text-cinema-text"
                         >
                           <option value="safer">Safer</option>
                           <option value="same">Same</option>
