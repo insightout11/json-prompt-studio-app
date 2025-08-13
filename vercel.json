@@ -3,31 +3,5 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "framework": "vite",
-  "functions": {
-    "api/groq.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/openai.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/app",
-      "destination": "/react-app.html"
-    },
-    {
-      "source": "/app/",
-      "destination": "/react-app.html"
-    },
-    {
-      "source": "/app/(.*)",
-      "destination": "/react-app.html"
-    },
-    {
-      "source": "/(?!api/)(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "framework": "vite"
 }

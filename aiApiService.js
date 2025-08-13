@@ -229,8 +229,11 @@ class AIApiService {
 
     await this.enforceRateLimit();
 
-    // Use local server endpoints instead of direct API calls
-    const baseURL = useOpenAI ? '/api/openai' : '/api/groq';
+    // Use deployed server endpoints instead of direct API calls
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseURL = isLocal 
+      ? (useOpenAI ? '/api/openai' : '/api/groq')
+      : (useOpenAI ? 'https://jsonpromptstudio.com/api/openai' : 'https://jsonpromptstudio.com/api/groq');
     const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant';
 
     const requestPayload = {
