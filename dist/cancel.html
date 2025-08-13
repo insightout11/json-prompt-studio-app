@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled - JSON Prompt Studio</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .card {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .cancel-icon {
+            font-size: 4rem;
+            color: #f59e0b;
+            margin-bottom: 20px;
+        }
+        h1 { color: #f59e0b; margin-bottom: 10px; }
+        p { line-height: 1.6; margin-bottom: 20px; }
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #5a67d8; }
+        .benefits {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="cancel-icon">⏸️</div>
+        <h1>Payment Cancelled</h1>
+        <p>No worries! Your payment was cancelled and you haven't been charged.</p>
+        
+        <div class="benefits">
+            <h3>You can still enjoy our free features:</h3>
+            <ul style="text-align: left;">
+                <li>✅ Basic prompt generation</li>
+                <li>✅ Template library</li>
+                <li>✅ JSON export</li>
+                <li>✅ Character presets</li>
+            </ul>
+        </div>
+
+        <p>Ready to unlock Pro features? You can upgrade anytime!</p>
+
+        <div style="margin-top: 30px;">
+            <a href="/" class="btn">Continue with Free</a>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 0.9em; color: #6b7280;">
+            Questions? Contact us at <a href="mailto:insightout11@gmail.com">insightout11@gmail.com</a>
+        </p>
+    </div>
+
+    <script>
+        // Track cancelled checkout with analytics
+        if (window.gtag) {
+            gtag('event', 'checkout_cancelled', {
+                event_category: 'Subscription',
+                event_label: 'Pro Plan'
+            });
+        }
+    </script>
+</body>
+</html>

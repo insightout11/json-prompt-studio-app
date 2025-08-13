@@ -9,9 +9,9 @@ export default defineConfig({
       input: 'react-app.html',
       output: {
         // Add timestamp to force cache invalidation
-        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
-        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`,
+        entryFileNames: `assets/[name]-[hash]-v${Math.floor(Date.now()/1000)}.js`,
+        chunkFileNames: `assets/[name]-[hash]-v${Math.floor(Date.now()/1000)}.js`,
+        assetFileNames: `assets/[name]-[hash]-v${Math.floor(Date.now()/1000)}.[ext]`,
       }
     },
     // Enable source maps for debugging

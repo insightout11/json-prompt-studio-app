@@ -1,0 +1,15 @@
+<svg width="1200" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#bg)"/>
+  <text x="600" y="260" font-family="Arial, sans-serif" font-size="46" font-weight="bold" fill="white" text-anchor="middle">JSON Prompt Studio</text>
+  <text x="600" y="320" font-family="Arial, sans-serif" font-size="26" fill="white" text-anchor="middle">AI Video Prompt Generator</text>
+  <text x="600" y="370" font-family="Arial, sans-serif" font-size="18" fill="#e5e7eb" text-anchor="middle">Create Professional JSON Prompts for AI Video Generation</text>
+  <circle cx="120" cy="120" r="35" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="1080" cy="480" r="50" fill="rgba(255,255,255,0.1)"/>
+  <rect x="1000" y="100" width="70" height="70" rx="8" fill="rgba(255,255,255,0.15)"/>
+</svg>
