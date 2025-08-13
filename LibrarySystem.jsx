@@ -1138,10 +1138,15 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
       {showCreateProject && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
           <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
+            <h3 className="text-lg font-semibold mb-6 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>✨</span>
               <span>Create New Project</span>
             </h3>
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text mb-2">
+                Project Name
+              </label>
+            </div>
             <input
               type="text"
               value={newProjectName}
