@@ -980,7 +980,10 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
             return (
               <div key={categoryKey} className="border border-gray-200 dark:border-cinema-border rounded-md p-3">
                 {/* Category Header */}
-                <div className="flex items-center justify-between mb-2">
+                <div 
+                  className="flex items-center justify-between mb-2 cursor-pointer hover:bg-light-surface dark:hover:bg-cinema-panel/30 rounded p-2 -m-2 transition-colors"
+                  onClick={() => toggleCategory(categoryKey)}
+                >
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{category.icon}</span>
                     <div>
@@ -992,9 +995,16 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-cinema-text-muted text-right">
-                    <div className="font-medium">{completion.percentage}%</div>
-                    <div>{completion.filled}/{completion.total}</div>
+                  <div className="flex items-center space-x-2">
+                    <div className="text-xs text-gray-600 dark:text-cinema-text-muted text-right">
+                      <div className="font-medium">{completion.percentage}%</div>
+                      <div>{completion.filled}/{completion.total}</div>
+                    </div>
+                    <span className={`text-sm text-gray-400 dark:text-cinema-text-muted transform transition-transform ${
+                      expandedCategories.has(categoryKey) ? 'rotate-90' : ''
+                    }`}>
+                      ▶
+                    </span>
                   </div>
                 </div>
                 
@@ -1037,6 +1047,47 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                     Create
                   </button>
                 </div>
+                
+                {/* Expanded Content - Show when category is expanded */}
+                {expandedCategories.has(categoryKey) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-cinema-border">
+                    <div className="space-y-3">
+                      {category.fields.filter(field => enabledFields.has(field)).map(field => {
+                        const fieldSchema = schema.properties[field];
+                        if (!fieldSchema) return null;
+                        
+                        return (
+                          <div key={field} className="space-y-1">
+                            <label className="block text-sm font-medium text-light-text dark:text-cinema-text">
+                              {fieldSchema.title || field}
+                            </label>
+                            {fieldSchema.type === 'array' ? (
+                              <textarea
+                                value={Array.isArray(fieldValues[field]) ? fieldValues[field].join(', ') : fieldValues[field] || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  const arrayValue = value ? value.split(',').map(item => item.trim()).filter(item => item) : [];
+                                  setFieldValue(field, arrayValue);
+                                }}
+                                placeholder={fieldSchema.description}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-light-text dark:text-cinema-text text-sm"
+                                rows="2"
+                              />
+                            ) : (
+                              <input
+                                type="text"
+                                value={fieldValues[field] || ''}
+                                onChange={(e) => setFieldValue(field, e.target.value)}
+                                placeholder={fieldSchema.description}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-light-text dark:text-cinema-text text-sm"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
