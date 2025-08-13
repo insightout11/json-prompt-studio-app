@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/app",
-      "destination": "/react-app.html"
+      "destination": "/app.html"
     },
     {
       "source": "/app/(.*)",
-      "destination": "/react-app.html"
+      "destination": "/app.html"
     },
     {
       "source": "/(.*)",
