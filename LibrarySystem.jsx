@@ -30,6 +30,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
   const [selectedProject, setSelectedProject] = useState('global'); // 'global' or project ID
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [scenesSortBy, setScenesSortBy] = useState('date_desc'); // 'date_desc', 'date_asc', 'name_asc', 'name_desc'
+  const [scenesSearchTerm, setScenesSearchTerm] = useState('');
   const dropdownRef = useRef(null);
 
   // Sync selectedProject with currentProject from store
@@ -373,6 +375,37 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
     });
   };
 
+  // Sort and filter scenes function
+  const sortAndFilterScenes = (scenes) => {
+    let filtered = scenes;
+    
+    // Apply search filter
+    if (scenesSearchTerm.trim()) {
+      const searchLower = scenesSearchTerm.toLowerCase().trim();
+      filtered = scenes.filter(scene => 
+        scene.name.toLowerCase().includes(searchLower) ||
+        (scene.data?.scene && scene.data.scene.toLowerCase().includes(searchLower)) ||
+        (scene.data?.summary && scene.data.summary.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      switch (scenesSortBy) {
+        case 'date_desc':
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        case 'date_asc':
+          return new Date(a.timestamp) - new Date(b.timestamp);
+        case 'name_asc':
+          return a.name.localeCompare(b.name);
+        case 'name_desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return new Date(b.timestamp) - new Date(a.timestamp);
+      }
+    });
+  };
+
   // Handle project assignment
   const handleAssignToProject = (categoryKey, itemId, projectId) => {
     const assetType = categoryKey.slice(0, -1); // Remove 's' from end (characters -> character)
@@ -399,7 +432,12 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
     if (!category) return null;
     
     // Filter items based on selected project
-    const filteredData = filterItemsByProject(category.data);
+    let filteredData = filterItemsByProject(category.data);
+    
+    // Apply additional sorting/filtering for scenes
+    if (categoryKey === 'scenes') {
+      filteredData = sortAndFilterScenes(filteredData);
+    }
 
     if (categoryKey === 'scene-packs') {
       return (
@@ -444,8 +482,40 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredData.length === 0 ? (
+      <div className="space-y-4">
+        {/* Scenes-specific sorting and filtering controls */}
+        {categoryKey === 'scenes' && (
+          <div className="bg-gray-50 dark:bg-cinema-card rounded-lg p-3 border border-gray-200 dark:border-cinema-border">
+            <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+              {/* Search input */}
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search scenes..."
+                  value={scenesSearchTerm}
+                  onChange={(e) => setScenesSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              {/* Sort dropdown */}
+              <div className="flex-shrink-0">
+                <select
+                  value={scenesSortBy}
+                  onChange={(e) => setScenesSortBy(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-panel text-gray-900 dark:text-cinema-text focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="date_desc">Newest First</option>
+                  <option value="date_asc">Oldest First</option>
+                  <option value="name_asc">Name A-Z</option>
+                  <option value="name_desc">Name Z-A</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredData.length === 0 ? (
           <div className="col-span-full text-center text-gray-500 dark:text-cinema-text-muted py-8 text-sm">
             <div className="text-4xl mb-2">{category.icon}</div>
             {selectedProject === 'global' ? (
@@ -642,6 +712,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
             </div>
           ))
         )}
+        </div>
       </div>
     );
   };
@@ -664,15 +735,15 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-start justify-center z-[9998] p-4 pt-8" ref={dropdownRef}>
-      <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-6xl w-full max-h-[85vh] overflow-hidden border border-teal-200 dark:border-teal-700/50 mt-4">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-start justify-center z-[9998] safe-area modal-fullscreen lg:p-4 lg:pt-8" ref={dropdownRef}>
+      <div className="modal-responsive lg:modal-mobile bg-white dark:bg-cinema-panel lg:rounded-lg shadow-xl dark:shadow-glow-soft lg:max-w-6xl w-full lg:max-h-[85vh] max-h-screen overflow-hidden border border-teal-200 dark:border-teal-700/50 lg:mt-4">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border">
-          <div className="flex items-center space-x-3">
+        <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border">
+          <div className="flex items-center responsive-gap">
             <span className="text-2xl">📚</span>
             <div>
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-cinema-text">Library</h2>
+              <h2 className="fluid-text-lg font-semibold text-gray-800 dark:text-cinema-text">Library</h2>
               {selectedProject !== 'global' && currentProject && (
                 <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-cinema-text-muted">
                   <span>📁</span>
@@ -690,7 +761,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
           </div>
           <button
             onClick={() => onToggle?.(false)}
-            className="text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text"
+            className="mobile-minimal text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text rounded-full"
+            aria-label="Close library"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -699,7 +771,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-cinema-border px-6">
+        <div className="button-wrap-mobile lg:flex border-b border-gray-200 dark:border-cinema-border responsive-spacing">
           {/* Projects Tab - First */}
           <button
             onClick={() => setActiveTab('projects')}
@@ -727,7 +799,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
                 : 'text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text'
             }`}
           >
-            Actions
+            Quick Save
           </button>
           
           {/* Library Category Tabs */}
@@ -991,9 +1063,9 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Save Modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] safe-area modal-fullscreen lg:p-4">
+          <div className="modal-mobile lg:modal-responsive bg-white dark:bg-cinema-panel lg:rounded-lg responsive-spacing lg:w-96 w-full border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
+            <h3 className="fluid-text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text flex items-center responsive-gap">
               <span>{libraryCategories[saveType]?.icon}</span>
               <span>Save {libraryCategories[saveType]?.label.slice(0, -1)}</span>
             </h3>
@@ -1064,8 +1136,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Scene Pack Viewer Modal */}
       {showScenePackModal && selectedScenePack && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] safe-area modal-fullscreen lg:p-4">
+          <div className="modal-mobile lg:modal-responsive bg-white dark:bg-cinema-panel lg:rounded-lg shadow-xl dark:shadow-glow-soft lg:max-w-4xl w-full lg:max-h-[90vh] max-h-screen overflow-hidden border border-transparent dark:border-cinema-border">
             <div className="p-6 border-b border-gray-200 dark:border-cinema-border">
               <div className="flex items-center justify-between">
                 <div>
@@ -1136,8 +1208,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
 
       {/* Create Project Modal */}
       {showCreateProject && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-full max-w-md border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/50 flex items-center justify-center z-[9999] safe-area modal-fullscreen lg:p-4">
+          <div className="modal-mobile lg:modal-responsive bg-white dark:bg-cinema-panel lg:rounded-lg responsive-spacing w-full lg:max-w-md border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft">
             <h3 className="text-lg font-semibold mb-6 text-gray-900 dark:text-cinema-text flex items-center space-x-2">
               <span>✨</span>
               <span>Create New Project</span>

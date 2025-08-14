@@ -9,6 +9,13 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        '2xl': '1536px',  // Very large monitors
+        'xl': '1440px',   // Desktop baseline - preserve exactly
+        'lg': '1024px',   // Standard desktop/laptop
+        'md': '768px',    // iPad portrait/tablet
+        'sm': '640px',    // Default Tailwind mobile
+      },
       colors: {
         // Cinematic Dark Mode Palette
         cinema: {

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import usePromptStore from './store';
 
-const UniversalInput = ({ className = "", aiFeatures = null }) => {
+const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => {
   const [textInput, setTextInput] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState(null);
@@ -37,6 +37,26 @@ const UniversalInput = ({ className = "", aiFeatures = null }) => {
       setHasConverted(false);
     }
   }, [textInput, lastConvertedInput, hasConverted]);
+
+  // Reset all states when Clear All is triggered
+  useEffect(() => {
+    console.log('🎯 UniversalInput resetTrigger changed:', resetTrigger);
+    if (resetTrigger) {
+      console.log('✅ Resetting Convert button and text input state');
+      setHasConverted(false);
+      setLastConvertedInput('');
+      setEnhanceCount(0);
+      setTextInput('');
+      setUploadedImage(null);
+      setImagePreview(null);
+      setError(null);
+      
+      // Reset file input if it exists
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [resetTrigger]);
 
   const handleConvert = async () => {
     if (inputMode === 'text-to-json') {

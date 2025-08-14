@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import usePromptStore from './store';
 
-const CharacterManager = ({ value = [], onChange }) => {
+const CharacterManager = ({ value = [], onChange, isAdvancedMode = false }) => {
   const { savedCharacters, loadCharacter } = usePromptStore();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState(null);
@@ -36,6 +36,12 @@ const CharacterManager = ({ value = [], onChange }) => {
       appearance: {
         creature_type: 'fantasy'
       }
+    },
+    object: {
+      type: 'object',
+      appearance: {
+        object_type: 'car'
+      }
     }
   };
 
@@ -45,7 +51,8 @@ const CharacterManager = ({ value = [], onChange }) => {
     female: ['Sarah', 'Emma', 'Luna', 'Sophia', 'Isabella', 'Ava', 'Mia', 'Charlotte', 'Amelia', 'Harper'],
     neutral: ['Jordan', 'Taylor', 'Casey', 'Riley', 'Avery', 'Quinn', 'Sage', 'River', 'Rowan', 'Phoenix'],
     robot: ['ARIA', 'ZETA', 'NOVA', 'AXIOM', 'CIPHER', 'ECHO', 'FLUX', 'NEXUS', 'VERTEX', 'ZENITH'],
-    creature: ['Shadowmere', 'Thornweaver', 'Mistral', 'Emberstar', 'Whisperwind', 'Crystalfang', 'Moonshadow', 'Starfire']
+    creature: ['Shadowmere', 'Thornweaver', 'Mistral', 'Emberstar', 'Whisperwind', 'Crystalfang', 'Moonshadow', 'Starfire'],
+    object: ['Red Ferrari', 'Vintage Guitar', 'Golden Watch', 'Magic Staff', 'Crystal Orb', 'Ancient Sword', 'Silver Ring', 'Treasure Chest', 'Flying Carpet', 'Time Portal']
   };
 
   const roles = ['protagonist', 'antagonist', 'supporting', 'background', 'narrator'];
@@ -58,6 +65,7 @@ const CharacterManager = ({ value = [], onChange }) => {
     
     if (type === 'robot') nameCategory = 'robot';
     else if (type === 'creature') nameCategory = 'creature';
+    else if (type === 'object') nameCategory = 'object';
     else if (preset.appearance?.gender === 'male') nameCategory = 'male';
     else if (preset.appearance?.gender === 'female') nameCategory = 'female';
     
@@ -193,12 +201,14 @@ const CharacterManager = ({ value = [], onChange }) => {
           <div className="text-gray-600 dark:text-cinema-text-muted mb-4">
             No characters added yet
           </div>
-          <button
-            onClick={() => addCharacter(generateRandomCharacter())}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
-          >
-            Add Your First Character
-          </button>
+          {!isAdvancedMode && (
+            <button
+              onClick={() => addCharacter(generateRandomCharacter())}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+            >
+              Add Your First Character
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

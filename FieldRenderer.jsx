@@ -5,7 +5,7 @@ import DialogueBuilder from './DialogueBuilder';
 import CharacterManager from './CharacterManager';
 import SoundDesignBuilder from './SoundDesignBuilder';
 
-const FieldRenderer = ({ field }) => {
+const FieldRenderer = ({ field, isAdvancedMode }) => {
   const { 
     enabledFields, 
     fieldValues, 
@@ -260,6 +260,7 @@ const FieldRenderer = ({ field }) => {
           <CharacterManager
             value={fieldValue || []}
             onChange={(value) => updateFieldValue(field.key, value)}
+            isAdvancedMode={isAdvancedMode}
           />
         );
       

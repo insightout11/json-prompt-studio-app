@@ -691,67 +691,77 @@ const App = () => {
 
   // Main app render
   return (
-    <div className="min-h-screen bg-light-surface dark:bg-cinema-black transition-colors duration-300">
+    <div className="min-h-screen bg-light-surface dark:bg-cinema-black transition-colors duration-300 safe-area">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
         
         {/* HEADER SECTION */}
         <header className="header-base mb-4 sm:mb-6 bg-light-panel/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-light-border dark:border-cinema-border rounded-xl shadow-light-elevated dark:shadow-glow-soft hover:shadow-light-primary dark:hover:shadow-xl transition-all duration-300" role="banner">
-          {/* Desktop Header - 3 Section Grid */}
-          <div className="hidden md:grid md:grid-cols-12 md:gap-4 items-center py-3 px-4 transition-all duration-300">
-            
-            {/* LEFT SECTION - Project & Library Manager */}
-            <div data-tutorial="project-system" className="col-span-3 flex items-center space-x-2 lg:space-x-3">
-              <Logo size="small" />
-              <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
-            </div>
-
-            {/* CENTER SECTION - Tools Group */}
-            <div data-tutorial="quick-tools" className="col-span-6 flex items-center justify-center space-x-1.5 lg:space-x-2">
-              {/* Templates & Presets */}
-              <TemplateSelector />
+          {/* Desktop & Tablet Header - Single Responsive Layout */}
+          <div className="hidden md:block py-3 px-4 transition-all duration-300">
+            <div className="min-[1280px]:grid min-[1280px]:grid-cols-12 min-[1280px]:gap-4 max-[1279px]:flex max-[1279px]:flex-wrap max-[1279px]:justify-between max-[1279px]:gap-3 items-center">
               
-              {/* Viral Generator */}
-              <button
-                onClick={() => setShowViralGenerator(true)}
-                className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
-                title="Viral Video Generator"
-              >
-                <span className="mr-2">📈</span>
-                <span>Viral Gen</span>
-              </button>
-              
-              {/* Randomize Tools */}
-              <div className="relative overflow-visible" ref={randomizeDropdownRef}>
-                <button
-                  onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                  className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
-                  title="Randomize Elements"
-                >
-                  <span className="mr-2">🎲</span>
-                  <span>Randomize</span>
-                  <svg
-                    className={`ml-1 w-4 h-4 transition-transform duration-200 ${
-                      showRandomizeDropdown ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showRandomizeDropdown && renderRandomizeDropdown()}
+              {/* LEFT SECTION - Project & Library Manager */}
+              <div data-tutorial="project-system" className="min-[1280px]:col-span-3 flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
+                <Logo size="small" />
+                <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
               </div>
-            </div>
 
-            {/* RIGHT SECTION - View Controls */}
-            <div className="col-span-3 flex items-center justify-end space-x-2 lg:space-x-3">
-              <CinematicModeToggle />
+              {/* CENTER SECTION - CTA Group */}
+              <div data-tutorial="quick-tools" className="min-[1280px]:col-span-6 flex items-center flex-wrap gap-2 min-[1280px]:justify-center max-[1279px]:justify-center min-w-0">
+                {/* Templates & Presets - Full version for ≥1025px */}
+                <div className="min-[1025px]:block">
+                  <TemplateSelector />
+                </div>
+                
+                {/* Templates Icon-only for ≤1024px */}
+                <TemplateSelector className="max-[1024px]:block min-[1025px]:hidden" iconOnly={true} />
+                
+                {/* Viral Generator */}
+                <button
+                  onClick={() => setShowViralGenerator(true)}
+                  className="min-[1280px]:px-4 min-[1280px]:py-2 max-[1279px]:px-3 max-[1279px]:py-2 max-[1024px]:px-2 max-[1024px]:py-1.5 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
+                  title="Viral Video Generator"
+                >
+                  <span className="mr-2 max-[1024px]:mr-0">📈</span>
+                  <span className="min-[1280px]:inline max-[1024px]:hidden">Viral Gen</span>
+                  <span className="max-[1279px]:inline min-[1280px]:hidden min-[1025px]:inline max-[1024px]:hidden">Viral Gen</span>
+                </button>
+                
+                {/* Randomize Tools */}
+                <div className="relative overflow-visible" ref={randomizeDropdownRef}>
+                  <button
+                    onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
+                    className="min-[1280px]:px-4 min-[1280px]:py-2 max-[1279px]:px-3 max-[1279px]:py-2 max-[1024px]:px-2 max-[1024px]:py-1.5 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center whitespace-nowrap"
+                    title="Randomize Elements"
+                  >
+                    <span className="mr-2 max-[1024px]:mr-1">🎲</span>
+                    <span className="min-[1280px]:inline max-[1024px]:hidden">Randomize</span>
+                    <span className="max-[1279px]:inline min-[1280px]:hidden min-[1025px]:inline max-[1024px]:hidden">Randomize</span>
+                    <span className="min-[1025px]:hidden">Rnd</span>
+                    <svg
+                      className={`ml-1 min-[1280px]:w-4 min-[1280px]:h-4 max-[1279px]:w-4 max-[1279px]:h-4 max-[1024px]:w-3 max-[1024px]:h-3 max-[1024px]:ml-0.5 transition-transform duration-200 flex-shrink-0 ${
+                        showRandomizeDropdown ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {showRandomizeDropdown && renderRandomizeDropdown()}
+                </div>
+              </div>
+
+              {/* RIGHT SECTION - View Controls */}
+              <div className="min-[1280px]:col-span-3 flex items-center justify-end space-x-2 lg:space-x-3 flex-shrink-0">
+                <CinematicModeToggle />
+              </div>
             </div>
           </div>
 
           {/* Mobile Header - Stacked Layout */}
-          <div className="md:hidden space-y-3 py-3 px-4 transition-all duration-300">
+          <div className="md:hidden flex flex-col space-y-3 p-3 safe-area transition-all duration-300">
             {/* Top Row: Logo and View Controls */}
             <div className="flex items-center justify-between">
               <Logo size="small" width={100} height={40} />
@@ -759,28 +769,28 @@ const App = () => {
             </div>
             
             {/* Bottom Row: Project & Library Manager and Tools */}
-            <div data-tutorial="project-system" className="flex flex-wrap items-center gap-2">
+            <div data-tutorial="project-system" className="flex flex-wrap gap-2 justify-center max-w-full overflow-hidden">
               <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
               <TemplateSelector />
               <button
                 onClick={() => setShowViralGenerator(true)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-2 max-sm:py-1.5"
                 aria-label="Open viral video generator"
                 title="Viral Video Generator"
               >
-                <span className="mr-1">📈</span>
-                <span className="hidden xs:inline">Viral Gen</span>
-                <span className="xs:hidden">Viral</span>
+                <span className="mr-1 max-sm:mr-0.5">📈</span>
+                <span className="hidden sm:inline max-sm:text-[10px]">Viral Gen</span>
+                <span className="sm:hidden">Viral</span>
               </button>
               <button
                 onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                className="px-3 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center text-xs focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-2 max-sm:py-1.5"
                 aria-label="Open randomization tools"
                 title="Randomize Elements"
               >
-                <span className="mr-1">🎲</span>
-                <span className="hidden xs:inline">Randomize</span>
-                <span className="xs:hidden">Random</span>
+                <span className="mr-1 max-sm:mr-0.5">🎲</span>
+                <span className="hidden sm:inline">Random</span>
+                <span className="sm:hidden">Rnd</span>
               </button>
             </div>
           </div>
@@ -904,7 +914,7 @@ const App = () => {
                         {expandedCategories.has(category.id) && (
                           <div className="p-4 border-t border-gray-200 dark:border-cinema-border bg-white dark:bg-cinema-panel/50">
                             {category.fields.map((field) => (
-                              <FieldRenderer key={field.key} field={field} />
+                              <FieldRenderer key={field.key} field={field} isAdvancedMode={isAdvancedMode} />
                             ))}
                           </div>
                         )}
@@ -959,11 +969,11 @@ const App = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 max-lg:space-x-1">
                     <button
                       onClick={copyToClipboard}
                       disabled={copyLoading}
-                      className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1 ${
                         copySuccess 
                           ? 'bg-green-500 text-white' 
                           : copyLoading
@@ -973,27 +983,38 @@ const App = () => {
                       aria-label="Copy JSON to clipboard"
                     >
                       {copyLoading ? (
-                        <div className="flex items-center space-x-1">
-                          <div className="animate-spin h-3 w-3 border border-white border-t-transparent rounded-full"></div>
-                          <span>Copying...</span>
+                        <div className="flex items-center space-x-1 max-lg:space-x-0.5">
+                          <div className="animate-spin h-3 w-3 border border-white border-t-transparent rounded-full max-lg:h-2 max-lg:w-2"></div>
+                          <span className="max-lg:hidden">Copying...</span>
                         </div>
-                      ) : copySuccess ? 'Copied!' : 'Copy to Clipboard'}
+                      ) : copySuccess ? (
+                        <>
+                          <span className="max-lg:hidden">Copied!</span>
+                          <span className="lg:hidden">✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="max-lg:hidden">Copy to Clipboard</span>
+                          <span className="lg:hidden">Copy</span>
+                        </>
+                      )}
                     </button>
                     
                     <button
                       onClick={() => setShowSaveModal(true)}
                       disabled={saveLoading}
-                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
                       aria-label="Save current scene"
                     >
                       {saveLoading ? (
-                        <div className="flex items-center space-x-1">
-                          <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full"></div>
-                          <span>Saving...</span>
+                        <div className="flex items-center space-x-1 max-lg:space-x-0.5">
+                          <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full max-lg:h-2 max-lg:w-2"></div>
+                          <span className="max-lg:hidden">Saving...</span>
                         </div>
                       ) : (
                         <>
-                          💾 Save
+                          <span className="max-lg:hidden">💾 Save</span>
+                          <span className="lg:hidden">💾</span>
                         </>
                       )}
                     </button>
@@ -1008,25 +1029,31 @@ const App = () => {
                         }
                       }}
                       disabled={undoStack.length === 0}
-                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400 max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
                       aria-label="Undo last action"
                       title="Undo last action"
                     >
-                      ↶ Undo
+                      <span className="max-lg:hidden">↶ Undo</span>
+                      <span className="lg:hidden">↶</span>
                     </button>
                     
                     <button
                       onClick={handleClearAllClick}
                       disabled={clearLoading}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
                       aria-label="Clear all scene data"
                     >
                       {clearLoading ? (
-                        <div className="flex items-center space-x-1">
-                          <div className="animate-spin h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
-                          <span>Clearing...</span>
+                        <div className="flex items-center space-x-1 max-lg:space-x-0.5">
+                          <div className="animate-spin h-3 w-3 border border-red-600 border-t-transparent rounded-full max-lg:h-2 max-lg:w-2"></div>
+                          <span className="max-lg:hidden">Clearing...</span>
                         </div>
-                      ) : 'Clear All'}
+                      ) : (
+                        <>
+                          <span className="max-lg:hidden">Clear All</span>
+                          <span className="lg:hidden">Clear</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -1037,7 +1064,8 @@ const App = () => {
               
               {/* UNIVERSAL INPUT + AI FEATURES */}
               <div data-tutorial="text-input" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
-                <UniversalInput 
+                <UniversalInput
+                  resetTrigger={resetSceneBuilderTrigger} 
                   aiFeatures={
                     <div data-tutorial="ai-tools">
                       <ProFeaturesHub 

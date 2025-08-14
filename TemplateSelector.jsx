@@ -60,7 +60,7 @@ const TAB_LABELS = {
   preset_audio: '🔊 Audio Presets'
 };
 
-const TemplateSelector = () => {
+const TemplateSelector = ({ className = "", iconOnly = false }) => {
   const { applyTemplate, getTemplatePreview, clearAll, setFieldValue, applyCharacterPresetData, applyScenePresetData } = usePromptStore();
   const [showModal, setShowModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -237,12 +237,21 @@ const TemplateSelector = () => {
       {/* Template Trigger Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
+        className={`px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center ${
+          iconOnly ? 'px-3 py-2 justify-center' : ''
+        } ${className}`}
+        title={iconOnly ? "Templates & Presets" : undefined}
       >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5M3 7h18M3 17h18" />
-        </svg>
-        <span>Templates & Presets</span>
+        {iconOnly ? (
+          <span className="text-lg">📋</span>
+        ) : (
+          <>
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5M3 7h18M3 17h18" />
+            </svg>
+            <span>Templates & Presets</span>
+          </>
+        )}
       </button>
 
       {/* Template Selection Modal */}

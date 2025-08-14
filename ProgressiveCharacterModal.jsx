@@ -51,6 +51,26 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
     setShowRelatedModal(false);
   };
 
+  // Helper function to safely render complex objects
+  const renderComplexField = (field) => {
+    if (typeof field === 'string') {
+      return field;
+    } else if (typeof field === 'object' && field !== null) {
+      // Convert object to readable text
+      return Object.entries(field)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            // Handle nested objects
+            const nestedValues = Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(', ');
+            return `${key}: ${nestedValues}`;
+          }
+          return `${key}: ${value}`;
+        })
+        .join(' | ');
+    }
+    return String(field);
+  };
+
   const handleInitialSubmit = async () => {
     if (!characterDescription.trim()) {
       setError('Please provide a character description to get started');
@@ -423,28 +443,28 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
                   {finalCharacter.appearance && (
                     <div>
                       <strong className="text-green-700 dark:text-green-400">Appearance:</strong>
-                      <p className="text-green-600 dark:text-green-300 mt-1">{finalCharacter.appearance}</p>
+                      <p className="text-green-600 dark:text-green-300 mt-1">{renderComplexField(finalCharacter.appearance)}</p>
                     </div>
                   )}
                   
                   {finalCharacter.personality && (
                     <div>
                       <strong className="text-green-700 dark:text-green-400">Personality:</strong>
-                      <p className="text-green-600 dark:text-green-300 mt-1">{finalCharacter.personality}</p>
+                      <p className="text-green-600 dark:text-green-300 mt-1">{renderComplexField(finalCharacter.personality)}</p>
                     </div>
                   )}
                   
                   {finalCharacter.background && (
                     <div>
                       <strong className="text-green-700 dark:text-green-400">Background:</strong>
-                      <p className="text-green-600 dark:text-green-300 mt-1">{finalCharacter.background}</p>
+                      <p className="text-green-600 dark:text-green-300 mt-1">{renderComplexField(finalCharacter.background)}</p>
                     </div>
                   )}
                   
                   {finalCharacter.uniqueTraits && (
                     <div>
                       <strong className="text-green-700 dark:text-green-400">Unique Traits:</strong>
-                      <p className="text-green-600 dark:text-green-300 mt-1">{finalCharacter.uniqueTraits}</p>
+                      <p className="text-green-600 dark:text-green-300 mt-1">{renderComplexField(finalCharacter.uniqueTraits)}</p>
                     </div>
                   )}
                 </div>

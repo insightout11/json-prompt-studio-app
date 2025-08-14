@@ -751,21 +751,21 @@ Return only the enhanced JSON object, properly formatted.`;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[3000] p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[3000] safe-area modal-fullscreen lg:p-4">
       <div 
         ref={modalRef}
-        className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-7xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border"
+        className="modal-mobile lg:modal-responsive bg-white dark:bg-cinema-panel lg:rounded-lg shadow-xl dark:shadow-glow-soft lg:max-w-7xl w-full lg:max-h-[90vh] max-h-screen overflow-hidden border border-transparent dark:border-cinema-border"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <div className="flex items-center space-x-3">
+        <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          <div className="flex items-center responsive-gap">
             <span className="text-3xl">🔥</span>
             <div>
-              <h2 className="text-2xl font-bold">Viral Video Generator</h2>
-              <p className="text-sm text-purple-100">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
+              <h2 className="fluid-text-lg font-bold">Viral Video Generator</h2>
+              <p className="fluid-text-xs text-purple-100">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="button-wrap-mobile lg:flex lg:items-center responsive-gap">
             {/* AI Enhancement Toggle */}
             <div className="flex items-center space-x-2">
               <span className="text-xs text-purple-100">AI Enhance</span>
@@ -796,7 +796,8 @@ Return only the enhanced JSON object, properly formatted.`;
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-purple-200 transition-colors"
+              className="mobile-minimal text-white hover:text-purple-200 transition-colors rounded-full"
+              aria-label="Close viral generator"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -808,7 +809,7 @@ Return only the enhanced JSON object, properly formatted.`;
         <div className="flex flex-row h-[75vh]">
           {/* Left Panel - Format Selection */}
           <div className="w-1/3 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
-            <div className="p-4">
+            <div className="responsive-spacing">
               <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-4">🎬 Viral Formats</h3>
               
               {/* Format List */}
@@ -817,7 +818,7 @@ Return only the enhanced JSON object, properly formatted.`;
                   <button
                     key={formatId}
                     onClick={() => handleFormatSelect(formatId)}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${
+                    className={`w-full mobile-minimal rounded-lg border transition-all text-left ${
                       selectedFormat === formatId
                         ? 'border-purple-500 bg-purple-50 dark:border-purple-500 dark:bg-purple-900/20'
                         : 'border-gray-200 dark:border-cinema-border hover:border-purple-300 dark:hover:border-purple-500/50 bg-white dark:bg-cinema-card'
@@ -842,7 +843,7 @@ Return only the enhanced JSON object, properly formatted.`;
 
           {/* Middle Panel - Input Fields */}
           <div className="w-1/3 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
-            <div className="p-4">
+            <div className="responsive-spacing">
               {selectedFormat ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
@@ -980,7 +981,7 @@ Return only the enhanced JSON object, properly formatted.`;
 
           {/* Right Panel - JSON Preview */}
           <div className="w-1/3 overflow-y-auto bg-gray-50 dark:bg-cinema-card">
-            <div className="p-4">
+            <div className="responsive-spacing">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 dark:text-cinema-text">
                   📄 JSON Output

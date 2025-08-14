@@ -770,11 +770,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
   if (compact) {
     return (
       <>
-        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-4 lg:p-6 border border-light-border dark:border-cinema-border transition-all duration-300 mb-4">
+        <div className="bg-light-panel dark:bg-cinema-panel rounded-lg shadow-light-elevated dark:shadow-glow-soft p-4 lg:p-6 xl:p-6 border border-light-border dark:border-cinema-border transition-all duration-300 mb-4">
           {/* Header - Matching JSON Output Style */}
           <div className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
-            <div className="flex items-center space-x-2 lg:space-x-4">
-              <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
+            <div className="flex items-center space-x-2 lg:space-x-4 xl:space-x-4">
+              <h2 className="text-base lg:text-lg xl:text-lg font-semibold text-gray-800 dark:text-cinema-text">
                 Scene Builder
               </h2>
               <div className="text-xs text-gray-500 dark:text-cinema-text-muted hidden sm:block">
@@ -789,9 +789,9 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
               const completion = getCategoryCompletion(categoryKey);
               
               return (
-                <div key={categoryKey} className="bg-light-card dark:bg-cinema-card rounded-lg shadow-light-card dark:shadow-glow-soft p-4 border border-light-border dark:border-cinema-border transition-all duration-300">
+                <div key={categoryKey} className="bg-light-card dark:bg-cinema-card rounded-lg shadow-light-card dark:shadow-glow-soft p-3 sm:p-4 lg:p-4 xl:p-4 border border-light-border dark:border-cinema-border transition-all duration-300">
                   {/* Full-width horizontal layout with proper alignment */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 xl:space-x-3">
                     {/* Left: Category Info - Fixed width */}
                     <div className="flex items-center space-x-2 w-28 flex-shrink-0">
                       <span className="text-base">{category.icon}</span>
@@ -821,7 +821,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         value={categoryInputs[categoryKey] || ''}
                         onChange={(e) => setCategoryInputs(prev => ({ ...prev, [categoryKey]: e.target.value }))}
                         placeholder={placeholderText[categoryKey] || `Describe your ${category.label.toLowerCase()}...`}
-                        className="w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none"
+                        className="scene-builder w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none max-lg:px-2 max-lg:py-2 max-lg:text-xs max-md:px-2 max-md:py-1.5 max-md:text-xs"
                         style={{ height: '3.5rem' }}
                         rows={1}
                         onKeyPress={(e) => {
@@ -835,16 +835,17 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                     </div>
                     
                     {/* Right: Action Button Groups with Separation */}
-                    <div className="flex items-center space-x-6 flex-shrink-0">
+                    <div className="flex items-center space-x-6 xl:space-x-6 flex-shrink-0 max-lg:space-x-3 max-md:space-x-2">
                       {/* Primary Actions Group */}
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 xl:space-x-3 max-lg:space-x-2 max-md:space-x-1">
                       <button
                         onClick={() => handleCategorySubmit(categoryKey)}
                         disabled={!categoryInputs[categoryKey]?.trim()}
-                        className="px-2 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200"
+                        className="px-2 py-2 xl:px-2 xl:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
                         title="Add this element to your prompt"
                       >
-                        Submit
+                        <span className="max-md:hidden">Submit</span>
+                        <span className="md:hidden">✓</span>
                       </button>
                       
                       <LoadingButton
@@ -860,7 +861,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           // Enable if there's input OR if there's existing content to enhance
                           return !hasInput && !hasExistingContent;
                         })()}
-                        className={`relative px-2 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200 ${
+                        className={`relative px-2 py-2 xl:px-2 xl:py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
                           expandSparkles.has(categoryKey) ? 'expand-sparkle' : ''
                         }`}
                         title={(() => {
@@ -883,13 +884,24 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           );
                           const count = enhanceButtonCounts[categoryKey];
                           const buttonText = hasExistingContent ? "Enhance" : "Expand";
-                          return count > 0 ? `${buttonText} (${count})` : buttonText;
+                          const shortText = hasExistingContent ? "Enh" : "Exp";
+                          return count > 0 ? (
+                            <>
+                              <span className="max-md:hidden">{buttonText} ({count})</span>
+                              <span className="md:hidden">{shortText}({count})</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="max-md:hidden">{buttonText}</span>
+                              <span className="md:hidden">{shortText}</span>
+                            </>
+                          );
                         })()}
                       </LoadingButton>
                       </div>
                       
                       {/* Secondary Actions Group */}
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-3 xl:space-x-3 max-lg:space-x-2 max-md:space-x-1">
                       <LoadingButton
                         onClick={() => handleLoad(categoryKey)}
                         loading={isLoading(`load-${categoryKey}`)}
@@ -900,7 +912,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className={`px-2 py-2 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none ${
+                        className={`px-2 py-2 xl:px-2 xl:py-2 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
                           loadGlowEffects.has(categoryKey) ? 'load-activation-glow' : ''
                         }`}
                         title={(() => {
@@ -925,7 +937,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         })()}
                         loadingText="..."
                       >
-                        Load
+                        <span className="max-md:hidden">Load</span>
+                        <span className="md:hidden">L</span>
                       </LoadingButton>
                       
                       <button
@@ -934,10 +947,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-2 py-2 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded font-medium transition-all duration-200"
+                        className="px-2 py-2 xl:px-2 xl:py-2 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
                         title="Insert a preset idea"
                       >
-                        Template
+                        <span className="max-md:hidden">Template</span>
+                        <span className="md:hidden">T</span>
                       </button>
                       </div>
                     </div>
@@ -1020,7 +1034,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       (categoryKey === 'style' && savedStyles.length === 0) ||
                       (categoryKey === 'audio' && savedAudio.length === 0)
                     }
-                    className="flex-1 px-2 py-2 md:py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
+                    className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors"
                     title={
                       (categoryKey === 'characters' && savedCharacters.length === 0) ? 
                       'No saved characters. Create and save characters first using the Library System.' :
@@ -1036,13 +1050,13 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                       setShowTemplateModal(true);
                     }}
                     disabled={Object.keys(category.templates).length === 0}
-                    className="flex-1 px-2 py-2 md:py-1.5 bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
+                    className="flex-1 px-3 py-2 bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Template
                   </button>
                   <button
                     onClick={() => handleCreate(categoryKey)}
-                    className="flex-1 px-2 py-2 md:py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors flex items-center justify-center"
+                    className="flex-1 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors flex items-center justify-center"
                   >
                     Create
                   </button>
