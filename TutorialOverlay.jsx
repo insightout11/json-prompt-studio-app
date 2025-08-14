@@ -13,7 +13,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     hasOpenedProjects: false
   });
   const overlayRef = useRef(null);
-  const { setFieldValue } = usePromptStore();
+  const { setFieldValue, clearAll } = usePromptStore();
 
   // Tutorial steps configuration with new user journey flow
   const tutorialSteps = [
@@ -45,10 +45,10 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       title: '✨ Fastest Start — Text to JSON',
       content: () => (
         <div>
-          <p className="mb-3">Describe your scene in plain English. Watch AI create structured prompts instantly.</p>
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-3 mb-3">
-            <p className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">💡 Try this example:</p>
-            <p className="text-sm text-green-700 dark:text-green-200 italic">"A dragon sleeping on a crystal mountain under the stars"</p>
+          <p className="mb-2">Describe your scene in plain English. Watch AI create structured prompts instantly.</p>
+          <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-2 mb-2">
+            <p className="text-xs font-medium text-green-800 dark:text-green-300 mb-1">💡 Try this example:</p>
+            <p className="text-xs text-green-700 dark:text-green-200 italic">"A dragon sleeping on a crystal mountain under the stars"</p>
           </div>
           {!tutorialState.hasTriedExample && (
             <button
@@ -147,30 +147,12 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
             </button>
           )}
           {tutorialState.hasTriedExample && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-              <div className="text-green-600 dark:text-green-400 text-sm font-medium mb-2">
-                ✓ Perfect! Watch the text-to-JSON conversion:
-              </div>
-              <div className="text-xs text-blue-800 dark:text-blue-200 space-y-2">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                    <span>Text filled in input area</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                    <span>Convert button clicked → <strong>JSON fields populate with structured data</strong> 👀</span>
-                  </div>
-                </div>
-                <p className="pt-1 border-t border-blue-200 dark:border-blue-700">✨ <strong>Perfect!</strong> The next step will show you the JSON output and demonstrate the enhancement workflow!</p>
-              </div>
+            <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-2 border border-green-200 dark:border-green-700">
+              <p className="text-sm text-green-800 dark:text-green-300">
+                ✅ <strong>Perfect!</strong> Text converted to structured JSON. The button now shows "Enhance" for richer descriptions.
+              </p>
             </div>
           )}
-          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2 mt-2 border border-amber-200 dark:border-amber-700">
-            <p className="text-xs text-amber-800 dark:text-amber-200">
-              🎯 <strong>KEY FEATURE:</strong> The Convert button intelligently transforms into Enhance after first use, enabling progressive enhancement workflow!
-            </p>
-          </div>
         </div>
       ),
       target: '[data-tutorial="text-input"]',
@@ -182,20 +164,13 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       title: '📊 Watch Your JSON Populate!',
       content: () => (
         <div>
-          <p className="mb-3">Perfect! Now look at how the JSON fields populated with structured data from your description.</p>
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 mb-3">
-            <p className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">✅ What just happened:</p>
-            <ul className="text-sm text-green-700 dark:text-green-200 space-y-1">
-              <li>• AI analyzed your scene description</li>
-              <li>• Extracted key elements (character, setting, mood, etc.)</li>
-              <li>• Populated structured JSON fields automatically</li>
-              <li>• Created a foundation you can now enhance</li>
-            </ul>
+          <p className="mb-2">Perfect! See how JSON fields populated with structured data from your description.</p>
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-2 mb-2">
+            <p className="text-xs font-medium text-green-800 dark:text-green-300 mb-1">✅ AI analyzed → extracted elements → populated JSON → ready to enhance</p>
           </div>
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 mb-3">
-            <p className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">🎨 Try Enhancement:</p>
-            <p className="text-sm text-purple-700 dark:text-purple-200">
-              The Convert button transformed into <strong>Enhance</strong> - click it to add richer, more detailed descriptions to existing fields!
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-2 mb-2">
+            <p className="text-xs text-purple-700 dark:text-purple-200">
+              🎨 Convert became <strong>Enhance</strong> - click it for richer, more detailed descriptions!
             </p>
           </div>
           <button
@@ -256,45 +231,139 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
           >
             🎨 Try Enhance Now
           </button>
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mt-3 border border-blue-200 dark:border-blue-700">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              💡 <strong>Progressive Enhancement:</strong> This is the core workflow - start simple, then enhance with more detail as needed!
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 mt-2 border border-blue-200 dark:border-blue-700">
+            <p className="text-xs text-blue-800 dark:text-blue-200">
+              💡 <strong>Core workflow:</strong> Start simple, then enhance with more detail!
             </p>
           </div>
         </div>
       ),
       target: '[data-tutorial="json-output"]',
-      position: 'right',
+      position: 'top',
       disableScroll: false
     },
     {
       id: 'quick-tools',
-      title: '🧠 Quick Inspiration Tools',
+      title: '🔧 Essential JSON Tools',
       content: () => (
         <div>
-          <p className="mb-3">Need instant inspiration? These tools jumpstart your creativity:</p>
-          <div className="space-y-2 mb-3">
+          <p className="mb-2">Try the essential tools for managing your JSON:</p>
+          <div className="space-y-1 mb-2">
             <div className="flex items-center space-x-2 text-sm">
               <span className="w-6">📋</span>
-              <span><strong>Templates & Presets</strong> — Genre-based starting points (horror, romance, etc.)</span>
+              <span><strong>Copy to Clipboard</strong> — Export your JSON instantly for use anywhere</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🔥</span>
-              <span><strong>Viral</strong> — Trending formats optimized for social media</span>
+              <span className="w-6">🗑️</span>
+              <span><strong>Clear All</strong> — Start fresh with one click</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🎲</span>
-              <span><strong>Randomize</strong> — AI surprises (perfect for breaking creative blocks)</span>
+              <span className="w-6">💾</span>
+              <span><strong>Save Scene</strong> — Store your creations for reuse</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">↶</span>
+              <span><strong>Undo</strong> — Reverse any changes safely</span>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              💡 <strong>Pro Tip:</strong> Click any of these buttons in the header to access these powerful creativity tools when you're ready to use them.
-            </p>
+          
+          {/* Interactive Demo Buttons */}
+          <div className="space-y-2 mb-2">
+            {!tutorialState.hasCopiedJSON && (
+              <button
+                onClick={() => {
+                  // Find and click the Copy to Clipboard button
+                  const copyButton = document.querySelector('[aria-label="Copy JSON to clipboard"]') ||
+                                   Array.from(document.querySelectorAll('button')).find(btn => 
+                                     (btn.textContent.includes('Copy to Clipboard') || btn.textContent.includes('Copy')) && !btn.disabled
+                                   );
+                  
+                  if (copyButton) {
+                    copyButton.click();
+                    
+                    // Show copy success indicator
+                    setTimeout(() => {
+                      const indicator = document.createElement('div');
+                      indicator.className = 'fixed z-[10002] bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg animate-bounce';
+                      indicator.textContent = '📋 JSON copied to clipboard!';
+                      indicator.style.top = '20px';
+                      indicator.style.right = '20px';
+                      document.body.appendChild(indicator);
+                      
+                      setTimeout(() => {
+                        if (document.body.contains(indicator)) {
+                          document.body.removeChild(indicator);
+                        }
+                      }, 3000);
+                    }, 500);
+                    
+                    setTutorialState(prev => ({ ...prev, hasCopiedJSON: true }));
+                  }
+                }}
+                className="w-full px-4 py-2 text-sm bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-lg transition-all duration-200 font-medium"
+              >
+                📋 Try Copy to Clipboard
+              </button>
+            )}
+            
+            {!tutorialState.hasClearedAll && (
+              <button
+                onClick={() => {
+                  // Directly call clearAll function to bypass confirmation modal
+                  if (typeof clearAll === 'function') {
+                    clearAll();
+                  } else {
+                    // Fallback: find and click the Clear All button
+                    const clearButton = document.querySelector('[aria-label="Clear all scene data"]') ||
+                                      Array.from(document.querySelectorAll('button')).find(btn => 
+                                        (btn.textContent.includes('Clear All') || btn.textContent.includes('Clear')) && !btn.disabled
+                                      );
+                    if (clearButton) clearButton.click();
+                  }
+                  
+                  // Show clear success indicator
+                  setTimeout(() => {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'fixed z-[10002] bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg animate-pulse';
+                    indicator.textContent = '🗑️ All fields cleared! Ready for new content.';
+                    indicator.style.top = '20px';
+                    indicator.style.right = '20px';
+                    document.body.appendChild(indicator);
+                    
+                    setTimeout(() => {
+                      if (document.body.contains(indicator)) {
+                        document.body.removeChild(indicator);
+                      }
+                    }, 3000);
+                  }, 500);
+                  
+                  setTutorialState(prev => ({ ...prev, hasClearedAll: true }));
+                }}
+                className="w-full px-4 py-2 text-sm bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-lg transition-all duration-200 font-medium"
+              >
+                🗑️ Try Clear All
+              </button>
+            )}
           </div>
+          
+          {(tutorialState.hasCopiedJSON || tutorialState.hasClearedAll) && (
+            <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-2 border border-green-200 dark:border-green-700">
+              <p className="text-xs text-green-800 dark:text-green-300">
+                ✅ <strong>Great!</strong> You've learned essential JSON management. These header tools give you complete control.
+              </p>
+            </div>
+          )}
+          
+          {!tutorialState.hasCopiedJSON && !tutorialState.hasClearedAll && (
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-2">
+              <p className="text-xs text-blue-800 dark:text-blue-300">
+                💡 <strong>Try the buttons above!</strong> Experience Copy and Clear All features.
+              </p>
+            </div>
+          )}
         </div>
       ),
-      target: '[data-tutorial="quick-tools"]',
+      target: '[data-tutorial="advanced-features-full"]',
       position: 'bottom'
     },
     {
@@ -415,34 +484,38 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       title: '🤖 AI Tools Hub',
       content: () => (
         <div>
-          <p className="mb-3">Supercharge your creativity with compact AI tools located right below the text input:</p>
-          <div className="space-y-2 mb-3">
+          <p className="mb-2">Supercharge your creativity with AI tools below the text input:</p>
+          <div className="space-y-1 mb-2">
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🎭</span>
-              <span><strong>Character Engine</strong> — Generate detailed personas</span>
+              <span className="w-5">🎭</span>
+              <span><strong>Character Builder</strong> — Generate detailed personas and profiles</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🌍</span>
-              <span><strong>World Builder</strong> — Create immersive environments</span>
+              <span className="w-5">🌍</span>
+              <span><strong>World Builder</strong> — Create immersive environments and settings</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🎬</span>
-              <span><strong>Storyboard Builder</strong> — Break scenes into sequences</span>
+              <span className="w-5">🎨</span>
+              <span><strong>Style Builder</strong> — Generate art styles and visual aesthetics</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">✨</span>
+              <span className="w-5">🎬</span>
+              <span><strong>Storyboard Builder</strong> — Break scenes into camera sequences</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-5">✨</span>
               <span><strong>Scene Extender</strong> — Generate multiple scene variations</span>
             </div>
           </div>
-          <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-3 border border-pink-200 dark:border-pink-700">
-            <p className="text-sm text-pink-800 dark:text-pink-200">
-              💡 <strong>Location:</strong> These AI tools appear as compact buttons right below the Convert/Enhance button in the text input area.
+          <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-2 border border-pink-200 dark:border-pink-700">
+            <p className="text-xs text-pink-800 dark:text-pink-200">
+              💡 These compact buttons appear below Convert/Enhance in the text area.
             </p>
           </div>
         </div>
       ),
       target: '[data-tutorial="ai-tools"]',
-      position: 'left',
+      position: 'right',
       disableScroll: true
     },
     {
@@ -477,32 +550,36 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     },
     {
       id: 'advanced-features',
-      title: '⚙️ Advanced Features',
+      title: '🧠 Creative Inspiration Hub',
       content: () => (
         <div>
-          <p className="mb-3">Professional tools for advanced users:</p>
+          <p className="mb-3">Need instant inspiration? These tools jumpstart your creativity:</p>
           <div className="space-y-2 mb-3">
             <div className="flex items-center space-x-2 text-sm">
               <span className="w-6">📋</span>
-              <span><strong>Live JSON preview</strong> with copy/export</span>
+              <span><strong>Templates & Presets</strong> — Genre-based starting points (horror, romance, sci-fi)</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">🔥</span>
+              <span><strong>Viral</strong> — Trending formats optimized for social media success</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">🎲</span>
+              <span><strong>Randomize</strong> — AI surprises perfect for breaking creative blocks</span>
             </div>
             <div className="flex items-center space-x-2 text-sm">
               <span className="w-6">📐</span>
-              <span><strong>Aspect ratio controls</strong> (16:9, 9:16, etc.)</span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <span className="w-6">🔧</span>
-              <span><strong>Direct JSON editing</strong> in Advanced Mode</span>
+              <span><strong>Aspect Ratio Controls</strong> — Optimize for any platform (Instagram, TikTok, etc.)</span>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg p-3">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              💡 <strong>Pro Tip:</strong> Use the aspect ratio dropdown to optimize your prompts for different platforms and formats.
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-3">
+            <p className="text-sm text-amber-800 dark:text-amber-300">
+              💡 <strong>Pro Tip:</strong> Click any of these header buttons when you need fresh ideas or want to optimize your content for specific platforms!
             </p>
           </div>
         </div>
       ),
-      target: '[data-tutorial="advanced-controls"]',
+      target: '[data-tutorial="quick-tools"]',
       position: 'bottom'
     },
     {
@@ -576,49 +653,87 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     }
 
     const tooltipWidth = 400; // Slightly wider for new content
-    const tooltipHeight = 280; // Taller for more detailed content
+    
+    // Dynamic height calculation based on content and buttons
+    const baseHeight = 280;
+    const buttonAreaHeight = 60; // Reserve space for navigation buttons
+    const tooltipHeight = baseHeight + buttonAreaHeight;
+    
     const padding = 20;
     const targetPadding = 60; // Increased padding from target to avoid covering it
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // For large target elements (height > 300px), position relative to top instead of center
-    // Also adjust for text-input and ai-tools to position higher
+    // Extra padding to ensure buttons are always visible
+    const buttonSafetyPadding = 80;
+    
+    // Define step type checks first
     const isLargeTarget = targetPos.height > 300;
     const isTextInput = stepData && stepData.id === 'text-input';
     const isAiTools = stepData && stepData.id === 'ai-tools';
+    const isJsonOutput = stepData && stepData.id === 'json-output';
+    
+    // Enhanced spacing for AI tools to ensure complete clearance
+    const aiToolsTargetPadding = isAiTools ? 120 : targetPadding;
+    const aiToolsButtonSafety = isAiTools ? 120 : buttonSafetyPadding;
+    
     const targetCenterY = isLargeTarget ? targetPos.top + 50 : 
                          isTextInput ? targetPos.top - 50 : // Position much higher for text input
-                         isAiTools ? targetPos.top - 80 : // Position much higher for AI tools to avoid cutoff
+                         isAiTools ? 150 : // EMERGENCY: Force AI tools tooltip to TOP of viewport
+                         isJsonOutput ? Math.max(targetPos.top - 100, 100) : // Special positioning for JSON output step
                          targetPos.top + (targetPos.height / 2);
     
     // Calculate positions for each direction with extra padding to avoid covering target
     const positions = {
       right: {
         top: targetCenterY - (tooltipHeight / 2),
-        left: targetPos.right + targetPadding,
+        left: targetPos.right + aiToolsTargetPadding,
       },
       left: {
         top: targetCenterY - (tooltipHeight / 2),
-        left: targetPos.left - tooltipWidth - targetPadding,
+        left: targetPos.left - tooltipWidth - (isTextInput ? aiToolsTargetPadding * 2 : aiToolsTargetPadding),
       },
       bottom: {
-        top: targetPos.bottom + targetPadding,
+        top: targetPos.bottom + aiToolsTargetPadding,
         left: targetPos.left + (targetPos.width / 2) - (tooltipWidth / 2),
       },
       top: {
-        top: targetPos.top - tooltipHeight - targetPadding,
+        top: targetPos.top - tooltipHeight - aiToolsTargetPadding,
         left: targetPos.left + (targetPos.width / 2) - (tooltipWidth / 2),
       }
     };
     
-    // Check if position fits in viewport
+    // Check if position fits in viewport with button safety area
     const fitsInViewport = (pos) => {
+      const tooltipBottom = pos.top + tooltipHeight;
+      const tooltipRight = pos.left + tooltipWidth;
+      
+      // Ensure tooltip and especially buttons are fully visible
       return pos.top >= padding && 
-             pos.top + tooltipHeight <= viewportHeight - padding &&
+             tooltipBottom <= viewportHeight - aiToolsButtonSafety &&
              pos.left >= padding && 
-             pos.left + tooltipWidth <= viewportWidth - padding;
+             tooltipRight <= viewportWidth - padding;
     };
+    
+    // NUCLEAR OPTION for AI Tools - Force DEAD CENTER like welcome step
+    if (isAiTools) {
+      // Use exact same positioning as welcome/completion steps - GUARANTEED to work
+      return {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      };
+    }
+    
+    // Special handling for json-output step - prefer top positioning to avoid cutoff
+    if (isJsonOutput) {
+      const jsonFallbackOrder = ['top', 'left', 'bottom', 'right'];
+      for (const position of jsonFallbackOrder) {
+        if (positions[position] && fitsInViewport(positions[position])) {
+          return positions[position];
+        }
+      }
+    }
     
     // Try preferred position first
     if (positions[preferredPosition] && fitsInViewport(positions[preferredPosition])) {
@@ -640,10 +755,10 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       }
     }
     
-    // If nothing fits, force position within viewport bounds
-    const forcedPosition = positions[preferredPosition] || positions.top;
+    // If nothing fits, force position within viewport bounds with button safety
+    const forcedPosition = positions[preferredPosition] || positions.right;
     return {
-      top: Math.max(padding, Math.min(forcedPosition.top, viewportHeight - tooltipHeight - padding)),
+      top: Math.max(padding, Math.min(forcedPosition.top, viewportHeight - tooltipHeight - aiToolsButtonSafety)),
       left: Math.max(padding, Math.min(forcedPosition.left, viewportWidth - tooltipWidth - padding))
     };
   };
@@ -653,35 +768,52 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     if (!targetPos && !tooltipPos) return;
     
     const padding = 80; // Increased padding for better visibility
+    const buttonSafetyPadding = 100; // Extra padding to ensure buttons are visible
+    const aiToolsButtonSafety = 120; // Enhanced safety for AI tools
     const viewportHeight = window.innerHeight;
     let scrollTarget = null;
     
-    if (targetPos) {
-      // Scroll to target element with better center calculation
+    if (tooltipPos && typeof tooltipPos.top === 'number') {
+      // Prioritize tooltip visibility with button safety area
+      const tooltipTop = tooltipPos.top + window.pageYOffset;
+      const tooltipHeight = 340; // Updated to match our dynamic height calculation
+      const tooltipBottom = tooltipTop + tooltipHeight;
+      const viewportTop = window.pageYOffset;
+      const viewportBottom = viewportTop + viewportHeight;
+      
+      // Use enhanced button safety for AI tools step
+      const currentButtonSafety = currentStep === 6 ? aiToolsButtonSafety : buttonSafetyPadding; // Step 6 is AI Tools Hub
+      
+      // Special scroll handling for AI tools - ensure both tooltip (high) and AI tools (lower) are visible
+      if (currentStep === 6) { // AI Tools Hub step
+        // AI tools tooltip is positioned high, ensure page is scrolled so both tooltip and tools are visible
+        const minScrollForTooltip = Math.max(0, tooltipTop - 100); // Keep tooltip near top
+        const maxScrollForTarget = targetPos ? Math.max(0, (targetPos.top + window.pageYOffset) - (viewportHeight * 0.7)) : 0; // Keep AI tools in bottom 30%
+        scrollTarget = Math.min(minScrollForTooltip, maxScrollForTarget);
+      } else {
+        // Check if tooltip (especially buttons) would be cut off
+        if (tooltipTop < viewportTop + padding || tooltipBottom > viewportBottom - currentButtonSafety) {
+          // Position tooltip in center of viewport with safety margins
+          scrollTarget = Math.max(0, tooltipTop - ((viewportHeight - tooltipHeight) / 2));
+        }
+      }
+    }
+    
+    // Fallback to target-based scrolling if tooltip positioning didn't set scroll target
+    if (scrollTarget === null && targetPos) {
       const targetTop = targetPos.top + window.pageYOffset;
       const targetBottom = targetPos.bottom + window.pageYOffset;
       const targetCenter = targetTop + (targetPos.height / 2);
       const viewportTop = window.pageYOffset;
       const viewportBottom = viewportTop + viewportHeight;
-      const viewportCenter = viewportTop + (viewportHeight / 2);
+      
+      // Use enhanced button safety for AI tools step
+      const currentButtonSafety = currentStep === 6 ? aiToolsButtonSafety : buttonSafetyPadding; // Step 6 is AI Tools Hub
       
       // Only scroll if target is not reasonably visible
-      if (targetTop < viewportTop + padding || targetBottom > viewportBottom - padding) {
-        // Try to center the target in the viewport
+      if (targetTop < viewportTop + padding || targetBottom > viewportBottom - currentButtonSafety) {
+        // Try to center the target in the viewport with button safety
         scrollTarget = Math.max(0, targetCenter - (viewportHeight / 2));
-      }
-    }
-    
-    if (tooltipPos && typeof tooltipPos.top === 'number') {
-      // Ensure tooltip is visible but don't override target positioning
-      const tooltipTop = tooltipPos.top + window.pageYOffset;
-      const tooltipBottom = tooltipTop + 280; // tooltip height
-      const viewportTop = window.pageYOffset;
-      const viewportBottom = viewportTop + viewportHeight;
-      
-      // Only adjust for tooltip if target positioning didn't already set a scroll target
-      if (scrollTarget === null && (tooltipTop < viewportTop + padding || tooltipBottom > viewportBottom - padding)) {
-        scrollTarget = Math.max(0, tooltipTop - padding);
       }
     }
     
@@ -799,6 +931,9 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
   
   // Determine arrow direction based on tooltip position relative to target
   const getArrowClass = () => {
+    // For AI Tools Hub (centered), no arrow needed
+    if (currentStepData.id === 'ai-tools') return '';
+    
     if (!targetPosition || !tooltipPosition || typeof tooltipPosition.top === 'string') return '';
     
     const tooltipCenterX = (typeof tooltipPosition.left === 'string' ? 200 : tooltipPosition.left) + 200;
@@ -838,8 +973,13 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
 
       {/* Tutorial tooltip */}
       <div
-        className={`absolute bg-light-panel dark:bg-cinema-panel rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 p-6 max-w-md z-[10001] ${getArrowClass()}`}
-        style={tooltipPosition}
+        className={`tutorial-tooltip-container absolute bg-light-panel dark:bg-cinema-panel rounded-xl shadow-2xl border border-gray-200 dark:border-gray-600 p-6 max-w-xl z-[10001] ${getArrowClass()}`}
+        style={{
+          ...tooltipPosition,
+          maxHeight: `${Math.min(window.innerHeight * 0.95, 700)}px`,
+          minHeight: 'auto',
+          overflowY: 'visible'
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -856,14 +996,14 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
         </div>
 
         {/* Content */}
-        <div className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+        <div className="tutorial-tooltip-content text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
           {typeof currentStepData.content === 'function' ? currentStepData.content() : (
             <p>{currentStepData.content}</p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between">
+        <div className="tutorial-tooltip-buttons flex items-center justify-between">
           {/* Step indicator */}
           <span className="text-sm text-gray-500 dark:text-gray-400">
             {currentStep + 1} of {tutorialSteps.length}

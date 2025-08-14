@@ -946,7 +946,7 @@ const App = () => {
                 )}
                 
                 {/* JSON Output Header */}
-                <div className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
+                <div data-tutorial="advanced-features-full" className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
                   <div className="flex items-center space-x-2 lg:space-x-4">
                     <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
                       JSON Output

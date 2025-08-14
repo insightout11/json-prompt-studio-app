@@ -237,3 +237,38 @@
 .tutorial-json-enhance-highlight {
   animation: jsonEnhanceHighlight 1s ease-out;
 }
+
+/* Tutorial Tooltip Responsive Improvements */
+@media (max-height: 600px) {
+  .tutorial-tooltip-container {
+    max-height: 85vh !important;
+    padding: 1rem !important;
+  }
+  
+  .tutorial-tooltip-content {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  
+  .tutorial-tooltip-buttons {
+    margin-top: 0.75rem !important;
+    padding-top: 0.75rem !important;
+  }
+}
+
+@media (max-height: 480px) {
+  .tutorial-tooltip-container {
+    max-height: 90vh !important;
+    padding: 0.75rem !important;
+  }
+  
+  .tutorial-tooltip-content {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .tutorial-tooltip-buttons {
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+}
