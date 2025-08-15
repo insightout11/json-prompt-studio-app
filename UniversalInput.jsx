@@ -402,7 +402,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
   const currentMode = modeOptions.find(mode => mode.value === inputMode);
 
   return (
-    <div className={`bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-cinema-border ${className}`}>
+    <div className={`bg-white dark:bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft border border-gray-200 dark:border-cinema-border ${className}`}>
       <div className="p-4">
         <div className="flex flex-row items-start space-x-3">
           {/* Input area - changes based on mode */}
@@ -538,11 +538,20 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
             >
               {isConverting ? (
                 <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>{inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Enhancing...' : 'Converting...'}</span>
+                  <div className="flex items-center space-x-2">
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium">
+                        {inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Enhancing Scene...' : inputMode === 'image-to-json' ? 'Analyzing Image...' : 'Converting Text...'}
+                      </span>
+                      <span className="text-xs opacity-75">
+                        {inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput ? 'Adding more detail' : inputMode === 'image-to-json' ? 'Processing with AI vision' : 'Generating JSON fields'}
+                      </span>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>

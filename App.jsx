@@ -927,7 +927,7 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300 relative">
               
               {/* JSON OUTPUT SECTION */}
               <div className="json-output-section">
@@ -969,11 +969,11 @@ const App = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 max-lg:space-x-1">
+                  <div className="absolute top-2 right-2 flex flex-col sm:flex-row items-stretch sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 bg-white dark:bg-cinema-panel rounded-lg shadow-lg border border-gray-200 dark:border-cinema-border p-2 z-10">
                     <button
                       onClick={copyToClipboard}
                       disabled={copyLoading}
-                      className={`px-3 py-2 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1 ${
+                      className={`px-3 py-2 text-sm rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed space-x-1 ${
                         copySuccess 
                           ? 'bg-green-500 text-white' 
                           : copyLoading
@@ -994,8 +994,8 @@ const App = () => {
                         </>
                       ) : (
                         <>
-                          <span className="max-lg:hidden">Copy to Clipboard</span>
-                          <span className="lg:hidden">Copy</span>
+                          <span>📋</span>
+                          <span className="max-lg:hidden">Copy</span>
                         </>
                       )}
                     </button>
@@ -1003,7 +1003,7 @@ const App = () => {
                     <button
                       onClick={() => setShowSaveModal(true)}
                       disabled={saveLoading}
-                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
+                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label="Save current scene"
                     >
                       {saveLoading ? (
@@ -1013,8 +1013,8 @@ const App = () => {
                         </div>
                       ) : (
                         <>
-                          <span className="max-lg:hidden">💾 Save</span>
-                          <span className="lg:hidden">💾</span>
+                          <span>💾</span>
+                          <span className="max-lg:hidden">Save</span>
                         </>
                       )}
                     </button>
@@ -1029,18 +1029,20 @@ const App = () => {
                         }
                       }}
                       disabled={undoStack.length === 0}
-                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400 max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
+                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-sm flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
                       aria-label="Undo last action"
                       title="Undo last action"
                     >
-                      <span className="max-lg:hidden">↶ Undo</span>
-                      <span className="lg:hidden">↶</span>
+                      <>
+                        <span>↶</span>
+                        <span className="max-lg:hidden">Undo</span>
+                      </>
                     </button>
                     
                     <button
                       onClick={handleClearAllClick}
                       disabled={clearLoading}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed max-lg:px-2 max-lg:py-1.5 max-lg:text-[10px] max-md:px-2 max-md:py-1"
+                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label="Clear all scene data"
                     >
                       {clearLoading ? (
@@ -1050,8 +1052,8 @@ const App = () => {
                         </div>
                       ) : (
                         <>
-                          <span className="max-lg:hidden">Clear All</span>
-                          <span className="lg:hidden">Clear</span>
+                          <span>🗑️</span>
+                          <span className="max-lg:hidden">Clear</span>
                         </>
                       )}
                     </button>
@@ -1063,37 +1065,36 @@ const App = () => {
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}
-              <div data-tutorial="text-input" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 border border-transparent dark:border-cinema-border transition-all duration-300">
-                <UniversalInput
-                  resetTrigger={resetSceneBuilderTrigger} 
-                  aiFeatures={
-                    <div data-tutorial="ai-tools">
-                      <ProFeaturesHub 
-                        isPro={isPro}
-                        onShowPricing={() => setShowPricing(true)}
-                      onSceneExtenderClick={() => handleGenerate5Options()}
-                      currentJson={JSON.parse(getJsonOutput() || '{}')}
-                      onJsonUpdate={(updatedJson) => {
-                        // Update the store with the new JSON data
-                        if (updatedJson && typeof updatedJson === 'object') {
-                          Object.keys(updatedJson).forEach(key => {
-                            if (key !== '_metadata' && updatedJson[key] !== undefined) {
-                              setFieldValue(key, updatedJson[key]);
-                            }
-                          });
-                        }
-                      }}
-                      sceneOptions={sceneOptions}
-                      onApplySceneOption={handleApplySceneOption}
-                      onDismissSceneOptions={handleDismissSceneOptions}
-                      extensionLoading={extensionLoading}
-                      extensionError={extensionError}
-                      compact={true}
-                    />
-                    </div>
-                  }
-                />
-              </div>
+              <UniversalInput
+                data-tutorial="text-input"
+                resetTrigger={resetSceneBuilderTrigger} 
+                aiFeatures={
+                  <div data-tutorial="ai-tools">
+                    <ProFeaturesHub 
+                      isPro={isPro}
+                      onShowPricing={() => setShowPricing(true)}
+                    onSceneExtenderClick={() => handleGenerate5Options()}
+                    currentJson={JSON.parse(getJsonOutput() || '{}')}
+                    onJsonUpdate={(updatedJson) => {
+                      // Update the store with the new JSON data
+                      if (updatedJson && typeof updatedJson === 'object') {
+                        Object.keys(updatedJson).forEach(key => {
+                          if (key !== '_metadata' && updatedJson[key] !== undefined) {
+                            setFieldValue(key, updatedJson[key]);
+                          }
+                        });
+                      }
+                    }}
+                    sceneOptions={sceneOptions}
+                    onApplySceneOption={handleApplySceneOption}
+                    onDismissSceneOptions={handleDismissSceneOptions}
+                    extensionLoading={extensionLoading}
+                    extensionError={extensionError}
+                    compact={true}
+                  />
+                  </div>
+                }
+              />
               
               {/* AI SCENE OPTIONS */}
               {renderSceneOptions()}
@@ -1256,8 +1257,18 @@ const App = () => {
               >
                 {saveLoading ? (
                   <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Saving...</span>
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium">
+                        Saving JSON...
+                      </span>
+                      <span className="text-xs opacity-75">
+                        Preparing download
+                      </span>
+                    </div>
                   </div>
                 ) : 'Save'}
               </button>

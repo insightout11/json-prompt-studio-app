@@ -138,7 +138,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     characters: {
       icon: '🧍',
       label: 'Characters',
-      description: 'People in your scene',
+      description: 'People and personalities\nin your scene',
       templates: Object.fromEntries(
         Object.entries(allTemplates).filter(([key, template]) => 
           template.isPreset && template.icon === '👤'
@@ -149,7 +149,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     actions: {
       icon: '🎬', 
       label: 'Actions',
-      description: 'What\'s happening',
+      description: 'What\'s happening and\nhow characters move',
       templates: Object.fromEntries(
         Object.entries(allTemplates).filter(([key, template]) => 
           template.isPreset && template.icon === '🎬'
@@ -160,7 +160,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     settings: {
       icon: '📍',
       label: 'Setting', 
-      description: 'Where it takes place',
+      description: 'Where it takes place\nand environmental details',
       templates: Object.fromEntries(
         Object.entries(allTemplates).filter(([key, template]) => 
           template.isPreset && template.icon === '📍'
@@ -171,7 +171,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     style: {
       icon: '🎨',
       label: 'Style',
-      description: 'Visual aesthetic & directors',
+      description: 'Visual aesthetic and\ndirector influences',
       templates: Object.fromEntries(
         Object.entries(allTemplates).filter(([key, template]) => 
           template.isPreset && template.icon === '🎨'
@@ -182,7 +182,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
     audio: {
       icon: '🔊',
       label: 'Audio',
-      description: 'Sound design',
+      description: 'Sound design and\nmusical atmosphere',
       templates: Object.fromEntries(
         Object.entries(allTemplates).filter(([key, template]) => 
           template.isPreset && template.icon === '🔊'
@@ -821,8 +821,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         value={categoryInputs[categoryKey] || ''}
                         onChange={(e) => setCategoryInputs(prev => ({ ...prev, [categoryKey]: e.target.value }))}
                         placeholder={placeholderText[categoryKey] || `Describe your ${category.label.toLowerCase()}...`}
-                        className="scene-builder w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none max-lg:px-2 max-lg:py-2 max-lg:text-xs max-md:px-2 max-md:py-1.5 max-md:text-xs"
-                        style={{ height: '3.5rem' }}
+                        className="scene-builder w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none overflow-hidden max-lg:px-2 max-lg:py-2 max-lg:text-xs max-md:px-2 max-md:py-1.5 max-md:text-xs"
+                        style={{ height: '3.5rem', minHeight: '3.5rem', maxHeight: '3.5rem' }}
                         rows={1}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {

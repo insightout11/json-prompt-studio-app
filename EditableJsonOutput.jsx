@@ -221,27 +221,29 @@ const EditableJsonOutput = ({ showToast }) => {
       <div className="relative">
         {!isEditing ? (
           // View Mode - Read-only formatted JSON
-          <div 
-            className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-light-border dark:border-cinema-border relative"
-            role="textbox"
-            aria-readonly="true"
-            aria-label="Generated JSON output"
-            tabIndex="0"
-          >
-            <pre className="text-green-400 dark:text-cinema-teal text-xs sm:text-sm font-mono whitespace-pre-wrap" aria-live="polite">
-              {currentJson || '{}'}
-              <span className="animate-cursor-blink text-cinema-teal">▊</span>
-            </pre>
+          <>
+            <div 
+              className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-light-border dark:border-cinema-border"
+              role="textbox"
+              aria-readonly="true"
+              aria-label="Generated JSON output"
+              tabIndex="0"
+            >
+              <pre className="text-green-400 dark:text-cinema-teal text-xs sm:text-sm font-mono whitespace-pre-wrap" aria-live="polite">
+                {currentJson || '{}'}
+                <span className="animate-cursor-blink text-cinema-teal">▊</span>
+              </pre>
+            </div>
             
-            {/* Edit Button - positioned in top-right */}
+            {/* Edit Button - positioned in top-right outside scrollable area */}
             <button
               onClick={handleEditClick}
-              className="absolute top-2 right-2 px-2 sm:px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-md font-medium transition-colors opacity-80 hover:opacity-100 min-h-8 sm:min-h-9"
+              className="absolute top-2 right-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md font-medium transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 shadow-lg hover:shadow-xl z-20"
               title="Edit JSON directly (Ctrl+E)"
             >
               ✏️ Edit JSON
             </button>
-          </div>
+          </>
         ) : (
           // Edit Mode - Editable textarea
           <div className="relative">
