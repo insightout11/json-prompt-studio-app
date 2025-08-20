@@ -223,7 +223,7 @@ const EditableJsonOutput = ({ showToast }) => {
           // View Mode - Read-only formatted JSON
           <>
             <div 
-              className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-h-[40vh] sm:max-h-[50vh] overflow-auto border border-light-border dark:border-cinema-border"
+              className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 max-sm:p-2 max-sm:mb-0 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-sm:min-h-20 max-h-[40vh] sm:max-h-[50vh] max-sm:max-h-[30vh] overflow-auto border border-light-border dark:border-cinema-border"
               role="textbox"
               aria-readonly="true"
               aria-label="Generated JSON output"
@@ -238,10 +238,11 @@ const EditableJsonOutput = ({ showToast }) => {
             {/* Edit Button - positioned in top-right outside scrollable area */}
             <button
               onClick={handleEditClick}
-              className="absolute top-2 right-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md font-medium transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 shadow-lg hover:shadow-xl z-20"
+              className="absolute top-2 right-2 px-3 py-2 max-sm:px-2 max-sm:py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm max-sm:text-xs rounded-md font-medium transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 shadow-lg hover:shadow-xl z-20"
               title="Edit JSON directly (Ctrl+E)"
             >
-              ✏️ Edit JSON
+              <span className="max-sm:hidden">✏️ Edit JSON</span>
+              <span className="sm:hidden">✏️</span>
             </button>
           </>
         ) : (

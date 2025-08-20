@@ -402,11 +402,11 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
   const currentMode = modeOptions.find(mode => mode.value === inputMode);
 
   return (
-    <div className={`bg-white dark:bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft border border-gray-200 dark:border-cinema-border ${className}`}>
-      <div className="p-4">
-        <div className="flex flex-row items-start space-x-3">
+    <div className={`bg-white dark:bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft border border-gray-200 dark:border-cinema-border max-sm:mb-0 ${className}`}>
+      <div className="p-4 max-sm:p-0 max-sm:pb-1">
+        <div className="flex flex-row items-start space-x-3 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:space-x-0 min-[1024px]:max-[1279px]:space-y-3 max-sm:flex-col max-sm:space-x-0 max-sm:space-y-1">
           {/* Input area - changes based on mode */}
-          <div className="flex-1">
+          <div className="flex-1 min-[1024px]:max-[1279px]:w-full max-sm:w-full">
             {inputMode === 'image-to-json' ? (
               // Image upload area
               <div>
@@ -488,32 +488,32 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
           </div>
 
           {/* Mode toggle and Convert button */}
-          <div className="flex flex-row space-x-3 flex-shrink-0">
+          <div className="flex flex-row space-x-3 max-sm:space-x-2 flex-shrink-0 min-[1024px]:max-[1279px]:justify-center min-[1024px]:max-[1279px]:w-full">
             {/* Toggle Switch */}
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-cinema-border rounded-md p-1">
+            <div className="flex items-center space-x-2 max-sm:space-x-1 bg-gray-100 dark:bg-cinema-border rounded-md p-1 max-sm:p-0.5">
               <button
                 onClick={() => setInputMode('text-to-json')}
                 disabled={isConverting}
-                className={`px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 ${
+                className={`px-3 py-1.5 max-sm:px-2 max-sm:py-1 text-sm max-sm:text-xs font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-0.5 ${
                   inputMode === 'text-to-json'
                     ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
                 }`}
               >
-                <span>✨</span>
-                <span>Text</span>
+                <span className="max-sm:text-xs">✨</span>
+                <span className="max-sm:hidden">Text</span>
               </button>
               <button
                 onClick={() => setInputMode('image-to-json')}
                 disabled={isConverting}
-                className={`px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 ${
+                className={`px-3 py-1.5 max-sm:px-2 max-sm:py-1 text-sm max-sm:text-xs font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-0.5 ${
                   inputMode === 'image-to-json'
                     ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
                 }`}
               >
-                <span>📸</span>
-                <span>Image</span>
+                <span className="max-sm:text-xs">📸</span>
+                <span className="max-sm:hidden">Image</span>
               </button>
             </div>
 
@@ -528,7 +528,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
                   ? 'Convert text description to JSON fields'
                   : 'Analyze image and extract scene details'
               }
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${
+              className={`px-4 py-2 max-sm:px-3 max-sm:py-1.5 rounded-md text-sm max-sm:text-xs font-medium transition-all duration-300 flex items-center justify-center space-x-2 max-sm:space-x-1 ${
                 isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)
                   ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   : inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput
@@ -570,7 +570,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
 
         {/* AI Features positioned directly under Text/Image/Convert buttons */}
         {aiFeatures && (
-          <div className="flex justify-end mt-2">
+          <div className="flex justify-end mt-2 min-[1024px]:max-[1279px]:justify-center">
             <div className="flex items-center">
               {aiFeatures}
             </div>

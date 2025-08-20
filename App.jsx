@@ -723,8 +723,8 @@ const App = () => {
                   title="Viral Video Generator"
                 >
                   <span className="mr-2 max-[1024px]:mr-0">📈</span>
-                  <span className="min-[1280px]:inline max-[1024px]:hidden">Viral Gen</span>
-                  <span className="max-[1279px]:inline min-[1280px]:hidden min-[1025px]:inline max-[1024px]:hidden">Viral Gen</span>
+                  <span className="min-[1280px]:inline hidden">Viral Gen</span>
+                  <span className="max-[1279px]:inline min-[1025px]:inline max-[1024px]:hidden min-[1280px]:hidden">Viral Gen</span>
                 </button>
                 
                 {/* Randomize Tools */}
@@ -735,9 +735,9 @@ const App = () => {
                     title="Randomize Elements"
                   >
                     <span className="mr-2 max-[1024px]:mr-1">🎲</span>
-                    <span className="min-[1280px]:inline max-[1024px]:hidden">Randomize</span>
-                    <span className="max-[1279px]:inline min-[1280px]:hidden min-[1025px]:inline max-[1024px]:hidden">Randomize</span>
-                    <span className="min-[1025px]:hidden">Rnd</span>
+                    <span className="min-[1280px]:inline hidden">Randomize</span>
+                    <span className="max-[1279px]:inline min-[1025px]:inline max-[1024px]:hidden min-[1280px]:hidden">Randomize</span>
+                    <span className="max-[1024px]:inline min-[1025px]:hidden">Rnd</span>
                     <svg
                       className={`ml-1 min-[1280px]:w-4 min-[1280px]:h-4 max-[1279px]:w-4 max-[1279px]:h-4 max-[1024px]:w-3 max-[1024px]:h-3 max-[1024px]:ml-0.5 transition-transform duration-200 flex-shrink-0 ${
                         showRandomizeDropdown ? 'rotate-180' : ''
@@ -774,7 +774,7 @@ const App = () => {
               <TemplateSelector />
               <button
                 onClick={() => setShowViralGenerator(true)}
-                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-2 max-sm:py-1.5"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] max-sm:min-h-[32px] max-sm:min-w-[32px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-1.5 max-sm:py-1"
                 aria-label="Open viral video generator"
                 title="Viral Video Generator"
               >
@@ -784,7 +784,7 @@ const App = () => {
               </button>
               <button
                 onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-2 max-sm:py-1.5"
+                className="px-3 py-2 min-h-[44px] min-w-[44px] max-sm:min-h-[32px] max-sm:min-w-[32px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-1.5 max-sm:py-1"
                 aria-label="Open randomization tools"
                 title="Randomize Elements"
               >
@@ -802,14 +802,14 @@ const App = () => {
             data-tutorial="advanced-mode-toggle"
             onClick={() => setIsAdvancedMode(!isAdvancedMode)}
             className={`
-              inline-flex items-center px-4 py-2 rounded-full font-medium transition-all duration-300 cursor-pointer
+              inline-flex items-center px-4 py-2 max-sm:px-2 max-sm:py-1 rounded-full font-medium max-sm:text-xs transition-all duration-300 cursor-pointer
               hover:scale-105 active:scale-95 group focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-600
               bg-teal-100 text-teal-800 border-2 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 dark:hover:bg-teal-800/40
             `}
             aria-label={`Switch to ${isAdvancedMode ? 'Simple' : 'Advanced'} editing mode`}
             title="Switch between simple and advanced editing modes"
           >
-            <div className="w-3 h-3 rounded-full mr-2 transition-all duration-300 group-hover:scale-110 bg-teal-500" />
+            <div className="w-3 h-3 max-sm:w-2 max-sm:h-2 rounded-full mr-2 max-sm:mr-1 transition-all duration-300 group-hover:scale-110 bg-teal-500" />
             
             {/* Desktop: Full text */}
             <span className="hidden sm:inline">
@@ -829,7 +829,7 @@ const App = () => {
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
+        <main className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
           
           {/* LEFT PANEL */}
           <div className="space-y-4 sm:space-y-5 lg:space-y-6 h-full relative">
@@ -927,10 +927,10 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 space-y-4 lg:space-y-6 border border-transparent dark:border-cinema-border transition-all duration-300 relative">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 max-sm:p-0 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
               
               {/* JSON OUTPUT SECTION */}
-              <div className="json-output-section">
+              <div className="json-output-section max-sm:flex-1 max-sm:min-h-[60vh] max-sm:order-1 max-sm:mb-0 max-sm:-mb-8">
                 {/* Success Notification */}
                 {sceneExtenderSuccess && (
                   <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg animate-pulse">
@@ -946,34 +946,102 @@ const App = () => {
                 )}
                 
                 {/* JSON Output Header */}
-                <div data-tutorial="advanced-features-full" className="flex items-center justify-between mb-3 py-2 border-b border-gray-200 dark:border-cinema-border">
-                  <div className="flex items-center space-x-2 lg:space-x-4">
+                <div data-tutorial="advanced-features-full" className="flex items-center justify-between mb-1 max-sm:mb-0.5 py-2 max-sm:py-1 border-b border-gray-200 dark:border-cinema-border max-sm:flex-col max-sm:items-start max-sm:space-y-2 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:items-start min-[1024px]:max-[1279px]:space-y-2">
+                  <div className="flex items-center space-x-2 lg:space-x-4 max-sm:w-full max-sm:justify-between min-[1024px]:max-[1279px]:w-full min-[1024px]:max-[1279px]:justify-between">
                     <h2 className="text-base lg:text-lg font-semibold text-gray-800 dark:text-cinema-text">
                       JSON Output
                     </h2>
-                    <div data-tutorial="advanced-controls" className="flex items-center space-x-1">
-                      <span className="text-xs text-gray-500 dark:text-cinema-text-muted">Ratio:</span>
-                      <select
-                        value={aspectRatio}
-                        onChange={(e) => setAspectRatio(e.target.value)}
-                        className="text-xs px-2 py-1 bg-white dark:bg-cinema-panel border border-gray-300 dark:border-cinema-border rounded text-gray-700 dark:text-cinema-text h-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        aria-label="Select aspect ratio for video output"
-                      >
-                        <option value="1:1">🔳 1:1</option>
-                        <option value="16:9">🖥️ 16:9</option>
-                        <option value="9:16">📱 9:16</option>
-                        <option value="4:3">📺 4:3</option>
-                        <option value="21:9">🎬 21:9</option>
-                        <option value="3:2">📸 3:2</option>
-                      </select>
+                    <div className="flex items-center space-x-2">
+                      <div data-tutorial="advanced-controls" className="flex items-center space-x-1">
+                        <span className="text-xs text-gray-500 dark:text-cinema-text-muted">Ratio:</span>
+                        <select
+                          value={aspectRatio}
+                          onChange={(e) => setAspectRatio(e.target.value)}
+                          className="text-xs px-2 py-1 bg-white dark:bg-cinema-panel border border-gray-300 dark:border-cinema-border rounded text-gray-700 dark:text-cinema-text h-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                          aria-label="Select aspect ratio for video output"
+                        >
+                          <option value="1:1">🔳 1:1</option>
+                          <option value="16:9">🖥️ 16:9</option>
+                          <option value="9:16">📱 9:16</option>
+                          <option value="4:3">📺 4:3</option>
+                          <option value="21:9">🎬 21:9</option>
+                          <option value="3:2">📸 3:2</option>
+                        </select>
+                      </div>
+                      
+                      {/* Action buttons - moved inline on mobile and 1244px */}
+                      <div className="hidden max-sm:flex min-[1024px]:max-[1279px]:flex flex-row items-center space-x-1">
+                        <button
+                          onClick={copyToClipboard}
+                          disabled={copyLoading}
+                          className={`px-2 py-1 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            copySuccess 
+                              ? 'bg-green-500 text-white' 
+                              : copyLoading
+                              ? 'bg-gray-400 text-white'
+                              : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                          }`}
+                          aria-label="Copy JSON to clipboard"
+                        >
+                          {copyLoading ? (
+                            <div className="animate-spin h-2 w-2 border border-white border-t-transparent rounded-full"></div>
+                          ) : copySuccess ? (
+                            <span>✓</span>
+                          ) : (
+                            <span>📋</span>
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={() => setShowSaveModal(true)}
+                          disabled={saveLoading}
+                          className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label="Save current scene"
+                        >
+                          {saveLoading ? (
+                            <div className="animate-spin h-2 w-2 border border-purple-600 border-t-transparent rounded-full"></div>
+                          ) : (
+                            <span>💾</span>
+                          )}
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            const success = undo();
+                            if (success) {
+                              showSuccess('Previous state restored!');
+                            } else {
+                              showInfo('Nothing to undo');
+                            }
+                          }}
+                          disabled={undoStack.length === 0}
+                          className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          aria-label="Undo last action"
+                        >
+                          <span>↶</span>
+                        </button>
+                        
+                        <button
+                          onClick={handleClearAllClick}
+                          disabled={clearLoading}
+                          className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label="Clear all scene data"
+                        >
+                          {clearLoading ? (
+                            <div className="animate-spin h-2 w-2 border border-red-600 border-t-transparent rounded-full"></div>
+                          ) : (
+                            <span>🗑️</span>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="absolute top-2 right-2 flex flex-col sm:flex-row items-stretch sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 bg-white dark:bg-cinema-panel rounded-lg shadow-lg border border-gray-200 dark:border-cinema-border p-2 z-10">
+                  <div className="absolute top-2 right-2 flex flex-col sm:flex-row items-stretch sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 max-sm:space-x-1 bg-white dark:bg-cinema-panel rounded-lg shadow-lg border border-gray-200 dark:border-cinema-border p-2 max-sm:p-1 z-10 max-sm:hidden min-[1024px]:max-[1279px]:hidden">
                     <button
                       onClick={copyToClipboard}
                       disabled={copyLoading}
-                      className={`px-3 py-2 text-sm rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed space-x-1 ${
+                      className={`px-3 py-2 max-sm:px-2 max-sm:py-1 text-sm max-sm:text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed space-x-1 max-sm:space-x-0 ${
                         copySuccess 
                           ? 'bg-green-500 text-white' 
                           : copyLoading
@@ -995,7 +1063,7 @@ const App = () => {
                       ) : (
                         <>
                           <span>📋</span>
-                          <span className="max-lg:hidden">Copy</span>
+                          <span className="max-lg:hidden max-sm:hidden">Copy</span>
                         </>
                       )}
                     </button>
@@ -1003,7 +1071,7 @@ const App = () => {
                     <button
                       onClick={() => setShowSaveModal(true)}
                       disabled={saveLoading}
-                      className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 max-sm:px-2 max-sm:py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-sm max-sm:text-xs flex items-center justify-center space-x-1 max-sm:space-x-0 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label="Save current scene"
                     >
                       {saveLoading ? (
@@ -1014,7 +1082,7 @@ const App = () => {
                       ) : (
                         <>
                           <span>💾</span>
-                          <span className="max-lg:hidden">Save</span>
+                          <span className="max-lg:hidden max-sm:hidden">Save</span>
                         </>
                       )}
                     </button>
@@ -1029,20 +1097,20 @@ const App = () => {
                         }
                       }}
                       disabled={undoStack.length === 0}
-                      className="px-3 py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-sm flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      className="px-3 py-2 max-sm:px-2 max-sm:py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-sm max-sm:text-xs flex items-center justify-center space-x-1 max-sm:space-x-0 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
                       aria-label="Undo last action"
                       title="Undo last action"
                     >
                       <>
                         <span>↶</span>
-                        <span className="max-lg:hidden">Undo</span>
+                        <span className="max-lg:hidden max-sm:hidden">Undo</span>
                       </>
                     </button>
                     
                     <button
                       onClick={handleClearAllClick}
                       disabled={clearLoading}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 max-sm:px-2 max-sm:py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm max-sm:text-xs flex items-center justify-center space-x-1 max-sm:space-x-0 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label="Clear all scene data"
                     >
                       {clearLoading ? (
@@ -1053,7 +1121,7 @@ const App = () => {
                       ) : (
                         <>
                           <span>🗑️</span>
-                          <span className="max-lg:hidden">Clear</span>
+                          <span className="max-lg:hidden max-sm:hidden">Clear</span>
                         </>
                       )}
                     </button>
@@ -1065,6 +1133,7 @@ const App = () => {
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}
+              <div className="max-sm:order-2 max-sm:-mt-32">
               <UniversalInput
                 data-tutorial="text-input"
                 resetTrigger={resetSceneBuilderTrigger} 
@@ -1095,6 +1164,7 @@ const App = () => {
                   </div>
                 }
               />
+              </div>
               
               {/* AI SCENE OPTIONS */}
               {renderSceneOptions()}
@@ -1104,31 +1174,31 @@ const App = () => {
 
         {/* FOOTER */}
         <footer className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 pb-4 sm:pb-6 border-t border-gray-200 dark:border-cinema-border" role="contentinfo">
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-3 sm:space-y-0 sm:space-x-3 lg:space-x-4 mb-4 sm:mb-6">
+          <div className="flex flex-row justify-center items-center flex-wrap gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
             <a 
               href="/privacy-policy.html" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-3 py-1.5 max-sm:px-1.5 max-sm:py-1 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">🔒</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Privacy Policy</span>
+              <span className="text-purple-500 text-sm max-sm:text-xs">🔒</span>
+              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors max-sm:text-[10px]">Privacy Policy</span>
             </a>
             <a 
               href="/terms-of-service.html" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-3 py-1.5 max-sm:px-1.5 max-sm:py-1 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">📜</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Terms of Service</span>
+              <span className="text-purple-500 text-sm max-sm:text-xs">📜</span>
+              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors max-sm:text-[10px]">Terms of Service</span>
             </a>
             <a 
               href="mailto:insightout11@gmail.com"
-              className="group flex items-center space-x-2 px-3 py-1.5 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
+              className="group flex items-center space-x-2 px-3 py-1.5 max-sm:px-1.5 max-sm:py-1 bg-white dark:bg-cinema-card border border-gray-200 dark:border-cinema-border rounded-lg hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md transition-all duration-300 text-gray-700 dark:text-cinema-text"
             >
-              <span className="text-purple-500 text-sm">✉️</span>
-              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Contact</span>
+              <span className="text-purple-500 text-sm max-sm:text-xs">✉️</span>
+              <span className="text-xs font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors max-sm:text-[10px]">Contact</span>
             </a>
           </div>
           <div className="text-center">

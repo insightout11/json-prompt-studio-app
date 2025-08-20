@@ -1,5 +1,11 @@
 {
- "name": "App",
+ "name": "JSON Prompt Studio",
+ "short_name": "JSON Prompt Studio",
+ "description": "Modular prompt-building for cinematic AI scenes",
+ "theme_color": "#0e0e0e",
+ "background_color": "#0e0e0e",
+ "display": "standalone",
+ "start_url": "/",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",

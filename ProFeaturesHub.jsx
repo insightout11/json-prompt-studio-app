@@ -163,20 +163,20 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
     return (
       <div>
         {/* Row of 5 AI feature buttons - sized similar to Convert button */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 max-sm:space-x-1 max-sm:overflow-x-auto">
           {proFeatures.slice(0, 5).map((feature) => (
             <button
               key={feature.id}
               onClick={() => handleFeatureClick(feature.id)}
-              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-1 ${
+              className={`flex-1 max-sm:flex-shrink-0 max-sm:min-w-[4rem] px-3 py-2 max-sm:px-1 max-sm:py-1 rounded-md text-sm max-sm:text-xs font-medium transition-all duration-300 flex items-center justify-center space-x-1 max-sm:space-x-0 max-sm:flex-col ${
                 activeFeature === feature.id
                   ? 'bg-cinema-teal text-white shadow-md'
                   : 'bg-gray-100 dark:bg-cinema-border text-gray-700 dark:text-cinema-text hover:bg-gray-200 dark:hover:bg-cinema-card shadow-sm hover:shadow-md'
               }`}
               title={feature.name}
             >
-              <span className="text-base">{feature.icon}</span>
-              <span className="text-xs font-medium">{feature.name}</span>
+              <span className="text-base max-sm:text-sm">{feature.icon}</span>
+              <span className="text-xs font-medium max-sm:text-[8px] max-sm:leading-tight">{feature.name}</span>
             </button>
           ))}
         </div>

@@ -790,18 +790,18 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
               
               return (
                 <div key={categoryKey} className="bg-light-card dark:bg-cinema-card rounded-lg shadow-light-card dark:shadow-glow-soft p-3 sm:p-4 lg:p-4 xl:p-4 border border-light-border dark:border-cinema-border transition-all duration-300">
-                  {/* Full-width horizontal layout with proper alignment */}
-                  <div className="flex items-center space-x-3 xl:space-x-3">
-                    {/* Left: Category Info - Fixed width */}
-                    <div className="flex items-center space-x-2 w-28 flex-shrink-0">
+                  {/* Full-width horizontal layout with proper alignment - Stack vertically at 1244px */}
+                  <div className="flex items-center space-x-3 xl:space-x-3 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:items-start min-[1024px]:max-[1279px]:space-x-0 min-[1024px]:max-[1279px]:space-y-3">
+                    {/* Left: Category Info - Fixed width - First at 1244px */}
+                    <div className="flex items-center space-x-2 w-28 flex-shrink-0 min-[1024px]:max-[1279px]:order-1 min-[1024px]:max-[1279px]:w-auto">
                       <span className="text-base">{category.icon}</span>
                       <span className="text-sm font-medium text-light-text dark:text-cinema-text">
                         {category.label}
                       </span>
                     </div>
                     
-                    {/* Center: Input Field with Status Indicator - Takes available space */}
-                    <div className="flex items-center space-x-2 flex-1">
+                    {/* Center: Input Field with Status Indicator - Takes available space - Full width at 1244px */}
+                    <div className="flex items-center space-x-1 flex-1 min-[1024px]:max-[1279px]:w-full min-[1024px]:max-[1279px]:order-2">
                       <div className="flex items-center justify-center w-4 flex-shrink-0">
                         <span 
                           className={`text-sm cursor-help transition-all duration-200 ${
@@ -822,7 +822,6 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         onChange={(e) => setCategoryInputs(prev => ({ ...prev, [categoryKey]: e.target.value }))}
                         placeholder={placeholderText[categoryKey] || `Describe your ${category.label.toLowerCase()}...`}
                         className="scene-builder w-full px-3 py-3 text-sm border border-light-border dark:border-cinema-border rounded bg-light-panel dark:bg-cinema-panel text-light-text dark:text-cinema-text placeholder-light-text-muted dark:placeholder-cinema-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-blue-400 focus:border-transparent resize-none overflow-hidden max-lg:px-2 max-lg:py-2 max-lg:text-xs max-md:px-2 max-md:py-1.5 max-md:text-xs"
-                        style={{ height: '3.5rem', minHeight: '3.5rem', maxHeight: '3.5rem' }}
                         rows={1}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
@@ -834,14 +833,14 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                     </div>
                     </div>
                     
-                    {/* Right: Action Button Groups with Separation */}
-                    <div className="flex items-center space-x-6 xl:space-x-6 flex-shrink-0 max-lg:space-x-3 max-md:space-x-2">
+                    {/* Right: Action Button Groups with Separation - Third at 1244px */}
+                    <div className="flex items-center space-x-6 xl:space-x-6 flex-shrink-0 max-lg:space-x-3 max-md:space-x-2 min-[1024px]:max-[1279px]:order-3 min-[1024px]:max-[1279px]:w-full min-[1024px]:max-[1279px]:justify-start">
                       {/* Primary Actions Group */}
                       <div className="flex items-center space-x-3 xl:space-x-3 max-lg:space-x-2 max-md:space-x-1">
                       <button
                         onClick={() => handleCategorySubmit(categoryKey)}
                         disabled={!categoryInputs[categoryKey]?.trim()}
-                        className="px-2 py-2 xl:px-2 xl:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
+                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
                         title="Add this element to your prompt"
                       >
                         <span className="max-md:hidden">Submit</span>
@@ -861,7 +860,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           // Enable if there's input OR if there's existing content to enhance
                           return !hasInput && !hasExistingContent;
                         })()}
-                        className={`relative px-2 py-2 xl:px-2 xl:py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
+                        className={`relative px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
                           expandSparkles.has(categoryKey) ? 'expand-sparkle' : ''
                         }`}
                         title={(() => {
@@ -912,7 +911,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className={`px-2 py-2 xl:px-2 xl:py-2 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
+                        className={`px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
                           loadGlowEffects.has(categoryKey) ? 'load-activation-glow' : ''
                         }`}
                         title={(() => {
@@ -947,7 +946,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-2 py-2 xl:px-2 xl:py-2 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
+                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
                         title="Insert a preset idea"
                       >
                         <span className="max-md:hidden">Template</span>
