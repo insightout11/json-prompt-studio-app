@@ -790,18 +790,18 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
               
               return (
                 <div key={categoryKey} className="bg-light-card dark:bg-cinema-card rounded-lg shadow-light-card dark:shadow-glow-soft p-3 sm:p-4 lg:p-4 xl:p-4 border border-light-border dark:border-cinema-border transition-all duration-300">
-                  {/* Full-width horizontal layout with proper alignment - Stack vertically at 1244px */}
-                  <div className="flex items-center space-x-3 xl:space-x-3 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:items-start min-[1024px]:max-[1279px]:space-x-0 min-[1024px]:max-[1279px]:space-y-3">
+                  {/* Full-width horizontal layout with proper alignment - Stack vertically at 1244px and mobile */}
+                  <div className="flex items-center space-x-3 xl:space-x-3 max-md:flex-col max-md:items-stretch max-md:space-x-0 max-md:space-y-3">
                     {/* Left: Category Info - Fixed width - First at 1244px */}
-                    <div className="flex items-center space-x-2 w-28 flex-shrink-0 min-[1024px]:max-[1279px]:order-1 min-[1024px]:max-[1279px]:w-auto">
+                    <div className="flex items-center space-x-2 w-28 flex-shrink-0">
                       <span className="text-base">{category.icon}</span>
                       <span className="text-sm font-medium text-light-text dark:text-cinema-text">
                         {category.label}
                       </span>
                     </div>
                     
-                    {/* Center: Input Field with Status Indicator - Takes available space - Full width at 1244px */}
-                    <div className="flex items-center space-x-1 flex-1 min-[1024px]:max-[1279px]:w-full min-[1024px]:max-[1279px]:order-2">
+                    {/* Center: Input Field with Status Indicator - Takes available space - Full width at 1244px - Expand left in 1024-1279 - Full width on mobile */}
+                    <div className="flex items-center space-x-1 flex-1 min-[1024px]:max-[1279px]:mr-2 max-md:w-full">
                       <div className="flex items-center justify-center w-4 flex-shrink-0">
                         <span 
                           className={`text-sm cursor-help transition-all duration-200 ${
@@ -833,20 +833,19 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                     </div>
                     </div>
                     
-                    {/* Right: Action Button Groups with Separation - Third at 1244px */}
-                    <div className="flex items-center space-x-6 xl:space-x-6 flex-shrink-0 max-lg:space-x-3 max-md:space-x-2 min-[1024px]:max-[1279px]:order-3 min-[1024px]:max-[1279px]:w-full min-[1024px]:max-[1279px]:justify-start">
-                      {/* Primary Actions Group */}
-                      <div className="flex items-center space-x-3 xl:space-x-3 max-lg:space-x-2 max-md:space-x-1">
+                    {/* Right: Action Button Groups with Separation - Third at 1244px - Horizontal row on mobile */}
+                    <div className="flex items-center space-x-6 xl:space-x-6 flex-shrink-0 max-lg:space-x-3 max-md:space-x-2 min-[1024px]:max-[1279px]:grid min-[1024px]:max-[1279px]:grid-cols-2 min-[1024px]:max-[1279px]:grid-rows-2 min-[1024px]:max-[1279px]:gap-2 min-[1024px]:max-[1279px]:space-x-0 max-md:w-full max-md:justify-between">
+                      {/* Submit Button - Grid position [1,1] */}
                       <button
                         onClick={() => handleCategorySubmit(categoryKey)}
                         disabled={!categoryInputs[categoryKey]?.trim()}
-                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
+                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:w-16 min-[1024px]:max-[1279px]:px-1 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-2 max-md:py-1 max-md:text-xs max-md:flex-1"
                         title="Add this element to your prompt"
                       >
-                        <span className="max-md:hidden">Submit</span>
-                        <span className="md:hidden">✓</span>
+                        Submit
                       </button>
                       
+                      {/* Expand Button - Grid position [1,2] */}
                       <LoadingButton
                         onClick={() => handleCategoryExpand(categoryKey)}
                         loading={isLoading(`${categoryKey}-expand`)}
@@ -860,7 +859,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           // Enable if there's input OR if there's existing content to enhance
                           return !hasInput && !hasExistingContent;
                         })()}
-                        className={`relative px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
+                        className={`relative px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:w-16 min-[1024px]:max-[1279px]:px-1 min-[1024px]:max-[1279px]:py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:brightness-110 hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-2 max-md:py-1 max-md:text-xs max-md:flex-1 ${
                           expandSparkles.has(categoryKey) ? 'expand-sparkle' : ''
                         }`}
                         title={(() => {
@@ -884,23 +883,11 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           const count = enhanceButtonCounts[categoryKey];
                           const buttonText = hasExistingContent ? "Enhance" : "Expand";
                           const shortText = hasExistingContent ? "Enh" : "Exp";
-                          return count > 0 ? (
-                            <>
-                              <span className="max-md:hidden">{buttonText} ({count})</span>
-                              <span className="md:hidden">{shortText}({count})</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="max-md:hidden">{buttonText}</span>
-                              <span className="md:hidden">{shortText}</span>
-                            </>
-                          );
+                          return count > 0 ? `${buttonText} (${count})` : buttonText;
                         })()}
                       </LoadingButton>
-                      </div>
                       
-                      {/* Secondary Actions Group */}
-                      <div className="flex items-center space-x-3 xl:space-x-3 max-lg:space-x-2 max-md:space-x-1">
+                      {/* Load Button - Grid position [2,1] */}
                       <LoadingButton
                         onClick={() => handleLoad(categoryKey)}
                         loading={isLoading(`load-${categoryKey}`)}
@@ -911,7 +898,7 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                           (categoryKey === 'style' && savedStyles.length === 0) ||
                           (categoryKey === 'audio' && savedAudio.length === 0)
                         }
-                        className={`px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px] ${
+                        className={`px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:w-16 min-[1024px]:max-[1279px]:px-1 min-[1024px]:max-[1279px]:py-1.5 bg-cinema-teal hover:bg-cinema-teal/90 hover:shadow-lg hover:shadow-cinema-teal/30 disabled:bg-cinema-teal/30 disabled:border-cinema-teal/40 disabled:text-cinema-teal disabled:cursor-not-allowed text-white disabled:text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 border border-transparent disabled:border disabled:hover:shadow-none max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-2 max-md:py-1 max-md:text-xs max-md:flex-1 ${
                           loadGlowEffects.has(categoryKey) ? 'load-activation-glow' : ''
                         }`}
                         title={(() => {
@@ -936,23 +923,21 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
                         })()}
                         loadingText="..."
                       >
-                        <span className="max-md:hidden">Load</span>
-                        <span className="md:hidden">L</span>
+                        Load
                       </LoadingButton>
                       
+                      {/* Template Button - Grid position [2,2] */}
                       <button
                         onClick={() => {
                           setActiveCategory(categoryKey);
                           setShowTemplateModal(true);
                         }}
                         disabled={Object.keys(category.templates).length === 0}
-                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:px-1.5 min-[1024px]:max-[1279px]:py-1.5 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-1 max-md:py-1 max-md:text-[10px]"
+                        className="px-2 py-2 xl:px-2 xl:py-2 min-[1024px]:max-[1279px]:w-16 min-[1024px]:max-[1279px]:px-1 min-[1024px]:max-[1279px]:py-1.5 bg-purple-700 hover:bg-purple-800 hover:shadow-lg hover:shadow-purple-500/20 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm xl:text-sm min-[1024px]:max-[1279px]:text-xs rounded font-medium transition-all duration-200 max-lg:px-1.5 max-lg:py-1.5 max-lg:text-xs max-md:px-2 max-md:py-1 max-md:text-xs max-md:flex-1"
                         title="Insert a preset idea"
                       >
-                        <span className="max-md:hidden">Template</span>
-                        <span className="md:hidden">T</span>
+                        Template
                       </button>
-                      </div>
                     </div>
                   </div>
                 </div>

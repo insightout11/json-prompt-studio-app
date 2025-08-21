@@ -692,54 +692,54 @@ const App = () => {
   // Main app render
   return (
     <div className="min-h-screen bg-light-surface dark:bg-cinema-black transition-colors duration-300 safe-area">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 min-[1025px]:max-[1439px]:max-w-none min-[1025px]:max-[1439px]:px-2 py-3 sm:py-4 lg:py-6">
         
         {/* HEADER SECTION */}
         <header className="header-base mb-4 sm:mb-6 bg-light-panel/90 dark:bg-cinema-panel/90 backdrop-blur-md border border-light-border dark:border-cinema-border rounded-xl shadow-light-elevated dark:shadow-glow-soft hover:shadow-light-primary dark:hover:shadow-xl transition-all duration-300" role="banner">
           {/* Desktop & Tablet Header - Single Responsive Layout */}
           <div className="hidden md:block py-3 px-4 transition-all duration-300">
-            <div className="min-[1280px]:grid min-[1280px]:grid-cols-12 min-[1280px]:gap-4 max-[1279px]:flex max-[1279px]:flex-wrap max-[1279px]:justify-between max-[1279px]:gap-3 items-center">
+            <div className="flex items-center justify-between w-full">
               
-              {/* LEFT SECTION - Project & Library Manager */}
-              <div data-tutorial="project-system" className="min-[1280px]:col-span-3 flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
-                <Logo size="small" />
+              {/* LEFT SECTION - Logo & Menu */}
+              <div data-tutorial="project-system" className="flex items-center space-x-0.5 min-[768px]:max-[1023px]:space-x-0 flex-shrink-0 -ml-8">
+                <Logo size="small" className="-ml-6" />
                 <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
               </div>
 
-              {/* CENTER SECTION - CTA Group */}
-              <div data-tutorial="quick-tools" className="min-[1280px]:col-span-6 flex items-center flex-wrap gap-2 min-[1280px]:justify-center max-[1279px]:justify-center min-w-0">
-                {/* Templates & Presets - Full version for ≥1025px */}
-                <div className="min-[1025px]:block">
+              {/* CENTER SECTION - Purple Buttons */}
+              <div data-tutorial="quick-tools" className="flex items-center flex-wrap gap-2 justify-center min-w-0">
+                {/* Templates & Presets - Full version for ≥1020px */}
+                <div className="min-[1020px]:block">
                   <TemplateSelector />
                 </div>
                 
-                {/* Templates Icon-only for ≤1024px */}
-                <TemplateSelector className="max-[1024px]:block min-[1025px]:hidden" iconOnly={true} />
+                {/* Templates Icon-only for ≤767px (mobile only) */}
+                <TemplateSelector className="max-[767px]:block min-[768px]:hidden" iconOnly={true} />
                 
                 {/* Viral Generator */}
                 <button
                   onClick={() => setShowViralGenerator(true)}
-                  className="min-[1280px]:px-4 min-[1280px]:py-2 max-[1279px]:px-3 max-[1279px]:py-2 max-[1024px]:px-2 max-[1024px]:py-1.5 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
+                  className="min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 max-[767px]:px-2 max-[767px]:py-1.5 rounded-md font-semibold min-[768px]:max-[1023px]:text-xs text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center"
                   title="Viral Video Generator"
                 >
-                  <span className="mr-2 max-[1024px]:mr-0">📈</span>
+                  <span className="mr-2 max-[1019px]:mr-0">📈</span>
                   <span className="min-[1280px]:inline hidden">Viral Gen</span>
-                  <span className="max-[1279px]:inline min-[1025px]:inline max-[1024px]:hidden min-[1280px]:hidden">Viral Gen</span>
+                  <span className="max-[1279px]:inline min-[1020px]:inline max-[1019px]:hidden min-[1280px]:hidden">Viral Gen</span>
                 </button>
                 
                 {/* Randomize Tools */}
                 <div className="relative overflow-visible" ref={randomizeDropdownRef}>
                   <button
                     onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                    className="min-[1280px]:px-4 min-[1280px]:py-2 max-[1279px]:px-3 max-[1279px]:py-2 max-[1024px]:px-2 max-[1024px]:py-1.5 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center whitespace-nowrap"
+                    className="min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 max-[767px]:px-2 max-[767px]:py-1.5 rounded-md font-semibold min-[768px]:max-[1023px]:text-xs text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center whitespace-nowrap"
                     title="Randomize Elements"
                   >
-                    <span className="mr-2 max-[1024px]:mr-1">🎲</span>
+                    <span className="mr-2 max-[1019px]:mr-1">🎲</span>
                     <span className="min-[1280px]:inline hidden">Randomize</span>
-                    <span className="max-[1279px]:inline min-[1025px]:inline max-[1024px]:hidden min-[1280px]:hidden">Randomize</span>
-                    <span className="max-[1024px]:inline min-[1025px]:hidden">Rnd</span>
+                    <span className="max-[1279px]:inline min-[1020px]:inline max-[1019px]:hidden min-[1280px]:hidden">Randomize</span>
+                    <span className="max-[1019px]:inline min-[1020px]:hidden">Rnd</span>
                     <svg
-                      className={`ml-1 min-[1280px]:w-4 min-[1280px]:h-4 max-[1279px]:w-4 max-[1279px]:h-4 max-[1024px]:w-3 max-[1024px]:h-3 max-[1024px]:ml-0.5 transition-transform duration-200 flex-shrink-0 ${
+                      className={`ml-1 min-[1280px]:w-4 min-[1280px]:h-4 max-[1279px]:w-4 max-[1279px]:h-4 max-[1019px]:w-3 max-[1019px]:h-3 max-[1019px]:ml-0.5 transition-transform duration-200 flex-shrink-0 ${
                         showRandomizeDropdown ? 'rotate-180' : ''
                       }`}
                       fill="none"
@@ -753,45 +753,27 @@ const App = () => {
                 </div>
               </div>
 
-              {/* RIGHT SECTION - View Controls */}
-              <div className="min-[1280px]:col-span-3 flex items-center justify-end space-x-2 lg:space-x-3 flex-shrink-0">
+              {/* RIGHT SECTION - Cinematic Toggle */}
+              <div className="flex items-center justify-end flex-shrink-0 -mr-2">
                 <CinematicModeToggle />
               </div>
             </div>
           </div>
 
-          {/* Mobile Header - Stacked Layout */}
-          <div className="md:hidden flex flex-col space-y-3 p-3 safe-area transition-all duration-300">
-            {/* Top Row: Logo and View Controls */}
+          {/* Mobile Header - Single Row Layout */}
+          <div className="md:hidden p-3 safe-area transition-all duration-300">
+            {/* Single Row: Menu (left) → Logo (center) → Cinematic (right) */}
             <div className="flex items-center justify-between">
-              <Logo size="small" width={100} height={40} />
-              <CinematicModeToggle className="scale-90" />
-            </div>
-            
-            {/* Bottom Row: Project & Library Manager and Tools */}
-            <div data-tutorial="project-system" className="flex flex-wrap gap-2 justify-center max-w-full overflow-hidden">
-              <IntegratedHeader showToast={{ showSuccess, showError, showWarning, showInfo }} />
-              <TemplateSelector />
-              <button
-                onClick={() => setShowViralGenerator(true)}
-                className="px-3 py-2 min-h-[44px] min-w-[44px] max-sm:min-h-[32px] max-sm:min-w-[32px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-1.5 max-sm:py-1"
-                aria-label="Open viral video generator"
-                title="Viral Video Generator"
-              >
-                <span className="mr-1 max-sm:mr-0.5">📈</span>
-                <span className="hidden sm:inline max-sm:text-[10px]">Viral Gen</span>
-                <span className="sm:hidden">Viral</span>
-              </button>
-              <button
-                onClick={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
-                className="px-3 py-2 min-h-[44px] min-w-[44px] max-sm:min-h-[32px] max-sm:min-w-[32px] rounded-md font-semibold text-white text-xs bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 max-sm:px-1.5 max-sm:py-1"
-                aria-label="Open randomization tools"
-                title="Randomize Elements"
-              >
-                <span className="mr-1 max-sm:mr-0.5">🎲</span>
-                <span className="hidden sm:inline">Random</span>
-                <span className="sm:hidden">Rnd</span>
-              </button>
+              <IntegratedHeader 
+                showToast={{ showSuccess, showError, showWarning, showInfo }}
+                onViralGenerator={() => setShowViralGenerator(true)}
+                onRandomize={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
+                showRandomizeDropdown={showRandomizeDropdown}
+                randomizeDropdownRef={randomizeDropdownRef}
+                renderRandomizeDropdown={renderRandomizeDropdown}
+              />
+              <Logo size="medium" width={180} height={60} />
+              <CinematicModeToggle className="scale-75" />
             </div>
           </div>
         </header>
@@ -802,7 +784,7 @@ const App = () => {
             data-tutorial="advanced-mode-toggle"
             onClick={() => setIsAdvancedMode(!isAdvancedMode)}
             className={`
-              inline-flex items-center px-4 py-2 max-sm:px-2 max-sm:py-1 rounded-full font-medium max-sm:text-xs transition-all duration-300 cursor-pointer
+              inline-flex items-center px-4 py-2 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 min-[640px]:max-[767px]:px-1.5 min-[640px]:max-[767px]:py-0.5 min-[640px]:max-[767px]:text-[10px] max-[639px]:px-1 max-[639px]:py-0.5 max-[639px]:text-[8px] max-[639px]:scale-90 rounded-full font-medium min-[768px]:max-[1023px]:text-xs transition-all duration-300 cursor-pointer
               hover:scale-105 active:scale-95 group focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-600
               bg-teal-100 text-teal-800 border-2 border-teal-200 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700 dark:hover:bg-teal-800/40
             `}
@@ -829,7 +811,7 @@ const App = () => {
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <main className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
+        <main className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-[1020px]:max-[1439px]:gap-3 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
           
           {/* LEFT PANEL */}
           <div className="space-y-4 sm:space-y-5 lg:space-y-6 h-full relative">
@@ -927,7 +909,7 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 max-sm:p-0 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 min-[1020px]:max-[1439px]:p-3 max-sm:p-0 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
               
               {/* JSON OUTPUT SECTION */}
               <div className="json-output-section max-sm:flex-1 max-sm:min-h-[60vh] max-sm:order-1 max-sm:mb-0 max-sm:-mb-8">
@@ -974,7 +956,7 @@ const App = () => {
                         <button
                           onClick={copyToClipboard}
                           disabled={copyLoading}
-                          className={`px-2 py-1 text-xs rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`px-2 py-1 min-[1024px]:max-[1279px]:px-3 min-[1024px]:max-[1279px]:py-2 text-xs min-[1024px]:max-[1279px]:text-sm rounded transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed space-x-1 ${
                             copySuccess 
                               ? 'bg-green-500 text-white' 
                               : copyLoading
@@ -988,20 +970,26 @@ const App = () => {
                           ) : copySuccess ? (
                             <span>✓</span>
                           ) : (
-                            <span>📋</span>
+                            <>
+                              <span>📋</span>
+                              <span className="hidden min-[1024px]:max-[1279px]:inline">Copy</span>
+                            </>
                           )}
                         </button>
                         
                         <button
                           onClick={() => setShowSaveModal(true)}
                           disabled={saveLoading}
-                          className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-2 py-1 min-[1024px]:max-[1279px]:px-3 min-[1024px]:max-[1279px]:py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors text-xs min-[1024px]:max-[1279px]:text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Save current scene"
                         >
                           {saveLoading ? (
                             <div className="animate-spin h-2 w-2 border border-purple-600 border-t-transparent rounded-full"></div>
                           ) : (
-                            <span>💾</span>
+                            <>
+                              <span>💾</span>
+                              <span className="hidden min-[1024px]:max-[1279px]:inline">Save</span>
+                            </>
                           )}
                         </button>
                         
@@ -1015,22 +1003,26 @@ const App = () => {
                             }
                           }}
                           disabled={undoStack.length === 0}
-                          className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          className="px-2 py-1 min-[1024px]:max-[1279px]:px-3 min-[1024px]:max-[1279px]:py-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-xs min-[1024px]:max-[1279px]:text-sm flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-400"
                           aria-label="Undo last action"
                         >
                           <span>↶</span>
+                          <span className="hidden min-[1024px]:max-[1279px]:inline">Undo</span>
                         </button>
                         
                         <button
                           onClick={handleClearAllClick}
                           disabled={clearLoading}
-                          className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-2 py-1 min-[1024px]:max-[1279px]:px-3 min-[1024px]:max-[1279px]:py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-xs min-[1024px]:max-[1279px]:text-sm flex items-center justify-center space-x-1 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label="Clear all scene data"
                         >
                           {clearLoading ? (
                             <div className="animate-spin h-2 w-2 border border-red-600 border-t-transparent rounded-full"></div>
                           ) : (
-                            <span>🗑️</span>
+                            <>
+                              <span>🗑️</span>
+                              <span className="hidden min-[1024px]:max-[1279px]:inline">Clear</span>
+                            </>
                           )}
                         </button>
                       </div>

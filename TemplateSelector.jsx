@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 import { allTemplates, getAllTemplateKeys, isPresetTemplate, getTemplate } from './templates';
 import ExperimentalModeEngine from './ExperimentalModeEngine';
@@ -60,7 +60,7 @@ const TAB_LABELS = {
   preset_audio: '🔊 Audio Presets'
 };
 
-const TemplateSelector = ({ className = "", iconOnly = false }) => {
+const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) => {
   const { applyTemplate, getTemplatePreview, clearAll, setFieldValue, applyCharacterPresetData, applyScenePresetData } = usePromptStore();
   const [showModal, setShowModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -236,8 +236,9 @@ const TemplateSelector = ({ className = "", iconOnly = false }) => {
     <>
       {/* Template Trigger Button */}
       <button
+        ref={ref}
         onClick={() => setShowModal(true)}
-        className={`px-4 py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center ${
+        className={`min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 max-[767px]:px-4 max-[767px]:py-2 rounded-md font-semibold text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:brightness-110 shadow-md transition-all duration-200 flex items-center min-[768px]:max-[1023px]:text-xs ${
           iconOnly ? 'px-3 py-2 justify-center' : ''
         } ${className}`}
         title={iconOnly ? "Templates & Presets" : undefined}
@@ -675,6 +676,8 @@ const TemplateSelector = ({ className = "", iconOnly = false }) => {
       )}
     </>
   );
-};
+});
+
+TemplateSelector.displayName = 'TemplateSelector';
 
 export default TemplateSelector;

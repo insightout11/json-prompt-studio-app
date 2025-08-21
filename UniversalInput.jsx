@@ -487,8 +487,8 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
             )}
           </div>
 
-          {/* Mode toggle and Convert button */}
-          <div className="flex flex-row space-x-3 max-sm:space-x-2 flex-shrink-0 min-[1024px]:max-[1279px]:justify-center min-[1024px]:max-[1279px]:w-full">
+          {/* Mode toggle and Convert button - stacked vertically */}
+          <div className="flex flex-col space-y-2 flex-shrink-0 min-[1024px]:max-[1279px]:flex-row min-[1024px]:max-[1279px]:space-y-0 min-[1024px]:max-[1279px]:space-x-3 min-[1024px]:max-[1279px]:justify-center min-[1024px]:max-[1279px]:w-full max-sm:flex-row max-sm:space-y-0 max-sm:space-x-2">
             {/* Toggle Switch */}
             <div className="flex items-center space-x-2 max-sm:space-x-1 bg-gray-100 dark:bg-cinema-border rounded-md p-1 max-sm:p-0.5">
               <button
