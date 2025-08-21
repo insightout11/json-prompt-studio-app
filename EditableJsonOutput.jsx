@@ -238,7 +238,7 @@ const EditableJsonOutput = ({ showToast }) => {
             {/* Edit Button - positioned in top-right outside scrollable area */}
             <button
               onClick={handleEditClick}
-              className="absolute top-2 right-2 px-3 py-2 max-sm:px-2 max-sm:py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm max-sm:text-xs rounded-md font-medium transition-all duration-200 opacity-80 hover:opacity-100 hover:scale-105 shadow-lg hover:shadow-xl z-20"
+              className="absolute top-2 right-2 px-3 py-2 max-sm:px-2 max-sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-sm max-sm:text-xs rounded-md font-medium transition-all duration-200 z-20"
               title="Edit JSON directly (Ctrl+E)"
             >
               <span className="max-sm:hidden">✏️ Edit JSON</span>
