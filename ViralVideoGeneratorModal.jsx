@@ -13,6 +13,9 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
   const [liveUpdates, setLiveUpdates] = useState(true);
   const [enhancingField, setEnhancingField] = useState(null);
   const [useAIEnhancement, setUseAIEnhancement] = useState(false);
+  
+  // Mobile navigation state
+  const [currentMobileStep, setCurrentMobileStep] = useState(1); // 1: Format, 2: Fields, 3: Preview
 
   // Viral format definitions with dropdown options
   const viralFormats = {
@@ -287,6 +290,32 @@ const ViralVideoGeneratorModal = ({ onClose }) => {
         initialInputs[field.key] = '';
       });
       setUserInputs(initialInputs);
+    }
+    // Auto-advance to next step on mobile
+    if (window.innerWidth < 768) {
+      setCurrentMobileStep(2);
+    }
+  };
+
+  // Mobile navigation functions
+  const goToNextStep = () => {
+    if (currentMobileStep < 3) {
+      setCurrentMobileStep(currentMobileStep + 1);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (currentMobileStep > 1) {
+      setCurrentMobileStep(currentMobileStep - 1);
+    }
+  };
+
+  const getMobileStepTitle = () => {
+    switch (currentMobileStep) {
+      case 1: return 'Choose Format';
+      case 2: return 'Fill Details';
+      case 3: return 'Review & Generate';
+      default: return 'Viral Video Generator';
     }
   };
 
@@ -761,8 +790,10 @@ Return only the enhanced JSON object, properly formatted.`;
           <div className="flex items-center responsive-gap">
             <span className="text-3xl">🔥</span>
             <div>
-              <h2 className="fluid-text-lg font-bold">Viral Video Generator</h2>
-              <p className="fluid-text-xs text-purple-100">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
+              <h2 className="fluid-text-lg font-bold md:block hidden">Viral Video Generator</h2>
+              <h2 className="fluid-text-lg font-bold md:hidden">{getMobileStepTitle()}</h2>
+              <p className="fluid-text-xs text-purple-100 md:block hidden">Dropdown inputs • Manual override • AI enhance • Live JSON</p>
+              <p className="fluid-text-xs text-purple-100 md:hidden">Step {currentMobileStep} of 3</p>
             </div>
           </div>
           <div className="button-wrap-mobile lg:flex lg:items-center responsive-gap">
@@ -806,7 +837,8 @@ Return only the enhanced JSON object, properly formatted.`;
           </div>
         </div>
 
-        <div className="flex flex-row h-[75vh]">
+        {/* Desktop Layout */}
+        <div className="hidden md:flex flex-row h-[75vh]">
           {/* Left Panel - Format Selection */}
           <div className="w-1/3 border-r border-gray-200 dark:border-cinema-border overflow-y-auto">
             <div className="responsive-spacing">
@@ -1066,6 +1098,247 @@ Return only the enhanced JSON object, properly formatted.`;
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Step-based Navigation */}
+        <div className="md:hidden flex flex-col h-[calc(100vh-120px)]">
+          {/* Step Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Step 1: Format Selection */}
+            {currentMobileStep === 1 && (
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-4 text-center">🎬 Choose Your Format</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {Object.entries(viralFormats).map(([formatId, format]) => (
+                    <button
+                      key={formatId}
+                      onClick={() => handleFormatSelect(formatId)}
+                      className={`p-4 border-2 rounded-lg transition-all duration-300 ${
+                        selectedFormat === formatId
+                          ? 'border-purple-500 bg-purple-50 dark:border-purple-500 dark:bg-purple-900/20'
+                          : 'border-gray-200 hover:border-purple-300 dark:border-cinema-border dark:hover:border-purple-500/50 bg-white dark:bg-cinema-card'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <span className="text-2xl">{format.icon}</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium text-gray-900 dark:text-cinema-text text-sm mb-1">
+                            {format.name}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-cinema-text-muted">
+                            {format.description}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Input Fields */}
+            {currentMobileStep === 2 && selectedFormat && (
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-4 text-center">
+                  ✨ {viralFormats[selectedFormat].name} Details
+                </h3>
+                
+                <div className="space-y-6">
+                  {viralFormats[selectedFormat].fields.map((field) => (
+                    <div key={field.key} className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-cinema-text">
+                        {field.label}
+                      </label>
+                      
+                      {/* Dropdown with options */}
+                      <select
+                        value={userInputs[field.key] || ''}
+                        onChange={(e) => handleInputChange(field.key, e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                      >
+                        <option value="">Select {field.label.toLowerCase()}...</option>
+                        {field.options.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                      
+                      <div className="text-center">
+                        <span className="text-xs text-gray-500 dark:text-cinema-text-muted">OR</span>
+                      </div>
+                      
+                      {/* Manual text input */}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={userInputs[field.key] || ''}
+                          onChange={(e) => handleInputChange(field.key, e.target.value)}
+                          placeholder={`Write your own ${field.label.toLowerCase()}...`}
+                          className="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-cinema-border rounded-md bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                        />
+                        
+                        {/* Enhance Button */}
+                        <button
+                          onClick={() => handleEnhance(field.key)}
+                          disabled={!userInputs[field.key] || enhancingField === field.key}
+                          className={`absolute right-2 top-2 bottom-2 px-3 text-xs font-medium rounded transition-colors ${
+                            !userInputs[field.key] || enhancingField === field.key
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-purple-500 hover:bg-purple-600 text-white'
+                          }`}
+                        >
+                          {enhancingField === field.key ? (
+                            <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            '✨'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Preview & Generate */}
+            {currentMobileStep === 3 && selectedFormat && (
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 dark:text-cinema-text mb-4 text-center">
+                  📄 Review & Generate
+                </h3>
+                
+                {/* Format Info */}
+                <div className="bg-white dark:bg-cinema-panel p-4 rounded-lg border border-gray-200 dark:border-cinema-border mb-4">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">{viralFormats[selectedFormat].icon}</span>
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-cinema-text">
+                        {viralFormats[selectedFormat].name}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-cinema-text-muted">
+                        Complete structured prompt
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* JSON Preview */}
+                <div className="bg-gray-900 dark:bg-cinema-black rounded-lg p-4 border border-gray-700 dark:border-cinema-border mb-4">
+                  <div className="text-xs text-gray-300 mb-2">JSON Output:</div>
+                  <div className="text-green-400 dark:text-cinema-teal text-xs font-mono leading-relaxed max-h-32 overflow-y-auto">
+                    {(() => {
+                      try {
+                        const jsonOutput = usePromptStore.getState().getJsonOutput();
+                        if (jsonOutput && jsonOutput.trim()) {
+                          return (
+                            <pre className="whitespace-pre-wrap">
+                              {JSON.stringify(JSON.parse(jsonOutput), null, 2)}
+                            </pre>
+                          );
+                        }
+                      } catch (e) {
+                        // Fall back to empty state
+                      }
+                      return (
+                        <div className="text-gray-500 italic">
+                          Fill in fields to see JSON output...
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Generate Button */}
+                <button
+                  onClick={handleManualGenerate}
+                  disabled={isGenerating || !selectedFormat}
+                  className={`w-full py-4 rounded-lg text-base font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                    isGenerating || !selectedFormat
+                      ? 'bg-gray-400 cursor-not-allowed text-white'
+                      : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  {isGenerating ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xl">{useAIEnhancement ? '🎯' : '🚀'}</span>
+                      <span>{useAIEnhancement ? 'AI Enhance & Generate' : 'Generate JSON'}</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Success Message */}
+                {showGenerateSuccess && (
+                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg">
+                    <div className="flex items-center justify-center space-x-2">
+                      <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                        ✨ JSON Generated Successfully!
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Navigation Footer */}
+          <div className="p-4 border-t border-gray-200 dark:border-cinema-border bg-gray-50 dark:bg-cinema-card">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={goToPreviousStep}
+                disabled={currentMobileStep === 1}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  currentMobileStep === 1
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20'
+                }`}
+              >
+                ← Previous
+              </button>
+
+              {/* Step Indicators */}
+              <div className="flex space-x-2">
+                {[1, 2, 3].map((step) => (
+                  <div
+                    key={step}
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      step === currentMobileStep
+                        ? 'bg-purple-500'
+                        : step < currentMobileStep
+                        ? 'bg-green-500'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={goToNextStep}
+                disabled={currentMobileStep === 3 || (currentMobileStep === 1 && !selectedFormat)}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  currentMobileStep === 3 || (currentMobileStep === 1 && !selectedFormat)
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20'
+                }`}
+              >
+                Next →
+              </button>
             </div>
           </div>
         </div>

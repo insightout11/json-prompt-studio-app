@@ -257,8 +257,8 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
 
       {/* Template Selection Modal */}
       {showModal && createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto z-[3000]">
-          <div className="bg-white dark:bg-cinema-panel rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border transition-all duration-300">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-0 md:p-4 overflow-y-auto z-[3000]">
+          <div className="bg-white dark:bg-cinema-panel md:rounded-lg shadow-xl dark:shadow-glow-soft max-w-4xl w-full h-full md:h-auto md:max-h-[90vh] overflow-hidden border border-transparent dark:border-cinema-border transition-all duration-300">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-cinema-border">
@@ -277,7 +277,7 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
 
             {/* Tab Navigation */}
             <div className="border-b border-gray-200 dark:border-cinema-border">
-              <nav className="flex space-x-8 px-6" aria-label="Tabs">
+              <nav className="flex space-x-0 md:space-x-8 px-2 md:px-6 overflow-x-auto" aria-label="Tabs">
                 {Object.entries(TAB_LABELS).map(([tabKey, label]) => {
                   const templateCount = tabKey === 'experimental' 
                     ? TEMPLATE_CATEGORIES[tabKey].length 
@@ -286,14 +286,14 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                     <button
                       key={tabKey}
                       onClick={() => handleTabChange(tabKey)}
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-300 whitespace-nowrap ${
+                      className={`py-3 md:py-4 px-2 md:px-1 border-b-2 font-medium text-xs md:text-sm transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
                         activeTab === tabKey
                           ? 'border-indigo-500 text-indigo-600 dark:border-cinema-teal dark:text-cinema-teal'
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text hover:border-gray-300 dark:hover:border-cinema-border'
                       }`}
                     >
-                      <span>{label}</span>
-                      <span className="ml-2 bg-gray-100 text-gray-900 dark:bg-cinema-card dark:text-cinema-text py-0.5 px-2.5 rounded-full text-xs transition-colors duration-300">
+                      <span className="block md:inline">{label}</span>
+                      <span className="ml-1 md:ml-2 bg-gray-100 text-gray-900 dark:bg-cinema-card dark:text-cinema-text py-0.5 px-1.5 md:px-2.5 rounded-full text-xs transition-colors duration-300">
                         {templateCount}
                       </span>
                     </button>
@@ -302,11 +302,11 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
               </nav>
             </div>
 
-            <div className="flex h-[60vh]">
+            <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] md:h-[60vh]">
               {/* Template Grid */}
-              <div className="flex-1 p-6 overflow-y-auto bg-white dark:bg-cinema-panel/30 transition-colors duration-300">
+              <div className="flex-1 p-3 md:p-6 overflow-y-auto bg-white dark:bg-cinema-panel/30 transition-colors duration-300">
                 {getFilteredTemplates().length > 0 ? (
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                     {getFilteredTemplates().map((templateKey) => {
                       // Handle experimental formats differently
                       if (activeTab === 'experimental') {
@@ -317,7 +317,7 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                           <button
                             key={templateKey}
                             onClick={() => handleTemplateSelect(templateKey)}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 group ${
+                            className={`p-4 md:p-4 border-2 rounded-lg transition-all duration-300 group min-h-[80px] md:min-h-auto ${
                               selectedTemplate === templateKey
                                 ? 'border-purple-500 bg-purple-50 dark:border-purple-500 dark:bg-purple-900/20 dark:shadow-glow-purple'
                                 : 'border-gray-200 hover:border-purple-300 dark:border-cinema-border dark:hover:border-purple-500/50 bg-white dark:bg-cinema-card hover:shadow-md dark:hover:shadow-glow-soft dark:hover:transform dark:hover:translateY(-2px)'
@@ -347,7 +347,7 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                           <button
                             key={templateKey}
                             onClick={() => handleTemplateSelect(templateKey)}
-                            className={`p-4 border-2 rounded-lg transition-all duration-300 group relative ${
+                            className={`p-4 md:p-4 border-2 rounded-lg transition-all duration-300 group relative min-h-[80px] md:min-h-auto ${
                               selectedTemplate === templateKey
                                 ? 'border-indigo-500 bg-indigo-50 dark:border-cinema-teal dark:bg-cinema-teal/10 dark:shadow-glow-teal'
                                 : `border-gray-200 hover:border-gray-300 dark:border-cinema-border dark:hover:border-cinema-teal/50 bg-white dark:bg-cinema-card hover:shadow-md dark:hover:shadow-glow-soft dark:hover:transform dark:hover:translateY(-2px) ${
@@ -392,9 +392,9 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                 )}
               </div>
 
-              {/* Preview Panel */}
+              {/* Preview Panel - Desktop Side Panel */}
               {selectedTemplate && preview && (
-                <div className="w-80 border-l border-gray-200 dark:border-cinema-border bg-gray-50 dark:bg-cinema-card flex flex-col transition-colors duration-300">
+                <div className="hidden md:flex w-80 border-l border-gray-200 dark:border-cinema-border bg-gray-50 dark:bg-cinema-card flex-col transition-colors duration-300">
                   {/* Scrollable Content */}
                   <div className="flex-1 p-6 overflow-y-auto">
                     <div className="space-y-4">
@@ -666,6 +666,80 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                     >
                       🚀 Apply Experimental Content
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Mobile Preview Overlay */}
+              {selectedTemplate && preview && (
+                <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+                  <div className="bg-white dark:bg-cinema-panel w-full max-h-[80vh] rounded-t-xl border-t border-gray-200 dark:border-cinema-border flex flex-col">
+                    {/* Mobile Preview Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-cinema-border">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{allTemplates[selectedTemplate]?.icon || '🎬'}</span>
+                        <span className="font-semibold text-gray-900 dark:text-cinema-text text-sm">
+                          {preview.name}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedTemplate(null)}
+                        className="text-gray-400 hover:text-gray-600 dark:text-cinema-text-muted dark:hover:text-cinema-text p-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Mobile Preview Content */}
+                    <div className="flex-1 p-4 overflow-y-auto">
+                      <div className="space-y-4">
+                        {/* Description */}
+                        <p className="text-sm text-gray-600 dark:text-cinema-text-muted">
+                          {preview.description}
+                        </p>
+
+                        {/* Preview Summary */}
+                        <div className="bg-gray-50 dark:bg-cinema-card p-3 rounded-md border border-gray-200 dark:border-cinema-border">
+                          <div className="text-sm font-medium text-gray-900 dark:text-cinema-text mb-2">
+                            Will apply {preview.fieldCount || Object.keys(preview.fields || {}).length} fields
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-cinema-text-muted">
+                            {preview.categoriesAffected ? preview.categoriesAffected.join(', ') : 'Multiple categories'}
+                          </div>
+                        </div>
+
+                        {/* Field List - Collapsed on mobile */}
+                        <div className="bg-gray-50 dark:bg-cinema-card p-3 rounded-md border border-gray-200 dark:border-cinema-border">
+                          <div className="text-sm font-medium text-gray-900 dark:text-cinema-text mb-2">
+                            Fields to be set:
+                          </div>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {Object.entries(preview.fields || {}).slice(0, 5).map(([key, value]) => (
+                              <div key={key} className="text-xs text-gray-600 dark:text-cinema-text-muted">
+                                <span className="font-medium">{key}:</span> {value.length > 30 ? value.substring(0, 30) + '...' : value}
+                              </div>
+                            ))}
+                            {Object.keys(preview.fields || {}).length > 5 && (
+                              <div className="text-xs text-gray-500 dark:text-cinema-text-muted italic">
+                                ...and {Object.keys(preview.fields || {}).length - 5} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mobile Apply Button */}
+                    <div className="p-4 border-t border-gray-200 dark:border-cinema-border">
+                      <button
+                        onClick={handleApply}
+                        className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 text-white font-medium rounded-md transition-all duration-300 text-base"
+                      >
+                        {(isPresetCategory(activeTab) || isPresetTemplate(selectedTemplate)) ? 'Apply Preset' : 'Apply Template'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
