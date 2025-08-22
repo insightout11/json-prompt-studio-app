@@ -8,7 +8,7 @@ const CinematicModeToggle = ({ className = "" }) => {
     <button
       onClick={toggleTheme}
       className={`
-        relative inline-flex items-center min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 max-[767px]:px-3 max-[767px]:py-2 rounded-md font-medium min-[1280px]:text-sm min-[1024px]:max-[1279px]:text-sm min-[768px]:max-[1023px]:text-xs max-[767px]:text-sm transition-all duration-300 group
+        relative inline-flex items-center min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 min-[420px]:max-[767px]:px-3 min-[420px]:max-[767px]:py-2 max-[419px]:px-2 max-[419px]:py-2 rounded-md font-medium min-[1280px]:text-sm min-[1024px]:max-[1279px]:text-sm min-[768px]:max-[1023px]:text-xs max-[767px]:text-sm transition-all duration-300 group
         bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal
         ${className}
       `}
@@ -16,7 +16,7 @@ const CinematicModeToggle = ({ className = "" }) => {
       title={`${isDarkMode ? 'Light' : 'Cinematic'} Mode`}
     >
       {/* Icon container with smooth transition */}
-      <div className="relative w-5 h-5 mr-2">
+      <div className="relative w-5 h-5 mr-2 max-[419px]:mr-0">
         {/* Moon Icon for Dark/Cinematic Mode */}
         <div className={`
           absolute inset-0 transition-all duration-300 transform
@@ -34,7 +34,7 @@ const CinematicModeToggle = ({ className = "" }) => {
         </div>
       </div>
       
-      <span className="relative z-10">
+      <span className="relative z-10 max-[419px]:hidden">
         {isDarkMode ? 'Cinematic' : 'Light'}
       </span>
       

@@ -22,14 +22,21 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
     if (textarea) {
       textarea.style.height = 'auto';
       const scrollHeight = textarea.scrollHeight;
-      // Min height: single line (~40px), Max height: 120px (3 lines)
-      textarea.style.height = Math.min(Math.max(scrollHeight, 40), 120) + 'px';
+      // Min height: 2 lines (~80px), Max height: 200px (5 lines)
+      textarea.style.height = Math.min(Math.max(scrollHeight, 80), 200) + 'px';
     }
   };
 
   useEffect(() => {
     adjustTextareaHeight();
   }, [textInput]);
+
+  // Adjust textarea height when switching back to text mode
+  useEffect(() => {
+    if (inputMode === 'text-to-json') {
+      adjustTextareaHeight();
+    }
+  }, [inputMode]);
 
   // Reset conversion state when input changes
   useEffect(() => {
@@ -473,16 +480,6 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
                   disabled={isConverting}
                   rows={1}
                 />
-                
-                {/* Input helpers */}
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs text-gray-500 dark:text-cinema-text-muted">
-                    Ctrl+Enter to convert
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-cinema-text-muted">
-                    {textInput.length}/500
-                  </span>
-                </div>
               </div>
             )}
           </div>
@@ -494,25 +491,25 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
               <button
                 onClick={() => setInputMode('text-to-json')}
                 disabled={isConverting}
-                className={`px-3 py-1.5 max-sm:px-2 max-sm:py-1 text-sm max-sm:text-xs font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-0.5 ${
+                className={`px-3 py-1.5 max-sm:px-4 max-sm:py-2 text-sm max-sm:text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-1 ${
                   inputMode === 'text-to-json'
                     ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
                 }`}
               >
-                <span className="max-sm:text-xs">✨</span>
+                <span className="max-sm:text-sm">✨</span>
                 <span className="max-sm:hidden">Text</span>
               </button>
               <button
                 onClick={() => setInputMode('image-to-json')}
                 disabled={isConverting}
-                className={`px-3 py-1.5 max-sm:px-2 max-sm:py-1 text-sm max-sm:text-xs font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-0.5 ${
+                className={`px-3 py-1.5 max-sm:px-4 max-sm:py-2 text-sm max-sm:text-sm font-medium rounded transition-all duration-200 flex items-center space-x-1 max-sm:space-x-1 ${
                   inputMode === 'image-to-json'
                     ? 'bg-white dark:bg-cinema-card text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-gray-600 dark:text-cinema-text-muted hover:text-gray-800 dark:hover:text-cinema-text'
                 }`}
               >
-                <span className="max-sm:text-xs">📸</span>
+                <span className="max-sm:text-sm">📸</span>
                 <span className="max-sm:hidden">Image</span>
               </button>
             </div>
@@ -528,7 +525,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
                   ? 'Convert text description to JSON fields'
                   : 'Analyze image and extract scene details'
               }
-              className={`px-4 py-2 max-sm:px-3 max-sm:py-1.5 rounded-md text-sm max-sm:text-xs font-medium transition-all duration-300 flex items-center justify-center space-x-2 max-sm:space-x-1 ${
+              className={`px-4 py-2 max-sm:px-6 max-sm:py-3 rounded-md text-sm max-sm:text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2 max-sm:space-x-2 ${
                 isConverting || (inputMode === 'text-to-json' && !textInput.trim()) || (inputMode === 'image-to-json' && !uploadedImage)
                   ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   : inputMode === 'text-to-json' && hasConverted && textInput === lastConvertedInput

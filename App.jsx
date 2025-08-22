@@ -909,7 +909,7 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 min-[1020px]:max-[1439px]:p-3 max-sm:p-2 max-[639px]:p-3 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 min-[1020px]:max-[1439px]:p-3 max-[639px]:p-3 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
               
               {/* JSON OUTPUT SECTION */}
               <div className="json-output-section max-sm:flex-1 max-sm:min-h-[40vh] max-[639px]:min-h-[30vh] max-sm:order-1 max-sm:mb-0 max-sm:-mb-8">

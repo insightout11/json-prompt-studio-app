@@ -163,12 +163,12 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
     return (
       <div>
         {/* Row of 5 AI feature buttons - sized similar to Convert button */}
-        <div className="flex justify-center space-x-2 max-sm:space-x-1 max-sm:justify-center max-sm:overflow-x-auto max-sm:px-2">
+        <div className="flex justify-center space-x-2 max-sm:space-x-1 max-sm:justify-center max-sm:overflow-x-auto max-sm:px-2 max-[419px]:grid max-[419px]:grid-cols-3 max-[419px]:gap-1 max-[419px]:space-x-0">
           {proFeatures.slice(0, 5).map((feature) => (
             <button
               key={feature.id}
               onClick={() => handleFeatureClick(feature.id)}
-              className={`flex-1 max-sm:flex-shrink-0 max-sm:min-w-[4rem] px-3 py-2 max-sm:px-1 max-sm:py-1 rounded-md text-sm max-sm:text-xs font-medium transition-all duration-300 flex items-center justify-center space-x-1 max-sm:space-x-0 max-sm:flex-col ${
+              className={`flex-1 max-sm:flex-shrink-0 max-sm:min-w-[4rem] px-3 py-2 max-sm:px-2 max-sm:py-2 rounded-md text-sm max-sm:text-xs font-medium transition-all duration-300 flex items-center justify-center space-x-1 max-sm:space-x-0 max-sm:flex-col ${
                 activeFeature === feature.id
                   ? 'bg-cinema-teal text-white shadow-md'
                   : 'bg-gray-100 dark:bg-cinema-border text-gray-700 dark:text-cinema-text hover:bg-gray-200 dark:hover:bg-cinema-card shadow-sm hover:shadow-md'
@@ -176,7 +176,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
               title={feature.name}
             >
               <span className="text-base max-sm:text-sm">{feature.icon}</span>
-              <span className="text-xs font-medium max-sm:text-[8px] max-sm:leading-tight">{feature.name}</span>
+              <span className="text-xs font-medium max-sm:text-[10px] max-sm:leading-tight">{feature.name}</span>
             </button>
           ))}
         </div>
