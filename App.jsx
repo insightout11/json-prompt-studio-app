@@ -934,7 +934,7 @@ const App = () => {
                       JSON Output
                     </h2>
                     <div className="flex items-center space-x-2">
-                      <div data-tutorial="advanced-controls" className="flex items-center space-x-1">
+                      <div data-tutorial="advanced-controls" className="flex items-center space-x-1 max-[370px]:hidden">
                         <span className="text-xs text-gray-500 dark:text-cinema-text-muted">Ratio:</span>
                         <select
                           value={aspectRatio}
@@ -1122,6 +1122,23 @@ const App = () => {
                 
                 {/* JSON Editor */}
                 <EditableJsonOutput showToast={{ showSuccess, showError, showWarning, showInfo }} />
+                
+                {/* Aspect Ratio Control - Mobile Only (370px and below) */}
+                <div className="min-[371px]:hidden mt-3 flex items-center justify-center space-x-2">
+                  <span className="text-xs text-gray-600 dark:text-cinema-text-muted">Ratio:</span>
+                  <select
+                    value={aspectRatio}
+                    onChange={(e) => setAspectRatio(e.target.value)}
+                    className="text-xs px-2 py-1 bg-white dark:bg-cinema-panel border border-gray-300 dark:border-cinema-border rounded text-gray-700 dark:text-cinema-text focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    aria-label="Select aspect ratio for video output"
+                  >
+                    <option value="1:1">🔳 1:1</option>
+                    <option value="16:9">🖥️ 16:9</option>
+                    <option value="9:16">📱 9:16</option>
+                    <option value="4:3">📺 4:3</option>
+                    <option value="21:9">🎬 21:9</option>
+                  </select>
+                </div>
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}
