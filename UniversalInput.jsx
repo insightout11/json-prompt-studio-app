@@ -404,7 +404,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
   return (
     <div className={`bg-white dark:bg-cinema-card rounded-lg shadow-lg dark:shadow-glow-soft border border-gray-200 dark:border-cinema-border max-sm:mb-0 ${className}`}>
       <div className="p-4 max-sm:p-0 max-sm:pb-1">
-        <div className="flex flex-row items-start space-x-3 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:space-x-0 min-[1024px]:max-[1279px]:space-y-3 max-sm:flex-col max-sm:space-x-0 max-sm:space-y-1">
+        <div className="flex flex-row items-start space-x-3 min-[1024px]:max-[1279px]:flex-col min-[1024px]:max-[1279px]:space-x-0 min-[1024px]:max-[1279px]:space-y-3 max-sm:flex-col max-sm:space-x-0 max-sm:space-y-1 max-sm:items-center">
           {/* Input area - changes based on mode */}
           <div className="flex-1 min-[1024px]:max-[1279px]:w-full max-sm:w-full">
             {inputMode === 'image-to-json' ? (
@@ -488,7 +488,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
           </div>
 
           {/* Mode toggle and Convert button - stacked vertically */}
-          <div className="flex flex-col space-y-2 flex-shrink-0 min-[1024px]:max-[1279px]:flex-row min-[1024px]:max-[1279px]:space-y-0 min-[1024px]:max-[1279px]:space-x-3 min-[1024px]:max-[1279px]:justify-center min-[1024px]:max-[1279px]:w-full max-sm:flex-row max-sm:space-y-0 max-sm:space-x-2">
+          <div className="flex flex-col space-y-2 flex-shrink-0 min-[1024px]:max-[1279px]:flex-row min-[1024px]:max-[1279px]:space-y-0 min-[1024px]:max-[1279px]:space-x-3 min-[1024px]:max-[1279px]:justify-center min-[1024px]:max-[1279px]:w-full max-sm:flex-row max-sm:space-y-0 max-sm:space-x-2 max-sm:justify-center max-sm:items-center">
             {/* Toggle Switch */}
             <div className="flex items-center space-x-2 max-sm:space-x-1 bg-gray-100 dark:bg-cinema-border rounded-md p-1 max-sm:p-0.5">
               <button
@@ -570,7 +570,7 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
 
         {/* AI Features positioned directly under Text/Image/Convert buttons */}
         {aiFeatures && (
-          <div className="flex justify-end mt-2 min-[1024px]:max-[1279px]:justify-center">
+          <div className="flex justify-end mt-2 min-[1024px]:max-[1279px]:justify-center max-sm:justify-center">
             <div className="flex items-center">
               {aiFeatures}
             </div>

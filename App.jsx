@@ -811,10 +811,10 @@ const App = () => {
         </div>
 
         {/* MAIN CONTENT GRID */}
-        <main className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 min-[1020px]:max-[1439px]:gap-3 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
+        <main className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-2 max-[639px]:gap-1 sm:gap-6 lg:gap-8 min-[1020px]:max-[1439px]:gap-3 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]" role="main">
           
           {/* LEFT PANEL */}
-          <div className="space-y-4 sm:space-y-5 lg:space-y-6 h-full relative">
+          <div className="space-y-2 max-[639px]:space-y-1 sm:space-y-5 lg:space-y-6 h-full relative">
             {/* Simple Mode: Scene Builder Only */}
             {!isAdvancedMode && (
               <div data-tutorial="scene-builder" className="transition-all duration-500 ease-in-out transform h-full">
@@ -909,10 +909,10 @@ const App = () => {
           </div>
           
           {/* RIGHT PANEL */}
-          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 min-[1020px]:max-[1439px]:p-3 max-sm:p-0 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
+          <div data-tutorial="json-output" className="bg-white dark:bg-cinema-panel rounded-lg shadow-lg dark:shadow-glow-soft p-4 lg:p-6 min-[1020px]:max-[1439px]:p-3 max-sm:p-2 max-[639px]:p-3 space-y-1 lg:space-y-2 max-sm:space-y-0 border border-transparent dark:border-cinema-border transition-all duration-300 relative max-sm:flex max-sm:flex-col max-sm:gap-0">
               
               {/* JSON OUTPUT SECTION */}
-              <div className="json-output-section max-sm:flex-1 max-sm:min-h-[60vh] max-sm:order-1 max-sm:mb-0 max-sm:-mb-8">
+              <div className="json-output-section max-sm:flex-1 max-sm:min-h-[40vh] max-[639px]:min-h-[30vh] max-sm:order-1 max-sm:mb-0 max-sm:-mb-8">
                 {/* Success Notification */}
                 {sceneExtenderSuccess && (
                   <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg animate-pulse">

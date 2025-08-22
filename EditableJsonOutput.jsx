@@ -223,7 +223,7 @@ const EditableJsonOutput = ({ showToast }) => {
           // View Mode - Read-only formatted JSON
           <>
             <div 
-              className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 max-sm:p-2 max-sm:mb-0 min-h-32 sm:min-h-40 md:min-h-48 lg:min-h-64 max-sm:min-h-20 max-h-[40vh] sm:max-h-[50vh] max-sm:max-h-[30vh] overflow-auto border border-light-border dark:border-cinema-border"
+              className="bg-light-card dark:bg-cinema-black rounded-lg p-3 sm:p-4 max-sm:p-2 max-sm:mb-0 min-h-40 sm:min-h-48 md:min-h-56 lg:min-h-64 max-[639px]:min-h-48 max-h-[50vh] sm:max-h-[60vh] max-[639px]:max-h-[50vh] overflow-auto border border-light-border dark:border-cinema-border"
               role="textbox"
               aria-readonly="true"
               aria-label="Generated JSON output"
@@ -258,7 +258,7 @@ const EditableJsonOutput = ({ showToast }) => {
                   ? 'border-red-500 focus:border-red-400' 
                   : 'border-gray-700 dark:border-cinema-border focus:border-blue-500'
               } focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none`}
-              style={{ minHeight: '192px', height: 'auto' }}
+              style={{ minHeight: '240px', height: 'auto' }}
               placeholder="Enter valid JSON..."
               spellCheck={false}
             />

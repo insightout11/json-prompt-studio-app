@@ -163,7 +163,7 @@ const ProFeaturesHub = ({ isPro, onShowPricing, currentJson, onJsonUpdate, onSce
     return (
       <div>
         {/* Row of 5 AI feature buttons - sized similar to Convert button */}
-        <div className="flex space-x-2 max-sm:space-x-1 max-sm:overflow-x-auto">
+        <div className="flex justify-center space-x-2 max-sm:space-x-1 max-sm:justify-center max-sm:overflow-x-auto max-sm:px-2">
           {proFeatures.slice(0, 5).map((feature) => (
             <button
               key={feature.id}
