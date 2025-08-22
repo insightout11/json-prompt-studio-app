@@ -174,10 +174,14 @@ const App = () => {
     }
   };
 
-  const handleFullSceneRandomizeClick = () => {
+  const handleFullSceneRandomizeClick = (mobileMode = false, onMobileClose = null) => {
     if (getConfirmationPreference('Randomize')) {
       randomizeFields();
-      setShowRandomizeDropdown(false);
+      if (mobileMode && onMobileClose) {
+        onMobileClose();
+      } else {
+        setShowRandomizeDropdown(false);
+      }
       return;
     }
     setDontShowAgain(false);
@@ -193,7 +197,11 @@ const App = () => {
           setConfirmationPreference('Randomize', true);
         }
         randomizeFields();
-        setShowRandomizeDropdown(false);
+        if (mobileMode && onMobileClose) {
+          onMobileClose();
+        } else {
+          setShowRandomizeDropdown(false);
+        }
         setShowConfirmModal(null);
         setDontShowAgain(false);
       }
@@ -557,66 +565,143 @@ const App = () => {
   }
 
   // Render randomize dropdown
-  const renderRandomizeDropdown = () => (
-    <div className="header-dropdown top-full mt-1 right-0 bg-light-panel dark:bg-cinema-panel border border-light-border dark:border-cinema-border rounded-md shadow-light-elevated dark:shadow-glow-soft min-w-[220px]">
+  const renderRandomizeDropdown = (mobileMode = false, onMobileClose = null) => (
+    <div 
+      className={mobileMode 
+        ? "bg-light-card dark:bg-cinema-card border border-light-border dark:border-cinema-border rounded-md shadow-md overflow-hidden"
+        : "header-dropdown top-full mt-1 right-0 bg-light-panel dark:bg-cinema-panel border border-light-border dark:border-cinema-border rounded-md shadow-light-elevated dark:shadow-glow-soft min-w-[220px] md:min-w-[240px]"
+      }
+    >
       <button
-        onClick={() => {
+        onPointerDown={(e) => {
+          console.log('🎯 POINTER DOWN CHARACTER BUTTON');
+          e.preventDefault();
+          e.stopPropagation();
           randomizeCharacterFields();
-          setShowRandomizeDropdown(false);
+          if (mobileMode && onMobileClose) {
+            onMobileClose();
+          } else {
+            setShowRandomizeDropdown(false);
+          }
         }}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 rounded-t-md"
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 relative z-10 ${
+          mobileMode ? 'py-3 first:rounded-t-md' : 'py-3 md:py-2 rounded-t-md'
+        }`}
+        style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
       >
-        👤 Character
+        <span className="text-lg">👤</span>
+        <div className="flex-1">
+          <div className="font-medium">Character</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize character details</div>
+        </div>
       </button>
       <button
-        onClick={() => {
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           randomizeLocationBased();
-          setShowRandomizeDropdown(false);
+          if (mobileMode && onMobileClose) {
+            onMobileClose();
+          } else {
+            setShowRandomizeDropdown(false);
+          }
         }}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 border-t border-light-border/50 dark:border-cinema-border/50 ${
+          mobileMode ? 'py-3' : 'py-3 md:py-2'
+        }`}
       >
-        📍 Setting
+        <span className="text-lg">📍</span>
+        <div className="flex-1">
+          <div className="font-medium">Setting</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize location & environment</div>
+        </div>
       </button>
       <button
-        onClick={() => {
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           const audioFields = ['sound_effects', 'background_music', 'ambient_sound'];
           audioFields.forEach(field => {
             const randomOptions = ['cinematic', 'dramatic', 'upbeat', 'mysterious', 'calm', 'intense'];
             setFieldValue(field, randomOptions[Math.floor(Math.random() * randomOptions.length)]);
           });
-          setShowRandomizeDropdown(false);
+          if (mobileMode && onMobileClose) {
+            onMobileClose();
+          } else {
+            setShowRandomizeDropdown(false);
+          }
         }}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 border-t border-light-border/50 dark:border-cinema-border/50 ${
+          mobileMode ? 'py-3' : 'py-3 md:py-2'
+        }`}
       >
-        🎵 Audio
+        <span className="text-lg">🎵</span>
+        <div className="flex-1">
+          <div className="font-medium">Audio</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize sounds & music</div>
+        </div>
       </button>
       <button
-        onClick={() => {
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           const actionFields = ['action', 'movement', 'activity'];
           actionFields.forEach(field => {
             const randomOptions = ['walking', 'running', 'dancing', 'talking', 'working', 'playing', 'sleeping', 'eating'];
             setFieldValue(field, randomOptions[Math.floor(Math.random() * randomOptions.length)]);
           });
-          setShowRandomizeDropdown(false);
+          if (mobileMode && onMobileClose) {
+            onMobileClose();
+          } else {
+            setShowRandomizeDropdown(false);
+          }
         }}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 border-t border-light-border/50 dark:border-cinema-border/50 ${
+          mobileMode ? 'py-3' : 'py-3 md:py-2'
+        }`}
       >
-        🎬 Action
+        <span className="text-lg">🎬</span>
+        <div className="flex-1">
+          <div className="font-medium">Action</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize activities & movement</div>
+        </div>
       </button>
       <button
-        onClick={() => {
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           randomizeCinematicStyle();
-          setShowRandomizeDropdown(false);
+          if (mobileMode && onMobileClose) {
+            onMobileClose();
+          } else {
+            setShowRandomizeDropdown(false);
+          }
         }}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 border-t border-light-border/50 dark:border-cinema-border/50 ${
+          mobileMode ? 'py-3' : 'py-3 md:py-2'
+        }`}
       >
-        🎨 Style
+        <span className="text-lg">🎨</span>
+        <div className="flex-1">
+          <div className="font-medium">Style</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize visual style & mood</div>
+        </div>
       </button>
       <button
-        onClick={handleFullSceneRandomizeClick}
-        className="w-full px-4 py-2 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleFullSceneRandomizeClick(mobileMode, onMobileClose);
+        }}
+        className={`w-full px-4 text-left text-sm text-light-text dark:text-cinema-text hover:bg-light-card dark:hover:bg-cinema-border transition-colors duration-300 flex items-center space-x-3 border-t border-light-border/50 dark:border-cinema-border/50 ${
+          mobileMode ? 'py-3 last:rounded-b-md' : 'py-3 md:py-2 rounded-b-md'
+        }`}
       >
-        🎲 Full Scene
+        <span className="text-lg">🎲</span>
+        <div className="flex-1">
+          <div className="font-medium">Full Scene</div>
+          <div className="text-xs text-light-text-muted dark:text-cinema-text-muted">Randomize everything at once</div>
+        </div>
       </button>
     </div>
   );
@@ -767,7 +852,14 @@ const App = () => {
               <IntegratedHeader 
                 showToast={{ showSuccess, showError, showWarning, showInfo }}
                 onViralGenerator={() => setShowViralGenerator(true)}
-                onRandomize={() => setShowRandomizeDropdown(!showRandomizeDropdown)}
+                onRandomize={() => {
+                  console.log('🔄 onRandomize called, current state:', showRandomizeDropdown);
+                  setShowRandomizeDropdown(!showRandomizeDropdown);
+                }}
+                onCloseRandomizer={() => {
+                  console.log('🔄 onCloseRandomizer called');
+                  setShowRandomizeDropdown(false);
+                }}
                 showRandomizeDropdown={showRandomizeDropdown}
                 randomizeDropdownRef={randomizeDropdownRef}
                 renderRandomizeDropdown={renderRandomizeDropdown}

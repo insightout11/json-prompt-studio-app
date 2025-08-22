@@ -950,6 +950,7 @@ const usePromptStore = create((set, get) => ({
 
   // Enhanced Randomization Methods
   randomizeCharacterFields: () => {
+    console.log('🎲 randomizeCharacterFields called!');
     const characterCategories = ['subjects', 'character_details'];
     const characterFields = [];
     
@@ -962,14 +963,39 @@ const usePromptStore = create((set, get) => ({
       }
     });
     
-    // Randomly select 3-8 character fields
-    const numFieldsToSelect = Math.floor(Math.random() * 6) + 3;
-    const shuffledFields = characterFields.sort(() => 0.5 - Math.random());
-    const selectedFields = shuffledFields.slice(0, numFieldsToSelect);
-    
     const newEnabledFields = new Set();
     const newFieldValues = {};
     const newExpandedCategories = new Set();
+    
+    // First, ensure character_type is set to enable dependent fields
+    const characterTypeField = characterFields.find(f => f.key === 'character_type');
+    if (characterTypeField && characterTypeField.options) {
+      const validCharacterTypes = characterTypeField.options.filter(option => option !== 'custom...');
+      if (validCharacterTypes.length > 0) {
+        const randomCharacterType = validCharacterTypes[Math.floor(Math.random() * validCharacterTypes.length)];
+        newEnabledFields.add('character_type');
+        newFieldValues['character_type'] = randomCharacterType;
+        newExpandedCategories.add('subjects');
+      }
+    }
+    
+    // Filter fields based on dependencies
+    const availableFields = characterFields.filter(field => {
+      if (!field.dependency || !field.dependsOn) {
+        return true; // No dependency, always available
+      }
+      
+      // Check if dependency is satisfied
+      const dependencyValue = newFieldValues[field.dependency];
+      return dependencyValue && field.dependsOn.includes(dependencyValue);
+    });
+    
+    // Randomly select 3-8 more character fields
+    const numFieldsToSelect = Math.floor(Math.random() * 6) + 3;
+    const shuffledFields = availableFields
+      .filter(f => f.key !== 'character_type') // Exclude character_type since we already set it
+      .sort(() => 0.5 - Math.random());
+    const selectedFields = shuffledFields.slice(0, numFieldsToSelect);
     
     selectedFields.forEach(field => {
       newEnabledFields.add(field.key);

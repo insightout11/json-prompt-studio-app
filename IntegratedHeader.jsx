@@ -3,7 +3,7 @@ import usePromptStore from './store';
 import LibrarySystem from './LibrarySystem';
 import TemplateSelector from './TemplateSelector';
 
-const IntegratedHeader = ({ showToast, onViralGenerator, onRandomize, showRandomizeDropdown, randomizeDropdownRef, renderRandomizeDropdown }) => {
+const IntegratedHeader = ({ showToast, onViralGenerator, onRandomize, onCloseRandomizer, showRandomizeDropdown, randomizeDropdownRef, renderRandomizeDropdown }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showEnhancedLibrary, setShowEnhancedLibrary] = useState(false);
   const dropdownRef = useRef(null);
@@ -141,6 +141,7 @@ const IntegratedHeader = ({ showToast, onViralGenerator, onRandomize, showRandom
               <div className="relative">
                 <button
                   onClick={() => {
+                    console.log('🎲 Randomizer toggle button clicked');
                     if (onRandomize) onRandomize();
                   }}
                   className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-light-card dark:hover:bg-cinema-card rounded-lg transition-all duration-200"
@@ -161,8 +162,12 @@ const IntegratedHeader = ({ showToast, onViralGenerator, onRandomize, showRandom
                 
                 {/* Randomize Dropdown - rendered inside menu with proper styling */}
                 {showRandomizeDropdown && renderRandomizeDropdown && (
-                  <div className="mt-2 ml-4 bg-light-panel dark:bg-cinema-panel border border-light-border dark:border-cinema-border rounded-md shadow-lg">
-                    {renderRandomizeDropdown()}
+                  <div className="mt-2">
+                    {renderRandomizeDropdown(true, () => {
+                      console.log('🔄 Mobile randomizer close callback triggered');
+                      setShowDropdown(false);
+                      if (onCloseRandomizer) onCloseRandomizer();
+                    })}
                   </div>
                 )}
               </div>
