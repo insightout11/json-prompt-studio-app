@@ -291,6 +291,16 @@
             scroll-behavior: smooth;
         }
         
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            height: 100vh;
+        }
+        
         /* Performance optimizations */
         * {
             -webkit-font-smoothing: antialiased;
@@ -902,22 +912,25 @@
             <!-- Mobile Header Layout -->
             <div class="md:hidden flex items-center justify-between h-16">
                 <!-- Mobile menu button (left) -->
-                <button id="mobile-menu-btn" class="text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                <div class="w-16 flex justify-start">
+                    <button id="mobile-menu-btn" class="text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
                 
                 <!-- Logo (center) -->
                 <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-12 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-16 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
                 </div>
                 
-                <!-- Stacked CTA Button (right) -->
-                <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-2 py-1 rounded text-white font-medium hover:shadow-glow-teal-bright btn-primary text-center leading-tight">
-                    <div class="text-xs">Launch JSON</div>
-                    <div class="text-xs">Prompt Studio</div>
-                </a>
+                <!-- CTA Button (right) -->
+                <div class="w-16 flex justify-end">
+                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-3 py-0.5 rounded text-white font-medium hover:shadow-glow-teal-bright btn-primary text-center h-12 flex items-center justify-center text-sm">
+                        Launch
+                    </a>
+                </div>
             </div>
             
             <!-- Desktop Header Layout -->
@@ -1348,7 +1361,7 @@
 
 
     <!-- FAQ Section -->
-    <section class="py-16 lg:py-24 bg-cinema-black" aria-label="Frequently asked questions">
+    <section id="faq" class="py-16 lg:py-24 bg-cinema-black" aria-label="Frequently asked questions">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-12">
@@ -1662,7 +1675,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-cinema-purple rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-                        <span class="text-sm">Export in Multiple Formats</span>
+                        <span class="text-sm">Save & Organize Elements</span>
                     </div>
                 </div>
             </div>
@@ -1670,7 +1683,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 lg:py-16 bg-cinema-panel border-t border-cinema-border">
+    <footer class="py-6 lg:py-8 bg-cinema-panel border-t border-cinema-border">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0">
                 <!-- Logo and tagline -->
