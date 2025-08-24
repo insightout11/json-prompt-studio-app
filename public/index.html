@@ -899,32 +899,46 @@
     <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-cinema-black/90 backdrop-blur-md border-b border-cinema-border z-50" role="navigation" aria-label="Main navigation">
         <div class="container mx-auto px-4 lg:px-6">
-            <div class="flex items-center justify-between h-16">
+            <!-- Mobile Header Layout -->
+            <div class="md:hidden flex items-center justify-between h-16">
+                <!-- Mobile menu button (left) -->
+                <button id="mobile-menu-btn" class="text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+                
+                <!-- Logo (center) -->
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-12 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
+                </div>
+                
+                <!-- Stacked CTA Button (right) -->
+                <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-2 py-1 rounded text-white font-medium hover:shadow-glow-teal-bright btn-primary text-center leading-tight">
+                    <div class="text-xs">Launch JSON</div>
+                    <div class="text-xs">Prompt Studio</div>
+                </a>
+            </div>
+            
+            <!-- Desktop Header Layout -->
+            <div class="hidden md:flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-20 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
                 </div>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="flex items-center space-x-8">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
                     <a href="#faq" class="text-cinema-text-muted hover:text-cinema-teal nav-link">FAQ</a>
-                    
                 </div>
                 
-                <!-- CTA Button -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-4 py-0.5 text-xs sm:px-4 sm:py-1.5 sm:text-sm rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary mx-2 sm:mx-0">
+                <!-- Desktop CTA Button -->
+                <div class="flex items-center">
+                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-4 py-1.5 text-sm rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
                         Launch JSON Prompt Studio
                     </a>
-                    
-                    <!-- Mobile menu button -->
-                    <button id="mobile-menu-btn" class="md:hidden text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
             
