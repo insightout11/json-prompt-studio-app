@@ -7,36 +7,207 @@
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="Modular prompt-building for cinematic AI scenes. Save characters, styles, and settings. Control every frame with JSON Prompt Studio.">
-    <meta name="keywords" content="AI video, prompt generator, JSON prompts, video creation, AI scenes, modular prompts">
+    <meta name="keywords" content="AI video, prompt generator, JSON prompts, video creation, AI scenes, modular prompts, RunwayML, Pika Labs, Luma AI, OpenAI Sora, Google Veo, Midjourney, cinematic AI, video prompting, prompt engineering, AI filmmaking, video generation, prompt templates, scene builder, AI director tools">
     
     <!-- Open Graph -->
     <meta property="og:title" content="JSON Prompt Studio - Prompt like a director, not a guesser">
     <meta property="og:description" content="Modular prompt-building for cinematic AI scenes. Save characters, styles, and settings. Control every frame.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://jsonpromptstudio.com">
+    <meta property="og:image" content="https://jsonpromptstudio.com/og-image.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="JSON Prompt Studio">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="JSON Prompt Studio - Prompt like a director, not a guesser">
+    <meta name="twitter:description" content="Modular prompt-building for cinematic AI scenes. Save characters, styles, and settings. Control every frame.">
+    <meta name="twitter:image" content="https://jsonpromptstudio.com/twitter-image.svg">
+    <meta name="twitter:creator" content="@jsonpromptstudio">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="author" content="JSON Prompt Studio">
+    <meta name="theme-color" content="#0e0e0e">
+    <meta name="color-scheme" content="dark light">
+    
+    <!-- Performance and Loading Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://jsonpromptstudio.com">
+    
+    <!-- Sitemap Reference -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
     
     <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     
-    <!-- Auto-redirect returning users and handle /app routing -->
-    <script>
-        // Simple routing logic
-        const path = window.location.pathname;
-        
-        // If accessing /app, redirect to app.html
-        if (path === '/app' || path.startsWith('/app/')) {
-            window.location.href = 'https://jsonpromptstudio.com/app';
-            // Don't execute the rest of the script
-            return;
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" href="/apple-icon.png">
+    
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="/android-icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/android-icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="72x72" href="/android-icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/android-icon-48x48.png">
+    <link rel="icon" type="image/png" sizes="36x36" href="/android-icon-36x36.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#0e0e0e">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "JSON Prompt Studio",
+        "alternateName": "JSON Prompt Studio - AI Video Prompt Generator",
+        "url": "https://jsonpromptstudio.com",
+        "description": "Modular prompt-building for cinematic AI scenes. Save characters, styles, and settings. Control every frame with JSON Prompt Studio.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "JSON Prompt Studio",
+            "url": "https://jsonpromptstudio.com"
+        },
+        "keywords": ["AI video", "prompt generator", "JSON prompts", "video creation", "AI scenes", "modular prompts", "RunwayML", "Pika Labs", "Luma AI", "OpenAI Sora"],
+        "softwareHelp": {
+            "@type": "CreativeWork",
+            "about": "Create professional AI video prompts using modular components"
         }
-        
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "JSON Prompt Studio",
+        "url": "https://jsonpromptstudio.com",
+        "logo": "https://jsonpromptstudio.com/favicon.svg",
+        "description": "Professional AI video prompt generation tool for creators",
+        "foundingDate": "2024",
+        "sameAs": [
+            "https://jsonpromptstudio.com"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "url": "https://jsonpromptstudio.com"
+        }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What AI video platforms does this work with?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "JSON Prompt Studio works with all major AI video platforms including RunwayML, Pika Labs, Luma AI, Stable Video Diffusion, and any platform that accepts structured prompts. Our JSON format is designed to be universally compatible."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How is this different from writing prompts manually?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Manual prompting is unpredictable and time-consuming. JSON Prompt Studio provides structured, reusable components that ensure consistency. You can save characters, settings, and styles to reuse across projects, eliminating the guesswork and dramatically reducing creation time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need technical knowledge to use this?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Not at all! Our interface is designed for creators, not developers. Simply fill in the visual forms, and we generate the technical JSON for you. No coding knowledge required - just focus on your creative vision."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is JSON Prompt Studio really free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, completely free! All features including the viral video generator, AI scene extension, unlimited scene saves, and component library are included at no cost. No hidden fees, no credit card required."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I use my prompts for commercial projects?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Absolutely! All prompts generated with JSON Prompt Studio are yours to use commercially without any restrictions. Whether you're creating content for clients, monetizing on social platforms, or selling video products - there are no licensing limitations or royalties."
+                }
+            }
+        ]
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://jsonpromptstudio.com"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "AI Video Prompt Generator",
+                "item": "https://jsonpromptstudio.com/app"
+            }
+        ]
+    }
+    </script>
+    
+    <!-- Auto-redirect returning users (server-side routing handles /app) -->
+    <script>
         // For landing page visits, check auto-redirect preference
         const hasUsedApp = localStorage.getItem('jsonPromptStudio_hasUsedApp') === 'true';
         const autoRedirect = localStorage.getItem('jsonPromptStudio_autoRedirect') === 'true';
         
         // If returning user has enabled auto-redirect, go straight to app
         if (hasUsedApp && autoRedirect) {
-            window.location.href = 'https://jsonpromptstudio.com/app';
+            window.location.href = '/app';
         }
     </script>
     
@@ -53,14 +224,14 @@
                             'card': '#2a2a2a',
                             'border': '#404040',
                             'text': '#e0e0e0',
-                            'text-muted': '#a0a0a0',
-                            'teal': '#008b8b',
+                            'text-muted': '#c0c0c0',
+                            'teal': '#00b3b3',
                             'teal-bright': '#00fff7',
-                            'purple': '#7c3aed',
+                            'purple': '#8b5cf6',
                             'purple-bright': '#a259ff',
                             'success': '#059669',
                             'success-bright': '#00ff88',
-                            'gold': '#d97706',
+                            'gold': '#f59e0b',
                             'gold-bright': '#ffd700',
                         }
                     },
@@ -164,8 +335,8 @@
         /* Enhanced Animations & Background Effects */
         
         /* Floating gradient orbs */
-        .floating-orbs::before,
-        .floating-orbs::after {
+        .spotlight-effect::before,
+        .spotlight-effect::after {
             content: '';
             position: absolute;
             border-radius: 50%;
@@ -174,21 +345,21 @@
             animation: float-orb 25s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
         }
         
-        .floating-orbs::before {
+        .spotlight-effect::before {
             width: 300px;
             height: 300px;
             background: radial-gradient(circle, #00fff7, #a259ff, transparent);
-            top: 10%;
+            top: 5%;
             right: 10%;
             animation-delay: 0s;
         }
         
-        .floating-orbs::after {
+        .spotlight-effect::after {
             width: 400px;
             height: 400px;
             background: radial-gradient(circle, #a259ff, #d97706, transparent);
-            bottom: 15%;
-            left: -5%;
+            top: 25%;
+            left: 5%;
             animation-delay: -10s;
         }
         
@@ -605,7 +776,7 @@
         }
         
         /* Performance optimizations */
-        .floating-orbs,
+        .spotlight-effect,
         .mesh-gradient,
         .geometric-pattern,
         .dots-pattern,
@@ -631,8 +802,8 @@
             }
             
             /* Disable all background patterns and animations for reduced motion */
-            .floating-orbs::before,
-            .floating-orbs::after,
+            .spotlight-effect::before,
+            .spotlight-effect::after,
             .dots-pattern::before,
             .grid-pattern::after,
             .floating-shapes::before,
@@ -665,8 +836,8 @@
         
         /* High contrast mode support */
         @media (prefers-contrast: high) {
-            .floating-orbs::before,
-            .floating-orbs::after,
+            .spotlight-effect::before,
+            .spotlight-effect::after,
             .geometric-pattern,
             .dots-pattern::before,
             .grid-pattern::after,
@@ -674,10 +845,39 @@
                 opacity: 0 !important;
             }
         }
+        
+        /* Accessibility Utilities */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .focus\:not-sr-only:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.5rem 1rem;
+            margin: 0;
+            overflow: visible;
+            clip: auto;
+            white-space: normal;
+        }
     </style>
 </head>
 
 <body class="bg-cinema-black text-cinema-text antialiased min-h-screen">
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-cinema-teal text-white px-4 py-2 rounded-md z-50 transition-all">
+        Skip to main content
+    </a>
+
     <!-- Returning User Quick Access Banner -->
     <div id="returning-user-banner" class="hidden bg-gradient-to-r from-cinema-teal to-cinema-purple py-2 px-4 text-center relative z-50">
         <div class="flex items-center justify-center space-x-4">
@@ -685,11 +885,11 @@
             <a href="https://jsonpromptstudio.com/app" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
                 Skip to App →
             </a>
-            <button id="enable-auto-redirect" class="text-white/80 hover:text-white text-xs underline">
+            <button id="enable-auto-redirect" class="text-white/90 hover:text-white text-xs underline">
                 Always skip landing page
             </button>
-            <button id="close-banner" class="text-white/80 hover:text-white ml-4">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="close-banner" class="text-white/90 hover:text-white ml-4" aria-label="Close banner" title="Close banner">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
@@ -697,33 +897,31 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-cinema-black/90 backdrop-blur-md border-b border-cinema-border z-50">
+    <nav class="fixed top-0 w-full bg-cinema-black/90 backdrop-blur-md border-b border-cinema-border z-50" role="navigation" aria-label="Main navigation">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 flex items-center justify-center logo-breathe">
-                        <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
-                    </div>
-                    <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-20 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
                 </div>
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="https://jsonpromptstudio.com/app" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
+                    <a href="#faq" class="text-cinema-text-muted hover:text-cinema-teal nav-link">FAQ</a>
+                    
                 </div>
                 
                 <!-- CTA Button -->
                 <div class="flex items-center space-x-4">
-                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
+                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-3 py-1 text-xs sm:px-4 sm:py-1.5 sm:text-sm rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary mx-2 sm:mx-0">
                         Launch JSON Prompt Studio
                     </a>
                     
                     <!-- Mobile menu button -->
-                    <button id="mobile-menu-btn" class="md:hidden text-cinema-text-muted hover:text-cinema-teal transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="mobile-menu-btn" class="md:hidden text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
@@ -735,14 +933,15 @@
                 <div class="flex flex-col space-y-3">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="https://jsonpromptstudio.com/app" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
+                    <a href="#faq" class="text-cinema-text-muted hover:text-cinema-teal nav-link">FAQ</a>
+                    
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-24 pb-16 lg:pt-32 lg:pb-24 gradient-bg mesh-gradient floating-orbs relative overflow-hidden parallax-slow">
+    <main id="main-content" class="pt-24 pb-24 lg:pt-32 lg:pb-32 gradient-bg mesh-gradient spotlight-effect relative overflow-hidden parallax-slow" role="main" aria-label="Hero section">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="max-w-4xl mx-auto text-center">
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
@@ -803,128 +1002,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-16 lg:py-24 bg-cinema-panel geometric-pattern relative">
-        <div class="container mx-auto px-4 lg:px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-cinema-text mb-4">
-                    Built for <span class="gradient-text">Precision</span>
-                </h2>
-                <p class="text-xl text-cinema-text-muted max-w-2xl mx-auto">
-                    Stop wrestling with unpredictable prompts. Create modular, reusable components that work every time.
-                </p>
-            </div>
-            
-            <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
-                <!-- Feature 1 -->
-                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                    <div class="text-4xl mb-4 float-gentle">⚙️</div>
-                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                        Perfect JSON Output
-                    </h3>
-                    <p class="text-cinema-text-muted mb-3">
-                        Clean, structured JSON prompts with multiple aspect ratios and one-click copying.
-                    </p>
-                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="json-details">
-                        Learn More →
-                    </button>
-                    <div id="json-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                        Here's what your prompt looks like in JSON — clean, reusable, and AI-ready. Includes undo/redo and project management.
-                    </div>
-                </div>
-                
-                <!-- Feature 2 -->
-                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                    <div class="text-4xl mb-4 float-gentle">🎆</div>
-                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                        Smart Scene Builder
-                    </h3>
-                    <p class="text-cinema-text-muted mb-3">
-                        Guided checklist system with AI-powered scene extension generating 5 smart variations.
-                    </p>
-                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="scene-details">
-                        Learn More →
-                    </button>
-                    <div id="scene-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                        Our AI engine extends your scenes with 5 smart variants for inspiration or remixing with intelligent merging.
-                    </div>
-                </div>
-                
-                <!-- Feature 3 -->
-                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                    <div class="text-4xl mb-4 float-gentle">🎭</div>
-                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                        Modular Component Library
-                    </h3>
-                    <p class="text-cinema-text-muted mb-3">
-                        Save characters, settings, styles, and audio as reusable components across all projects.
-                    </p>
-                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="library-details">
-                        Learn More →
-                    </button>
-                    <div id="library-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                        Build your library once, use it everywhere. Perfect JSON output every time with consistent character styles.
-                    </div>
-                </div>
-                
-            </div>
-            
-            <!-- Second Row: Advanced Features -->
-            <div class="grid md:grid-cols-3 gap-8 lg:gap-12 mt-8">
-                    <!-- Feature 4 -->
-                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                        <div class="text-4xl mb-4 float-gentle">🔄</div>
-                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                            Advanced/Simple Mode
-                        </h3>
-                        <p class="text-cinema-text-muted mb-3">
-                            Switch between guided checklist mode and advanced manual configuration.
-                        </p>
-                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="mode-details">
-                            Learn More →
-                        </button>
-                        <div id="mode-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                            Perfect for beginners who need guidance and power users who want full control over their prompts.
-                        </div>
-                    </div>
-                    
-                    <!-- Feature 5 -->
-                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                        <div class="text-4xl mb-4 float-gentle">📋</div>
-                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                            Templates & Smart Randomization
-                        </h3>
-                        <p class="text-cinema-text-muted mb-3">
-                            Pre-built templates plus intelligent randomization for instant creative inspiration.
-                        </p>
-                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="template-details">
-                            Learn More →
-                        </button>
-                        <div id="template-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                            Smart randomization for characters, settings, styles, and actions. Beat creative block instantly.
-                        </div>
-                    </div>
-                    
-                    <!-- Feature 6 -->
-                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
-                        <div class="text-4xl mb-4 float-gentle">📈</div>
-                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
-                            AI Viral Video Generator
-                        </h3>
-                        <p class="text-cinema-text-muted mb-3">
-                            Generate trending video concepts that analyze current trends and audience preferences.
-                        </p>
-                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="viral-details">
-                            Learn More →
-                        </button>
-                        <div id="viral-details" class="hidden mt-3 text-sm text-cinema-text-muted opacity-80">
-                            Perfect for TikTok, Instagram Reels, and YouTube Shorts creators who need fresh, engaging content ideas.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Interactive Demo Section -->
     <section class="py-16 lg:py-24 bg-cinema-black dots-pattern relative">
@@ -1055,6 +1132,129 @@
         </div>
     </section>
 
+    <!-- Features Section -->
+    <section id="features" class="py-16 lg:py-24 bg-cinema-panel geometric-pattern relative" aria-label="Features section">
+        <div class="container mx-auto px-4 lg:px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-cinema-text mb-4">
+                    Built for <span class="gradient-text">Precision</span>
+                </h2>
+                <p class="text-xl text-cinema-text-muted max-w-2xl mx-auto">
+                    Stop wrestling with unpredictable prompts. Create modular, reusable components that work every time.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+                <!-- Feature 1 -->
+                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                    <div class="text-4xl mb-4 float-gentle">⚙️</div>
+                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                        Perfect JSON Output
+                    </h3>
+                    <p class="text-cinema-text-muted mb-3">
+                        Clean, structured JSON prompts with multiple aspect ratios and one-click copying.
+                    </p>
+                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="json-details" aria-label="Learn more about Perfect JSON Output">
+                        Learn More →
+                    </button>
+                    <div id="json-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                        Here's what your prompt looks like in JSON — clean, reusable, and AI-ready. Includes undo/redo and project management.
+                    </div>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                    <div class="text-4xl mb-4 float-gentle">🎆</div>
+                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                        Smart Scene Builder
+                    </h3>
+                    <p class="text-cinema-text-muted mb-3">
+                        Guided checklist system with AI-powered scene extension generating 5 smart variations.
+                    </p>
+                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="scene-details" aria-label="Learn more about Smart Scene Builder">
+                        Learn More →
+                    </button>
+                    <div id="scene-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                        Our AI engine extends your scenes with 5 smart variants for inspiration or remixing with intelligent merging.
+                    </div>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                    <div class="text-4xl mb-4 float-gentle">🎭</div>
+                    <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                        Reusable Creative Library
+                    </h3>
+                    <p class="text-cinema-text-muted mb-3">
+                        Save characters, settings, styles, and audio as reusable components across all projects.
+                    </p>
+                    <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="library-details" aria-label="Learn more about Reusable Creative Library">
+                        Learn More →
+                    </button>
+                    <div id="library-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                        Build your library once, use it everywhere. Perfect JSON output every time with consistent character styles.
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Second Row: Advanced Features -->
+            <div class="grid md:grid-cols-3 gap-8 lg:gap-12 mt-8">
+                    <!-- Feature 4 -->
+                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                        <div class="text-4xl mb-4 float-gentle">🔄</div>
+                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                            Advanced/Simple Mode
+                        </h3>
+                        <p class="text-cinema-text-muted mb-3">
+                            Switch between guided checklist mode and advanced manual configuration.
+                        </p>
+                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="mode-details" aria-label="Learn more about Advanced/Simple Mode">
+                            Learn More →
+                        </button>
+                        <div id="mode-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                            Perfect for beginners who need guidance and power users who want full control over their prompts.
+                        </div>
+                    </div>
+                    
+                    <!-- Feature 5 -->
+                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                        <div class="text-4xl mb-4 float-gentle">📋</div>
+                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                            Templates & Smart Randomization
+                        </h3>
+                        <p class="text-cinema-text-muted mb-3">
+                            Pre-built templates plus intelligent randomization for instant creative inspiration.
+                        </p>
+                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="template-details" aria-label="Learn more about Templates & Smart Randomization">
+                            Learn More →
+                        </button>
+                        <div id="template-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                            Smart randomization for characters, settings, styles, and actions. Beat creative block instantly.
+                        </div>
+                    </div>
+                    
+                    <!-- Feature 6 -->
+                    <div class="bg-cinema-card rounded-xl p-6 lg:p-8 border border-cinema-border enhanced-card stagger-reveal">
+                        <div class="text-4xl mb-4 float-gentle">📈</div>
+                        <h3 class="text-xl lg:text-2xl font-bold text-cinema-text mb-3">
+                            AI Viral Video Generator
+                        </h3>
+                        <p class="text-cinema-text-muted mb-3">
+                            Generate trending video concepts that analyze current trends and audience preferences.
+                        </p>
+                        <button class="text-cinema-teal text-sm hover:text-cinema-teal-bright transition-colors learn-more-btn" data-target="viral-details" aria-label="Learn more about AI Viral Video Generator">
+                            Learn More →
+                        </button>
+                        <div id="viral-details" class="hidden mt-3 text-sm text-cinema-text-muted">
+                            Perfect for TikTok, Instagram Reels, and YouTube Shorts creators who need fresh, engaging content ideas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Integration Showcase -->
     <section class="py-16 lg:py-24 bg-cinema-black circuit-pattern floating-shapes relative">
         <div class="container mx-auto px-4 lg:px-6">
@@ -1134,7 +1334,7 @@
 
 
     <!-- FAQ Section -->
-    <section class="py-16 lg:py-24 bg-cinema-black">
+    <section class="py-16 lg:py-24 bg-cinema-black" aria-label="Frequently asked questions">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-12">
@@ -1149,66 +1349,157 @@
                 <div class="space-y-4">
                     <!-- FAQ Item 1 -->
                     <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
-                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-1" id="faq-question-1">
                             <span class="font-medium text-cinema-text">What AI video platforms does this work with?</span>
-                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="faq-content hidden px-6 pb-4">
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-1" role="region" aria-labelledby="faq-question-1">
                             <p class="text-cinema-text-muted">JSON Prompt Studio works with all major AI video platforms including RunwayML, Pika Labs, Luma AI, Stable Video Diffusion, and any platform that accepts structured prompts. Our JSON format is designed to be universally compatible.</p>
                         </div>
                     </div>
                     
                     <!-- FAQ Item 2 -->
                     <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
-                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-2" id="faq-question-2">
                             <span class="font-medium text-cinema-text">How is this different from writing prompts manually?</span>
-                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="faq-content hidden px-6 pb-4">
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-2" role="region" aria-labelledby="faq-question-2">
                             <p class="text-cinema-text-muted">Manual prompting is unpredictable and time-consuming. JSON Prompt Studio provides structured, reusable components that ensure consistency. You can save characters, settings, and styles to reuse across projects, eliminating the guesswork and dramatically reducing creation time.</p>
                         </div>
                     </div>
                     
                     <!-- FAQ Item 3 -->
                     <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
-                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-3" id="faq-question-3">
                             <span class="font-medium text-cinema-text">Do I need technical knowledge to use this?</span>
-                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="faq-content hidden px-6 pb-4">
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-3" role="region" aria-labelledby="faq-question-3">
                             <p class="text-cinema-text-muted">Not at all! Our interface is designed for creators, not developers. Simply fill in the visual forms, and we generate the technical JSON for you. No coding knowledge required - just focus on your creative vision.</p>
                         </div>
                     </div>
                     
                     <!-- FAQ Item 4 -->
                     <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
-                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-4" id="faq-question-4">
                             <span class="font-medium text-cinema-text">How does the AI scene extension work?</span>
-                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="faq-content hidden px-6 pb-4">
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-4" role="region" aria-labelledby="faq-question-4">
                             <p class="text-cinema-text-muted">The AI analyzes your current scene and generates 5 unique variations or extensions. You can apply any option with smart merging that preserves your existing work while adding new elements. Perfect for exploring creative possibilities.</p>
                         </div>
                     </div>
                     
                     <!-- FAQ Item 5 -->
                     <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
-                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-5" id="faq-question-5">
                             <span class="font-medium text-cinema-text">Is JSON Prompt Studio really free?</span>
-                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div class="faq-content hidden px-6 pb-4">
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-5" role="region" aria-labelledby="faq-question-5">
                             <p class="text-cinema-text-muted">Yes, completely free! All features including the viral video generator, AI scene extension, unlimited scene saves, and component library are included at no cost. No hidden fees, no credit card required.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 6 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-6" id="faq-question-6">
+                            <span class="font-medium text-cinema-text">Can I use my prompts for commercial projects?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-6" role="region" aria-labelledby="faq-question-6">
+                            <p class="text-cinema-text-muted">Absolutely! All prompts generated with JSON Prompt Studio are yours to use commercially without any restrictions. Whether you're creating content for clients, monetizing on social platforms, or selling video products - there are no licensing limitations or royalties.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 7 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-7" id="faq-question-7">
+                            <span class="font-medium text-cinema-text">Do you store my prompts or generated media?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-7" role="region" aria-labelledby="faq-question-7">
+                            <p class="text-cinema-text-muted">No, we prioritize your privacy. JSON Prompt Studio runs entirely in your browser - your prompts, characters, and scenes are stored locally on your device only. We never see, store, or have access to your creative work. You maintain complete ownership and control.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 8 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-8" id="faq-question-8">
+                            <span class="font-medium text-cinema-text">What makes prompts from JSON Prompt Studio more effective?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-8" role="region" aria-labelledby="faq-question-8">
+                            <p class="text-cinema-text-muted">Our structured JSON format ensures consistency and reduces AI hallucination. Instead of random text that AI interprets differently each time, you get modular components that work predictably. This means better character consistency, reliable scene elements, and dramatically higher success rates.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 9 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-9" id="faq-question-9">
+                            <span class="font-medium text-cinema-text">Can I save and reuse my favorite scenes and styles?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-9" role="region" aria-labelledby="faq-question-9">
+                            <p class="text-cinema-text-muted">Yes! Our component library system lets you save characters, settings, lighting styles, camera angles, and complete scenes. Once saved, drag and drop them into new projects instantly. Build your library once, use it everywhere - perfect for series content or brand consistency.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 10 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-10" id="faq-question-10">
+                            <span class="font-medium text-cinema-text">What kind of viral video formats are included?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-10" role="region" aria-labelledby="faq-question-10">
+                            <p class="text-cinema-text-muted">Our AI Viral Video Generator includes trending formats like Podcast Interviews, Street Interviews, ASMR/Satisfying content, Jealous Boyfriend memes, and Out-of-Place Character scenarios. Plus templates for Conspiracy Reveals, Campus Debates, Truth or Dare IRL, and much more.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 11 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-11" id="faq-question-11">
+                            <span class="font-medium text-cinema-text">Does it work with images, music, and presentations too?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-11" role="region" aria-labelledby="faq-question-11">
+                            <p class="text-cinema-text-muted">While optimized for video generation, our JSON structure works great for any AI creative tools. Use it for image generation with Midjourney, presentation creation, music video concepts, or any platform that accepts structured prompts. One tool, unlimited creative possibilities.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 12 -->
+                    <div class="bg-cinema-card rounded-lg border border-cinema-border overflow-hidden">
+                        <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-cinema-panel transition-colors faq-toggle" aria-expanded="false" aria-controls="faq-content-12" id="faq-question-12">
+                            <span class="font-medium text-cinema-text">Do I need to know JSON to use this?</span>
+                            <svg class="w-5 h-5 text-cinema-text-muted transition-transform faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="faq-content hidden px-6 pb-4" id="faq-content-12" role="region" aria-labelledby="faq-question-12">
+                            <p class="text-cinema-text-muted">Not at all! You never see or write JSON code. Our visual interface lets you click, select, and fill in forms - then we automatically generate perfect JSON behind the scenes. Focus on your creative vision while we handle all the technical formatting.</p>
                         </div>
                     </div>
                 </div>
@@ -1300,17 +1591,78 @@
         </div>
     </section>
 
+    <!-- Final CTA Section -->
+    <section class="py-20 lg:py-28 bg-gradient-to-br from-cinema-black via-cinema-panel to-cinema-black relative overflow-hidden">
+        <!-- Background elements -->
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-cinema-teal to-cinema-purple rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-r from-cinema-gold to-cinema-teal rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 lg:px-6 relative z-10">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-cinema-text mb-6">
+                    Ready to Create <span class="gradient-text">Professional Prompts</span>?
+                </h2>
+                <p class="text-xl lg:text-2xl text-cinema-text-muted mb-12 max-w-3xl mx-auto">
+                    Join thousands of creators who've transformed their video production workflow. 
+                    Start building structured, reusable prompts that work every time.
+                </p>
+                
+                <!-- CTA Button -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="https://jsonpromptstudio.com/app" 
+                       class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cinema-teal to-cinema-purple rounded-xl shadow-lg hover:shadow-glow-teal transition-all duration-300 transform hover:scale-105">
+                        <span class="relative z-10 flex items-center">
+                            🚀 Launch JSON Prompt Studio
+                            <svg class="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                        <!-- Hover effect -->
+                        <div class="absolute inset-0 bg-gradient-to-r from-cinema-purple to-cinema-teal rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </a>
+                    
+                    <!-- Secondary text -->
+                    <div class="text-cinema-text-muted text-sm">
+                        <div class="flex items-center justify-center space-x-1 mb-1">
+                            <span class="text-cinema-success">✓</span>
+                            <span>100% Free to Start</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-1">
+                            <span class="text-cinema-success">✓</span>
+                            <span>No Credit Card Required</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats or social proof -->
+                <div class="mt-12 flex flex-wrap justify-center items-center gap-8 text-cinema-text-muted">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-cinema-teal rounded-full animate-pulse"></div>
+                        <span class="text-sm">1000+ Prompts Created</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-cinema-gold rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                        <span class="text-sm">Compatible with All Major AI Platforms</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-cinema-purple rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                        <span class="text-sm">Export in Multiple Formats</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="py-12 lg:py-16 bg-cinema-panel border-t border-cinema-border">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0">
                 <!-- Logo and tagline -->
                 <div class="text-center lg:text-left">
-                    <div class="flex items-center justify-center lg:justify-start space-x-3 mb-3">
-                        <div class="w-8 h-8 flex items-center justify-center">
-                            <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
-                        </div>
-                        <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
+                    <div class="flex items-center justify-center lg:justify-start mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-20 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
                     </div>
                     <p class="text-cinema-text-muted">Prompt like a director, not a guesser.</p>
                 </div>
@@ -1319,8 +1671,8 @@
                 <div class="flex flex-wrap justify-center gap-8">
                     <a href="/terms-of-service.html" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Terms</a>
                     <a href="/privacy-policy.html" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Privacy</a>
-                    <a href="mailto:insightout11@gmail.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Support</a>
-                    <a href="https://twitter.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Twitter</a>
+                    <a href="mailto:support@jsonpromptstudio.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Support</a>
+                    <a href="https://x.com/jsnpromptstudio" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">X</a>
                 </div>
             </div>
             
@@ -1363,7 +1715,10 @@
         const mobileMenu = document.getElementById('mobile-menu');
         
         mobileMenuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
             mobileMenu.classList.toggle('hidden');
+            mobileMenuBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            mobileMenuBtn.setAttribute('aria-label', isHidden ? 'Close navigation menu' : 'Open navigation menu');
         });
         
         // Close mobile menu when clicking on a link
@@ -1371,7 +1726,28 @@
         mobileLinks.forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.setAttribute('aria-label', 'Open navigation menu');
             });
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.setAttribute('aria-label', 'Open navigation menu');
+            }
+        });
+        
+        // Close mobile menu with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileMenuBtn.setAttribute('aria-label', 'Open navigation menu');
+                mobileMenuBtn.focus(); // Return focus to button
+            }
         });
         
         // Smooth scroll for anchor links
@@ -1428,9 +1804,13 @@
             toggle.addEventListener('click', () => {
                 const content = toggle.nextElementSibling;
                 const icon = toggle.querySelector('.faq-icon');
+                const isHidden = content.classList.contains('hidden');
                 
                 // Toggle content visibility
                 content.classList.toggle('hidden');
+                
+                // Update ARIA states
+                toggle.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
                 
                 // Rotate icon
                 if (content.classList.contains('hidden')) {
@@ -1577,7 +1957,7 @@
         // Performance optimization: Pause animations when page is not visible
         document.addEventListener('visibilitychange', () => {
             const animatedElements = document.querySelectorAll([
-                '.floating-orbs', '.mesh-gradient', '.geometric-pattern', 
+                '.spotlight-effect', '.mesh-gradient', '.geometric-pattern', 
                 '.dots-pattern', '.grid-pattern', '.circuit-pattern', '.floating-shapes'
             ].join(', '));
 
