@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes for AI services
 app.post('/api/groq', async (req, res) => {
   try {
-    const { messages, model, temperature, max_tokens } = req.body;
+    const { messages, model, temperature, max_tokens, seed, top_p, frequency_penalty, presence_penalty } = req.body;
     
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ 
@@ -41,6 +41,10 @@ app.post('/api/groq', async (req, res) => {
         messages,
         temperature: temperature || 0.7,
         max_tokens: max_tokens || 1000,
+        ...(seed && { seed }),
+        ...(top_p && { top_p }),
+        ...(frequency_penalty && { frequency_penalty }),
+        ...(presence_penalty && { presence_penalty })
       }),
     });
 
@@ -66,7 +70,7 @@ app.post('/api/groq', async (req, res) => {
 
 app.post('/api/openai', async (req, res) => {
   try {
-    const { messages, model, temperature, max_tokens } = req.body;
+    const { messages, model, temperature, max_tokens, seed, top_p, frequency_penalty, presence_penalty } = req.body;
     
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ 
@@ -85,6 +89,10 @@ app.post('/api/openai', async (req, res) => {
         messages,
         temperature: temperature || 0.7,
         max_tokens: max_tokens || 1000,
+        ...(seed && { seed }),
+        ...(top_p && { top_p }),
+        ...(frequency_penalty && { frequency_penalty }),
+        ...(presence_penalty && { presence_penalty })
       }),
     });
 
