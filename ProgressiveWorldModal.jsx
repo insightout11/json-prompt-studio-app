@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 import { useStore } from './store';
+import usePromptStore from './store';
+import { useToast } from './useToast';
 
 const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
+  const { exportData } = usePromptStore();
+  const { showSuccess } = useToast();
   
   // State management
   const [currentStep, setCurrentStep] = useState(0); // 0 = input, 1-6 = questions
@@ -67,6 +71,7 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
     setIsComplete(false);
     setFinalWorld(null);
     setShowRelatedModal(false);
+    setShowSaveModal(false);
   };
 
   const handleInitialSubmit = async () => {
@@ -189,6 +194,12 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
     }
     onClose();
   };
+
+  const handleSaveJSON = () => {
+    exportData('current');
+    showSuccess('World saved successfully!');
+  };
+
 
   const handleRelatedResult = (relatedWorld) => {
     if (relatedWorld && onResult) {
@@ -516,6 +527,12 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
                       Apply World to Scene 🎬
                     </button>
                     <button
+                      onClick={handleSaveJSON}
+                      className="px-6 py-3 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg transition-all"
+                    >
+                      💾 Save JSON
+                    </button>
+                    <button
                       onClick={resetModal}
                       className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
                     >
@@ -632,6 +649,7 @@ const ProgressiveWorldModal = ({ isOpen, onClose, onResult, currentJson }) => {
         specType="world"
         onResult={handleRelatedResult}
       />
+
     </div>
   );
 };

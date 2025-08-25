@@ -2299,7 +2299,8 @@ const usePromptStore = create((set, get) => ({
     });
     
     return Object.keys(sceneData).length > 0 ? sceneData : null;
-  }
+  },
+
 }));
 
 export default usePromptStore;

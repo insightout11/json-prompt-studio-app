@@ -40,7 +40,8 @@ const TEMPLATE_CATEGORIES = {
   preset_scenes: Object.keys(scenePresets), 
   preset_actions: Object.keys(actionPresets),
   preset_styles: Object.keys(directorStyles).filter(key => directorStyles[key].category !== 'directors'),
-  preset_audio: Object.keys(audioPresets)
+  preset_audio: Object.keys(audioPresets),
+  
 };
 
 const TAB_LABELS = {
@@ -57,7 +58,8 @@ const TAB_LABELS = {
   preset_scenes: '📍 Scene Presets', 
   preset_actions: '🎬 Action Presets',
   preset_styles: '🎨 Styles',
-  preset_audio: '🔊 Audio Presets'
+  preset_audio: '🔊 Audio Presets',
+  
 };
 
 const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) => {
@@ -281,6 +283,8 @@ const TemplateSelector = forwardRef(({ className = "", iconOnly = false }, ref) 
                 {Object.entries(TAB_LABELS).map(([tabKey, label]) => {
                   const templateCount = tabKey === 'experimental' 
                     ? TEMPLATE_CATEGORIES[tabKey].length 
+                    : tabKey === 'custom'
+                    ? getCustomPresets('character').length + getCustomPresets('style').length + getCustomPresets('world').length
                     : TEMPLATE_CATEGORIES[tabKey].filter(key => allTemplates[key]).length;
                   return (
                     <button

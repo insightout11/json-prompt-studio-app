@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 import { useStore } from './store';
+import usePromptStore from './store';
+import { useToast } from './useToast';
 
 const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
+  const { exportData } = usePromptStore();
+  const { showSuccess } = useToast();
   
   // State management
   const [currentStep, setCurrentStep] = useState(0); // 0 = input, 1-6 = questions
@@ -67,6 +71,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
     setIsComplete(false);
     setFinalStyle(null);
     setShowRelatedModal(false);
+    setShowSaveModal(false);
   };
 
   const handleInitialSubmit = async () => {
@@ -181,6 +186,12 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
   const handleShowRelated = () => {
     setShowRelatedModal(true);
   };
+
+  const handleSaveJSON = () => {
+    exportData('current');
+    showSuccess('Style saved successfully!');
+  };
+
 
   const handleCompleteEarly = async () => {
     // Clear any existing errors
@@ -415,6 +426,12 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
                     >
                       Generate Related Styles
                     </button>
+                    <button
+                      onClick={handleSaveJSON}
+                      className="px-4 py-2 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md"
+                    >
+                      💾 Save JSON
+                    </button>
                   </div>
                   
                   <button
@@ -474,6 +491,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
           }}
         />
       )}
+
     </>
   );
 };

@@ -112,6 +112,39 @@ class AIApiService {
     this.lastRequestTime = Date.now();
   }
 
+  // Simple but effective JSON repair for common AI response issues
+  simpleJsonRepair(jsonString) {
+    console.log('🔧 Applying simple JSON repair...');
+    
+    let repaired = jsonString
+      // Convert common measurement patterns to avoid quote issues
+      .replace(/(\d)'(\d+)"/g, '$1 feet $2 inches')
+      .replace(/(\d)'(\d)"/g, '$1 foot $2 inches') // singular foot
+      // Fix common quote patterns in descriptions
+      .replace(/:\s*"([^"]*?)(\d)'(\d+)"([^"]*?)"/g, ': "$1$2 feet $3 inches$4"')
+      // More aggressive quote fixing within string values
+      .replace(/:\s*"([^"]*?)"([^",:}]*?)"([^"]*?)"/g, (match, start, middle, end) => {
+        // This handles cases where there are unescaped quotes in the middle of strings
+        const escaped = middle.replace(/"/g, '\\"');
+        return `: "${start}\\"${escaped}\\"${end}"`;
+      })
+      // Fix trailing commas and other common issues
+      .replace(/,(\s*[}\]])/g, '$1')
+      // Handle incomplete JSON strings
+      .replace(/:\s*"([^"]*?)$/g, ': "$1"')
+      // Ensure proper closing
+      .replace(/([^}])\s*$/, '$1}');
+    
+    try {
+      JSON.parse(repaired);
+      console.log('✅ Simple JSON repair successful!');
+      return repaired;
+    } catch (e) {
+      console.log('❌ Simple repair failed:', e.message);
+      return jsonString;
+    }
+  }
+
   // Helper function to clean and parse JSON responses
   // Robust JSON repair function using state machine parsing
   repairJsonQuotes(jsonString) {
@@ -194,18 +227,21 @@ class AIApiService {
       console.log('❌ JSON repair failed, trying fallback...', e.message);
       console.log('❌ Failed repaired JSON (first 600 chars):', result.substring(0, 600));
       
-      // Fallback: simpler escape approach
+      // Fallback: enhanced pattern-based escape approach
       let fallback = jsonString
-        .replace(/(\d)'(\d+)"/g, '$1\\\'$2\\"')  // Fix measurements
-        .replace(/([^\\])"/g, (match, prefix, offset) => {
-          // Simple heuristic: if quote is not at property boundary, escape it
-          const after = jsonString[offset + 2];
-          const before = jsonString[offset - 1];
-          
-          if (after === ':' || before === ':' || after === ',' || after === '}' || before === '{' || before === ',') {
-            return match; // Keep structural quotes
-          }
-          return prefix + '\\"'; // Escape content quotes
+        // First, handle common measurement patterns
+        .replace(/(\d)'(\d+)"/g, '$1 feet $2 inches')  // Convert measurements to safer text
+        .replace(/(\w+)'s\s/g, '$1\'s ')  // Fix possessives
+        // Handle quotes within string values (not property names)
+        .replace(/"([^"]*)"(\s*:\s*"[^"]*)"([^"]*?)"/g, (match, prop, middle, content) => {
+          // This is a property with quoted content - escape internal quotes
+          const escapedContent = content.replace(/"/g, '\\"');
+          return `"${prop}"${middle}${escapedContent}"`;
+        })
+        // More aggressive quote fixing for content within JSON string values
+        .replace(/:\s*"([^"]*)"([^",}\]]*)"([^"]*?)"/g, (match, start, middle, end) => {
+          // Handle quotes in the middle of string values
+          return `: "${start}\\"${middle}\\"${end}"`;
         });
       
       try {
@@ -288,10 +324,16 @@ class AIApiService {
       
       console.log('🔍 Final cleaned response (first 300 chars):', cleanedResponse.substring(0, 300));
       
-      // Apply comprehensive JSON fixes
-      cleanedResponse = this.repairJsonQuotes(cleanedResponse);
+      // Try simple repair first, then comprehensive repair if needed
+      let repairedResponse = this.simpleJsonRepair(cleanedResponse);
       
-      const result = JSON.parse(cleanedResponse);
+      // If simple repair failed, try comprehensive repair
+      if (repairedResponse === cleanedResponse) {
+        console.log('🔧 Simple repair unchanged, trying comprehensive repair...');
+        repairedResponse = this.repairJsonQuotes(cleanedResponse);
+      }
+      
+      const result = JSON.parse(repairedResponse);
       console.log('✅ Successfully parsed JSON:', Object.keys(result));
       return result;
       
@@ -311,18 +353,24 @@ class AIApiService {
       ];
       
       for (let i = 0; i < desperatePatterns.length; i++) {
+        let candidateJson = '';
         try {
           const desperateMatch = content.match(desperatePatterns[i]);
           if (desperateMatch) {
             console.log(`🚨 Attempting desperate JSON extraction with pattern ${i + 1}...`);
             
-            let candidateJson = desperateMatch[0];
+            candidateJson = desperateMatch[0];
             
             // Try to fix common JSON issues
             console.log('🔧 Attempting to fix JSON formatting issues...');
             
-            // Apply the same comprehensive JSON repair
-            candidateJson = this.repairJsonQuotes(candidateJson);
+            // Try simple repair first, then comprehensive repair if needed
+            candidateJson = this.simpleJsonRepair(candidateJson);
+            
+            // If simple repair didn't work, try comprehensive repair
+            if (candidateJson === desperateMatch[0]) {
+              candidateJson = this.repairJsonQuotes(candidateJson);
+            }
             
             // Fix incomplete JSON by attempting to close it properly
             if (!candidateJson.trim().endsWith('}')) {
@@ -344,8 +392,10 @@ class AIApiService {
           }
         } catch (desperateError) {
           console.error(`💥 Pattern ${i + 1} failed:`, desperateError.message);
-          console.error(`💥 Failed candidate JSON (first 500 chars):`, candidateJson.substring(0, 500));
-          console.error(`💥 Failed candidate JSON (around error pos):`, candidateJson.substring(Math.max(0, 519-50), 519+50));
+          if (candidateJson) {
+            console.error(`💥 Failed candidate JSON (first 500 chars):`, candidateJson.substring(0, 500));
+            console.error(`💥 Failed candidate JSON (around error pos):`, candidateJson.substring(Math.max(0, 319-50), 319+50));
+          }
           continue; // Try next pattern
         }
       }

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import { useStore } from './store';
+import usePromptStore from './store';
+import { useToast } from './useToast';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 
 const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
   const getAvailableContexts = useStore(state => state.getAvailableContexts);
+  const { exportData } = usePromptStore();
+  const { showSuccess } = useToast();
   
   // State management following progressive pattern
   const [currentStep, setCurrentStep] = useState(0); // 0 = input, 1-6 = questions
@@ -177,6 +181,11 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
       setBuilderContext('storyboard', finalStoryboard.formFields || finalStoryboard);
     }
     onClose();
+  };
+
+  const handleSaveJSON = () => {
+    exportData('current');
+    showSuccess('Storyboard saved successfully!');
   };
 
   const handleRelatedResult = (relatedStoryboard) => {
@@ -446,6 +455,12 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
                       className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Apply Storyboard to Scene 🎬
+                    </button>
+                    <button
+                      onClick={handleSaveJSON}
+                      className="px-6 py-3 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg transition-all"
+                    >
+                      💾 Save JSON
                     </button>
                     <button
                       onClick={handleStartOver}
