@@ -205,10 +205,49 @@ const usePromptStore = create((set, get) => ({
     const { fieldValues, detailValues, customDetails, aspectRatio } = get();
     const filtered = {};
     
-    // Include main field values
+    // Consistency field keys that should go in advanced object
+    const consistencyFields = [
+      'seed', 'lock_identity', 'lock_style', 'creativity', 'palette', 'negative',
+      'camera_lens_mm', 'camera_move', 'camera_speed', 'duration_s', 'fps'
+    ];
+    
+    // Advanced object to hold consistency features
+    const advanced = {};
+    
+    // Include main field values (excluding consistency fields)
     Object.entries(fieldValues).forEach(([key, value]) => {
       if (value !== '' && value !== null && value !== undefined) {
-        filtered[key] = value;
+        if (consistencyFields.includes(key)) {
+          // Handle consistency fields specially
+          if (key === 'negative' && value) {
+            // Convert negative list to array if it's a string
+            advanced.negative = value.split(',').map(item => item.trim()).filter(item => item);
+          } else if (key === 'palette' && value) {
+            // Convert palette to array of color codes
+            advanced.palette = value.split(',').map(color => color.trim()).filter(color => color);
+          } else if (key === 'camera_lens_mm' || key === 'camera_move' || key === 'camera_speed') {
+            // Group camera settings
+            if (!advanced.camera) advanced.camera = {};
+            if (key === 'camera_lens_mm') advanced.camera.lens_mm = parseInt(value);
+            else if (key === 'camera_move') advanced.camera.move = value;
+            else if (key === 'camera_speed') advanced.camera.speed = value;
+          } else if (key === 'duration_s' || key === 'fps') {
+            // Group timing settings
+            if (!advanced.timing) advanced.timing = {};
+            if (key === 'duration_s') advanced.timing.duration_s = parseInt(value);
+            else if (key === 'fps') advanced.timing.fps = parseInt(value);
+          } else if (key === 'creativity') {
+            // Map creativity to temperature
+            if (!advanced.creativity) advanced.creativity = {};
+            advanced.creativity.temperature = parseFloat(value);
+          } else {
+            // Direct mapping for seed, lock_identity, lock_style
+            advanced[key] = key === 'seed' ? parseInt(value) : value;
+          }
+        } else {
+          // Regular fields go in main object
+          filtered[key] = value;
+        }
       }
     });
     
@@ -231,7 +270,39 @@ const usePromptStore = create((set, get) => ({
       filtered.aspect_ratio = aspectRatio;
     }
     
+    // Only include advanced object if it has content
+    if (Object.keys(advanced).length > 0) {
+      filtered.advanced = advanced;
+    }
+    
     return JSON.stringify(filtered, null, 2);
+  },
+
+  // Helper function to check if consistency features are active
+  hasActiveConsistencyFeatures: () => {
+    const { fieldValues } = get();
+    const consistencyFields = [
+      'seed', 'lock_identity', 'lock_style', 'creativity', 'palette', 'negative',
+      'camera_lens_mm', 'camera_move', 'camera_speed', 'duration_s', 'fps'
+    ];
+    
+    return consistencyFields.some(field => {
+      const value = fieldValues[field];
+      return value !== '' && value !== null && value !== undefined;
+    });
+  },
+
+  // Helper function to check if locks are active specifically
+  hasActiveLocks: () => {
+    const { fieldValues } = get();
+    return fieldValues.lock_identity === true || fieldValues.lock_style === true;
+  },
+
+  // Generate random seed
+  generateRandomSeed: () => {
+    const randomSeed = Math.floor(Math.random() * 999999) + 1;
+    get().setFieldValue('seed', randomSeed);
+    return randomSeed;
   },
 
   // Aspect ratio management

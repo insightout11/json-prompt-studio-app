@@ -388,6 +388,8 @@ class AIApiService {
       top_p: options.topP || 1,
       frequency_penalty: options.frequencyPenalty || 0,
       presence_penalty: options.presencePenalty || 0,
+      // Include seed if provided for consistency
+      ...(options.seed && { seed: options.seed }),
       ...options.additionalParams
     };
 
@@ -507,12 +509,12 @@ class AIApiService {
   }
 
   // Simple Scene Extension API - Returns plain text summary + updated JSON
-  async extendSceneSimple(originalScene, extensionType) {
+  async extendSceneSimple(originalScene, extensionType, consistencyOptions = {}) {
     try {
       // Wait for rate limiting
       await this.enforceRateLimit();
       
-      const prompt = this.buildSimpleExtensionPrompt(originalScene, extensionType);
+      const prompt = this.buildSimpleExtensionPrompt(originalScene, extensionType, consistencyOptions);
       
       const messages = [
         {
@@ -525,11 +527,15 @@ class AIApiService {
         }
       ];
 
-      const response = await this.makeRequest(messages, {
-        temperature: 0.7,
+      // Extract consistency parameters
+      const requestOptions = {
+        temperature: consistencyOptions.creativity?.temperature || 0.7,
         maxTokens: 1500,
-        timeout: 90000 // 90 seconds for scene extensions
-      });
+        timeout: 90000, // 90 seconds for scene extensions
+        ...(consistencyOptions.seed && { seed: consistencyOptions.seed })
+      };
+
+      const response = await this.makeRequest(messages, requestOptions);
 
       const result = this.parseJsonResponse(response.content);
       
@@ -553,12 +559,12 @@ class AIApiService {
   }
 
   // Generate 5 Scene Options API - Returns array of 5 different scene extensions
-  async generateSceneOptions(originalScene, count = 5) {
+  async generateSceneOptions(originalScene, count = 5, consistencyOptions = {}) {
     try {
       // Wait for rate limiting
       await this.enforceRateLimit();
       
-      const prompt = this.build5OptionsPrompt(originalScene, count);
+      const prompt = this.build5OptionsPrompt(originalScene, count, consistencyOptions);
       
       const messages = [
         {
@@ -571,11 +577,15 @@ class AIApiService {
         }
       ];
 
-      const response = await this.makeRequest(messages, {
-        temperature: 0.8,
+      // Extract consistency parameters
+      const requestOptions = {
+        temperature: consistencyOptions.creativity?.temperature || 0.8,
         maxTokens: 4000, // Increased for more detailed scene options with 8B model
-        timeout: 90000 // 90 seconds for generating multiple scene options
-      });
+        timeout: 90000, // 90 seconds for generating multiple scene options
+        ...(consistencyOptions.seed && { seed: consistencyOptions.seed })
+      };
+
+      const response = await this.makeRequest(messages, requestOptions);
 
       const result = this.parseJsonResponse(response.content);
       
@@ -597,10 +607,29 @@ class AIApiService {
   }
 
   // Build 5 options generation prompt
-  build5OptionsPrompt(originalScene, count) {
+  build5OptionsPrompt(originalScene, count, consistencyOptions = {}) {
+    let consistencyInstructions = '';
+    
+    if (consistencyOptions.lock_identity) {
+      consistencyInstructions += '\n- PRESERVE character identity and appearance exactly as described in ALL options';
+    }
+    
+    if (consistencyOptions.lock_style) {
+      consistencyInstructions += '\n- MAINTAIN the exact visual style, mood, and aesthetic from the original scene in ALL options';
+    }
+    
+    if (consistencyOptions.palette && consistencyOptions.palette.length > 0) {
+      consistencyInstructions += `\n- USE ONLY these brand colors in ALL options: ${consistencyOptions.palette.join(', ')}`;
+    }
+    
+    if (consistencyOptions.negative && consistencyOptions.negative.length > 0) {
+      consistencyInstructions += `\n- AVOID these elements in ALL options: ${consistencyOptions.negative.join(', ')}`;
+    }
+
     return `You are a creative AI assistant that generates multiple scene continuation options for video scenes.
 
 Your task is to create ${count} DIFFERENT and DISTINCT scene extensions from the given JSON scene.
+${consistencyInstructions}
 
 Return your response in this EXACT JSON format:
 {
@@ -636,11 +665,30 @@ REQUIREMENTS:
 - Make summaries engaging and clear for user selection`;
   }
 
-  // Build simple extension prompts (keeping for backward compatibility)
-  buildSimpleExtensionPrompt(originalScene, extensionType) {
+  // Build simple extension prompts (updated with consistency support)
+  buildSimpleExtensionPrompt(originalScene, extensionType, consistencyOptions = {}) {
+    let consistencyInstructions = '';
+    
+    if (consistencyOptions.lock_identity) {
+      consistencyInstructions += '\n- PRESERVE character identity and appearance exactly as described in the original scene';
+    }
+    
+    if (consistencyOptions.lock_style) {
+      consistencyInstructions += '\n- MAINTAIN the exact visual style, mood, and aesthetic from the original scene';
+    }
+    
+    if (consistencyOptions.palette && consistencyOptions.palette.length > 0) {
+      consistencyInstructions += `\n- USE ONLY these brand colors: ${consistencyOptions.palette.join(', ')}`;
+    }
+    
+    if (consistencyOptions.negative && consistencyOptions.negative.length > 0) {
+      consistencyInstructions += `\n- AVOID these elements: ${consistencyOptions.negative.join(', ')}`;
+    }
+
     const basePrompt = `You are a creative AI assistant that helps extend video scene descriptions. 
 
 Your task is to take a JSON scene description and extend it with a ${extensionType}.
+${consistencyInstructions}
 
 Return your response in this EXACT JSON format:
 {
@@ -2335,6 +2383,7 @@ JSON FORMAT:
 
       // Determine if this is expansion or generation
       const isExpansion = userSeedIdea && userSeedIdea.trim().length > 0;
+      const isGenericEnhancement = userSeedIdea && userSeedIdea.includes('enhance existing details');
       
       // Check if this is a progressive expansion (existing fields have content)
       const existingFields = currentScene.field_values || {};
@@ -2344,7 +2393,7 @@ JSON FORMAT:
       
       let userPrompt;
       if (isExpansion) {
-        if (isProgressive && hasExistingContent) {
+        if ((isProgressive && hasExistingContent) || isGenericEnhancement) {
           // Build current fields description
           const currentFieldsDesc = Object.entries(existingFields)
             .filter(([key, value]) => categoryConfig.fieldMap[key] && value && value.trim() !== '')
@@ -2353,29 +2402,43 @@ JSON FORMAT:
           
           // Build available fields description
           const availableFieldsDesc = Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
-            const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+            const primaryFieldNames = ['characters', 'actions', 'setting', 'style', 'audio'];
             const currentValue = existingFields[field];
             if (primaryFieldNames.includes(field)) {
-              return '- ' + field + ': ' + (currentValue ? 'Enhance "' + currentValue + '" with more detail' : 'MUST be exactly "' + userSeedIdea.trim() + '"');
+              return '- ' + field + ': ' + (currentValue ? 'Keep the core concept from "' + currentValue + '" but make it more detailed and specific' : 'MUST be exactly "' + userSeedIdea.trim() + '"');
             }
             return '- ' + field + ': ' + (currentValue ? 'Enhance "' + currentValue + '" with more specificity' : '(choose from: ' + options.join(', ') + ' or suggest similar)');
           }).join('\n');
           
-          userPrompt = 'Given the current scene context: ' + sceneContext + '\n\n' +
-            'PROGRESSIVE EXPANSION: Enhance existing ' + categoryKey + ' details with more depth and specificity.\n\n' +
-            'Original input: "' + userSeedIdea.trim() + '"\n\n' +
-            'Current field values to enhance:\n' + currentFieldsDesc + '\n\n' +
-            'INSTRUCTIONS:\n' +
-            '1. Keep all existing content but make it MORE detailed and specific\n' +
-            '2. Add new complementary fields that were not filled before\n' +
-            '3. Preserve the original concept "' + userSeedIdea.trim() + '" in the primary field\n' +
-            '4. Focus on adding layers of detail, specificity, and richness\n\n' +
-            'Available fields to enhance or add:\n' + availableFieldsDesc + '\n\n' +
-            'Return enhanced JSON with richer, more detailed descriptions. Don\'t remove existing content - build upon it.';
+          if (isGenericEnhancement) {
+            userPrompt = 'CORE CONCEPT PRESERVATION: Enhance existing ' + categoryKey + ' while preserving the original user intent.\n\n' +
+              'Current field values:\n' + currentFieldsDesc + '\n\n' +
+              'CRITICAL INSTRUCTIONS:\n' +
+              '1. Identify the SIMPLE USER CONCEPT in the primary field (e.g., "mall", "dog", "forest", "happy")\n' +
+              '2. NEVER replace simple concepts with generic descriptions (NO "atmospheric environment", "compelling character", etc.)\n' +
+              '3. Keep the simple concept as the core and ADD specific details around it\n' +
+              '4. Example: "mall" → "bustling shopping mall" → "modern indoor shopping mall with glass skylights"\n' +
+              '5. Example: "cute dog" → "adorable golden retriever puppy" → "playful golden retriever puppy with soft fur"\n\n' +
+              'Available fields to enhance:\n' + availableFieldsDesc + '\n\n' +
+              'Return JSON that PRESERVES the simple user concept while adding rich details.';
+          } else {
+            userPrompt = 'Given the current scene context: ' + sceneContext + '\n\n' +
+              'PROGRESSIVE EXPANSION: Enhance existing ' + categoryKey + ' details with more depth and specificity.\n\n' +
+              'Original input: "' + userSeedIdea.trim() + '"\n\n' +
+              'Current field values to enhance:\n' + currentFieldsDesc + '\n\n' +
+              'INSTRUCTIONS:\n' +
+              '1. For the primary field, preserve the CORE CONCEPT from the existing value but make it more specific and detailed\n' +
+              '2. If the existing primary field contains obvious user input (like "mall", "dog", etc.), keep that core concept intact\n' +
+              '3. Add new complementary fields that were not filled before\n' +
+              '4. Focus on adding layers of detail, specificity, and richness without losing the original intent\n' +
+              '5. Do NOT replace simple user concepts with generic descriptions\n\n' +
+              'Available fields to enhance or add:\n' + availableFieldsDesc + '\n\n' +
+              'Return enhanced JSON with richer, more detailed descriptions. Don\'t remove existing content - build upon it.';
+          }
         } else {
           // Build available fields description
           const availableFieldsDesc = Object.entries(categoryConfig.fieldMap).map(([field, options]) => {
-            const primaryFieldNames = ['character', 'actions', 'setting', 'style', 'audio'];
+            const primaryFieldNames = ['characters', 'actions', 'setting', 'style', 'audio'];
             if (primaryFieldNames.includes(field)) {
               return '- ' + field + ': MUST be exactly "' + userSeedIdea.trim() + '" (preserve user input exactly)';
             }

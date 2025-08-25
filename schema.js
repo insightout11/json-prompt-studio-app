@@ -943,6 +943,23 @@ export const schema = {
         { "key": "style_elements", "type": "textarea", "label": "Style Elements", "placeholder": "Applied style characteristics" },
         { "key": "aesthetic_enhancements", "type": "textarea", "label": "Aesthetic Enhancements", "placeholder": "Visual style improvements" }
       ]
+    },
+    {
+      "id": "consistency",
+      "label": "Consistency",
+      "fields": [
+        { "key": "seed", "type": "number", "label": "Seed", "placeholder": "Random starting point", "min": 1, "max": 999999 },
+        { "key": "lock_identity", "type": "toggle", "label": "Lock Identity", "description": "Keep same character/look across retries" },
+        { "key": "lock_style", "type": "toggle", "label": "Lock Style", "description": "Keep same overall visual style" },
+        { "key": "creativity", "type": "range", "label": "Creativity", "min": 0.1, "max": 1.0, "step": 0.1, "default": 0.4, "description": "Lower = steadier, higher = wilder" },
+        { "key": "palette", "type": "text", "label": "Brand Colors", "placeholder": "e.g., #FF1A2E, #111111, #E6E6E6" },
+        { "key": "negative", "type": "textarea", "label": "Negative List", "placeholder": "Things to avoid (e.g., extra people, text overlays, hands)" },
+        { "key": "camera_lens_mm", "type": "number", "label": "Camera Lens (mm)", "placeholder": "e.g., 35, 50, 85", "min": 10, "max": 400 },
+        { "key": "camera_move", "type": "select", "label": "Camera Movement", "options": ["static", "dolly_in", "dolly_out", "pan_left", "pan_right", "tilt_up", "tilt_down", "orbit", "custom..."] },
+        { "key": "camera_speed", "type": "select", "label": "Movement Speed", "options": ["slow", "normal", "fast", "variable"] },
+        { "key": "duration_s", "type": "number", "label": "Duration (seconds)", "placeholder": "e.g., 8, 12, 15", "min": 1, "max": 60 },
+        { "key": "fps", "type": "select", "label": "Frame Rate", "options": ["24", "30", "60"] }
+      ]
     }
   ]
 };

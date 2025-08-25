@@ -26,6 +26,8 @@ import { ToastContainer } from './Toast';
 import { useToast } from './useToast';
 import IntegratedHeader from './IntegratedHeader';
 import EditableJsonOutput from './EditableJsonOutput';
+import ConsistencyPanel from './ConsistencyPanel';
+import ConsistencyBadge from './ConsistencyBadge';
 
 const App = () => {
   const { 
@@ -56,7 +58,10 @@ const App = () => {
     aspectRatio,
     setAspectRatio,
     undo,
-    undoStack
+    undoStack,
+    hasActiveConsistencyFeatures,
+    hasActiveLocks,
+    generateRandomSeed
   } = usePromptStore();
 
   // State Management
@@ -87,6 +92,16 @@ const App = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(null);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+  
+  // Consistency panel state
+  const [isConsistencyExpanded, setIsConsistencyExpanded] = useState(() => {
+    return localStorage.getItem('jsonPromptStudio_consistencyExpanded') === 'true';
+  });
+  
+  // Save consistency panel state to localStorage
+  useEffect(() => {
+    localStorage.setItem('jsonPromptStudio_consistencyExpanded', isConsistencyExpanded);
+  }, [isConsistencyExpanded]);
   
   // Toast notifications
   const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
@@ -318,7 +333,7 @@ const App = () => {
     }
   };
 
-  // Generate 5 scene options handler
+  // Generate 5 scene options handler with consistency support
   const handleGenerate5Options = async () => {
     if (!isPro) {
       setShowPricing(true);
@@ -347,7 +362,10 @@ const App = () => {
     setAppliedOptionIndex(null);
 
     try {
-      const response = await aiApiService.generateSceneOptions(currentScene, 5);
+      // Extract consistency options from current scene's advanced object
+      const consistencyOptions = currentScene.advanced || {};
+      
+      const response = await aiApiService.generateSceneOptions(currentScene, 5, consistencyOptions);
       
       if (response.success && response.options && response.options.length > 0) {
         setSceneOptions(response.options);
@@ -838,8 +856,9 @@ const App = () => {
                 </div>
               </div>
 
-              {/* RIGHT SECTION - Cinematic Toggle */}
-              <div className="flex items-center justify-end flex-shrink-0 -mr-2">
+              {/* RIGHT SECTION - Consistency Badge & Cinematic Toggle */}
+              <div className="flex items-center justify-end flex-shrink-0 -mr-2 space-x-3">
+                <ConsistencyBadge />
                 <CinematicModeToggle />
               </div>
             </div>
@@ -1231,6 +1250,14 @@ const App = () => {
                     <option value="21:9">🎬 21:9</option>
                   </select>
                 </div>
+              </div>
+              
+              {/* CONSISTENCY PANEL */}
+              <div className="mb-4">
+                <ConsistencyPanel 
+                  isExpanded={isConsistencyExpanded}
+                  onToggleExpanded={() => setIsConsistencyExpanded(!isConsistencyExpanded)}
+                />
               </div>
               
               {/* UNIVERSAL INPUT + AI FEATURES */}

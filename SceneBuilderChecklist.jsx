@@ -720,12 +720,8 @@ const SceneBuilderChecklist = ({ onProjectChange, compact = false, isAdvancedMod
         fieldValues[field] && fieldValues[field].trim() !== ''
       );
       
-      // For progressive expansion without input, use existing primary field value or generic enhancement
-      const enhancementInput = input?.trim() || (() => {
-        const primaryFields = ['character', 'actions', 'setting', 'style', 'audio'];
-        const primaryField = primaryFields.find(field => fieldValues[field]);
-        return primaryField ? fieldValues[primaryField] : 'enhance existing details';
-      })();
+      // For progressive expansion without input, use a generic enhancement instruction
+      const enhancementInput = input?.trim() || 'enhance existing details with more specificity while preserving core concepts';
       
       // Use AI service to expand the description
       const response = await aiApiService.generateCategorySuggestions(categoryKey, {

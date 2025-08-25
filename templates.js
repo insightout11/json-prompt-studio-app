@@ -1,4 +1,154 @@
 export const templates = {
+  // Consistency Examples
+  consistency_examples: {
+    name: "Consistency Examples",
+    icon: "⚙️",
+    description: "Showcase consistency features with locks, seeds, and advanced controls",
+    levels: {
+      1: {
+        name: "Young Woman Walking",
+        description: "Cinematic scene with identity lock and seed",
+        fields: {
+          characters: "Young woman with brown hair and denim jacket",
+          actions: "Walks toward camera through light traffic",
+          setting: "Downtown street at golden hour, soft haze",
+          style: "Cinematic, natural light, gentle contrast",
+          audio: "Soft indie guitar",
+          aspect_ratio: "16:9",
+          seed: 137421,
+          lock_identity: true,
+          lock_style: true,
+          negative: "extra people, text overlays, hands",
+          camera_lens_mm: 35,
+          camera_move: "dolly_in",
+          camera_speed: "slow",
+          duration_s: 8,
+          fps: 24,
+          creativity: 0.4
+        }
+      },
+      2: {
+        name: "Product Spin with Brand Colors",
+        description: "Commercial product shot with color lock",
+        fields: {
+          characters: "Red running shoe on turntable",
+          actions: "Smooth 360° spin, subtle highlight sweep",
+          setting: "Black studio cyclorama",
+          style: "Clean commercial, glossy reflections",
+          audio: "Mute",
+          aspect_ratio: "16:9",
+          seed: 884212,
+          lock_style: true,
+          palette: "#111111, #FF1A2E, #E6E6E6",
+          negative: "hands, dust, text overlays",
+          camera_lens_mm: 70,
+          camera_move: "static",
+          camera_speed: "normal",
+          duration_s: 8,
+          fps: 24,
+          creativity: 0.3
+        }
+      },
+      3: {
+        name: "Vertical Vlog Intro",
+        description: "Social-first content with exact timing",
+        fields: {
+          characters: "Creator talking to camera, cozy room",
+          actions: "Waves hello and smiles",
+          setting: "Soft window light, plants in background",
+          style: "Vlog, naturalistic, shallow depth of field",
+          audio: "Lo-fi beat, very light",
+          aspect_ratio: "9:16",
+          seed: 612090,
+          lock_identity: true,
+          camera_lens_mm: 35,
+          camera_move: "static",
+          camera_speed: "normal",
+          duration_s: 12,
+          fps: 30,
+          creativity: 0.45
+        }
+      },
+      4: {
+        name: "Whimsical Animation",
+        description: "Controlled creativity with palette",
+        fields: {
+          characters: "Wise old wizard riding a giant turtle",
+          actions: "Raises staff; glowing runes swirl",
+          setting: "Foggy coast at dawn",
+          style: "Studio Ghibli, soft watercolor",
+          audio: "Whispering wind and gentle synths",
+          aspect_ratio: "16:9",
+          seed: 17351,
+          lock_identity: true,
+          lock_style: true,
+          palette: "#0F1418, #CADBE7, #65D6C6",
+          camera_lens_mm: 50,
+          camera_move: "dolly_in",
+          camera_speed: "slow",
+          duration_s: 8,
+          fps: 24,
+          creativity: 0.5
+        }
+      },
+      5: {
+        name: "Educational Close-up",
+        description: "Steady framing with low variance",
+        fields: {
+          characters: "Teacher at whiteboard, marker in hand",
+          actions: "Points to formula, nods once",
+          setting: "Bright classroom, neutral wall",
+          style: "Clean instructional, soft contrast",
+          audio: "Light ambient classroom tone",
+          aspect_ratio: "1:1",
+          seed: 90214,
+          lock_identity: true,
+          lock_style: true,
+          negative: "crowd, background text, decorative posters",
+          camera_lens_mm: 85,
+          camera_move: "static",
+          camera_speed: "normal",
+          duration_s: 8,
+          fps: 24,
+          creativity: 0.25
+        }
+      },
+      6: {
+        name: "Nature Mood",
+        description: "Color discipline with slow movement",
+        fields: {
+          characters: "Coastal cliffs and waves",
+          actions: "Slow push over shoreline; mist drifts",
+          setting: "Overcast blue hour",
+          style: "Atmospheric, desaturated blues",
+          audio: "Ocean surf and wind",
+          aspect_ratio: "16:9",
+          seed: 445566,
+          palette: "#0B1D2A, #6FA6C9, #BFD6E6",
+          camera_lens_mm: 35,
+          camera_move: "dolly_in",
+          camera_speed: "slow",
+          duration_s: 8,
+          fps: 24,
+          creativity: 0.35
+        }
+      },
+      7: {
+        name: "Minimal Reproducible",
+        description: "Just seed for basic consistency",
+        fields: {
+          characters: "Golden retriever in a field",
+          actions: "Runs toward camera",
+          setting: "Sunset meadow with tall grass",
+          style: "Warm, filmic, soft flares",
+          audio: "Acoustic guitar",
+          aspect_ratio: "16:9",
+          seed: 321987
+        }
+      }
+    }
+  },
+
   horror: {
     name: "Horror/Thriller",
     icon: "👻",

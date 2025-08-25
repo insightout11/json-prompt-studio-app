@@ -156,7 +156,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
         </div>
       ),
       target: '[data-tutorial="text-input"]',
-      position: 'left',
+      position: 'right',
       disableScroll: true
     },
     {
@@ -583,6 +583,60 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       position: 'bottom'
     },
     {
+      id: 'consistency-controls',
+      title: '⚙️ Master Consistency & Control',
+      content: () => (
+        <div>
+          <p className="mb-3">Perfect for content creators who need reliable, repeatable results:</p>
+          <div className="space-y-3 mb-4">
+            <div className="bg-teal-50 dark:bg-teal-900/20 rounded-lg p-3">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🎲</span>
+                <span className="font-medium text-teal-800 dark:text-teal-300">Seed Controls</span>
+              </div>
+              <ul className="text-sm text-teal-700 dark:text-teal-200 space-y-1 ml-6">
+                <li>• Same seed = similar results every time</li>
+                <li>• Tap the dice for fresh variations</li>
+                <li>• Perfect for A/B testing ideas</li>
+              </ul>
+            </div>
+            
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🔒</span>
+                <span className="font-medium text-orange-800 dark:text-orange-300">Smart Locks</span>
+              </div>
+              <ul className="text-sm text-orange-700 dark:text-orange-200 space-y-1 ml-6">
+                <li>• <strong>Lock Identity:</strong> Keep same character/look across retries</li>
+                <li>• <strong>Lock Style:</strong> Maintain visual grade/palette</li>
+                <li>• Prevent unwanted changes during iteration</li>
+              </ul>
+            </div>
+            
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🎨</span>
+                <span className="font-medium text-purple-800 dark:text-purple-300">Creative Control</span>
+              </div>
+              <ul className="text-sm text-purple-700 dark:text-purple-200 space-y-1 ml-6">
+                <li>• Creativity slider: Lower = steadier, Higher = wilder</li>
+                <li>• Brand color palettes with visual color picker</li>
+                <li>• Camera and timing controls for precision</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>💡 Pro Tip:</strong> Use consistency controls for content series, brand campaigns, or when you need to iterate on a concept while maintaining key visual elements!
+            </p>
+          </div>
+        </div>
+      ),
+      target: '[data-tutorial="consistency-panel"]',
+      position: 'left'
+    },
+    {
       id: 'completion',
       title: '🚀 Ready to Create!',
       content: () => (
@@ -595,6 +649,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
               <li>• Use Templates & Quick Tools for instant results</li>  
               <li>• Build detailed prompts with Scene Builder</li>
               <li>• Use AI Tools for creative enhancement</li>
+              <li>• Master Consistency controls for repeatable results</li>
               <li>• Organize everything with Projects</li>
             </ul>
           </div>
@@ -603,6 +658,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
             <ul className="text-xs text-blue-700 dark:text-blue-200 space-y-1">
               <li>• Switch to Advanced Mode for full JSON control</li>
               <li>• Edit JSON directly in Advanced Mode</li>
+              <li>• Use Consistency panel for seeds, locks, and creative control</li>
               <li>• Use aspect ratio controls for different platforms</li>
               <li>• Copy/export your finished prompts</li>
             </ul>
@@ -644,6 +700,14 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
   // Calculate tooltip position with viewport boundary detection
   const getTooltipPosition = (targetPos, preferredPosition, stepData = null) => {
     if (!targetPos) {
+      // Special positioning for consistency step - balanced left position
+      if (stepData && stepData.id === 'consistency-controls') {
+        return {
+          top: '0px',
+          left: '15%',
+          transform: 'translateX(-50%)'
+        };
+      }
       // Center position for welcome/complete steps
       return {
         top: '50%',
@@ -672,6 +736,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     const isTextInput = stepData && stepData.id === 'text-input';
     const isAiTools = stepData && stepData.id === 'ai-tools';
     const isJsonOutput = stepData && stepData.id === 'json-output';
+    const isConsistencyControls = stepData && stepData.id === 'consistency-controls';
     
     // Enhanced spacing for AI tools to ensure complete clearance
     const aiToolsTargetPadding = isAiTools ? 120 : targetPadding;
@@ -680,6 +745,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     const targetCenterY = isLargeTarget ? targetPos.top + 50 : 
                          isTextInput ? targetPos.top - 50 : // Position much higher for text input
                          isAiTools ? 150 : // EMERGENCY: Force AI tools tooltip to TOP of viewport
+                         isConsistencyControls ? 50 : // EMERGENCY: Force consistency controls tooltip to TOP of viewport
                          isJsonOutput ? Math.max(targetPos.top - 100, 100) : // Special positioning for JSON output step
                          targetPos.top + (targetPos.height / 2);
     
