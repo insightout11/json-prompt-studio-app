@@ -385,9 +385,10 @@ class AIApiService {
       messages: messages,
       max_tokens: options.maxTokens || 2000,
       temperature: options.temperature || 0.7,
-      top_p: options.topP || 1,
-      frequency_penalty: options.frequencyPenalty || 0,
-      presence_penalty: options.presencePenalty || 0,
+      // Only include advanced parameters if they have non-default values
+      ...(options.topP && options.topP !== 1 && { top_p: options.topP }),
+      ...(options.frequencyPenalty && options.frequencyPenalty !== 0 && { frequency_penalty: options.frequencyPenalty }),
+      ...(options.presencePenalty && options.presencePenalty !== 0 && { presence_penalty: options.presencePenalty }),
       // Include seed if provided for consistency
       ...(options.seed && { seed: options.seed }),
       ...options.additionalParams
