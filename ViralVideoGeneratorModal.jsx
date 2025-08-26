@@ -786,7 +786,7 @@ Return only the enhanced JSON object, properly formatted.`;
         className="modal-mobile lg:modal-responsive bg-white dark:bg-cinema-panel lg:rounded-lg shadow-xl dark:shadow-glow-soft lg:max-w-7xl w-full lg:max-h-[90vh] max-h-screen overflow-hidden border border-transparent dark:border-cinema-border"
       >
         {/* Header */}
-        <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+        <div className="flex items-center justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border bg-gradient-to-r from-purple-500 to-pink-500 text-white">
           <div className="flex items-center responsive-gap">
             <span className="text-3xl">🔥</span>
             <div>
@@ -796,7 +796,7 @@ Return only the enhanced JSON object, properly formatted.`;
               <p className="fluid-text-xs text-purple-100 md:hidden">Step {currentMobileStep} of 3</p>
             </div>
           </div>
-          <div className="button-wrap-mobile lg:flex lg:items-center responsive-gap">
+          <div className="flex items-center responsive-gap">
             {/* AI Enhancement Toggle */}
             <div className="flex items-center space-x-2">
               <span className="text-xs text-purple-100">AI Enhance</span>
@@ -827,7 +827,7 @@ Return only the enhanced JSON object, properly formatted.`;
             </div>
             <button
               onClick={onClose}
-              className="mobile-minimal text-white hover:text-purple-200 transition-colors rounded-full"
+              className="p-2 text-white hover:text-purple-200 hover:bg-purple-600/30 transition-all rounded-full"
               aria-label="Close viral generator"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

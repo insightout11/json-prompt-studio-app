@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import usePromptStore from './store';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
+import SceneSelectionModal from './SceneSelectionModal';
 
 const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle }) => {
   const { 
@@ -32,6 +33,8 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
   const [newProjectName, setNewProjectName] = useState('');
   const [scenesSortBy, setScenesSortBy] = useState('date_desc'); // 'date_desc', 'date_asc', 'name_asc', 'name_desc'
   const [scenesSearchTerm, setScenesSearchTerm] = useState('');
+  const [showSceneSelectionModal, setShowSceneSelectionModal] = useState(false);
+  const [selectedStoryboard, setSelectedStoryboard] = useState(null);
   const dropdownRef = useRef(null);
 
   // Sync selectedProject with currentProject from store
@@ -171,6 +174,38 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
     };
   }, [isOpen, headerMode, onToggle]);
 
+  // Custom scene loader that detects storyboards
+  const handleSceneLoad = (sceneId) => {
+    const scene = savedScenes.find(s => s.id === sceneId);
+    const isStoryboard = scene?.type === 'storyboard' && scene?.data?.storyboard?.scenes;
+    
+    if (isStoryboard) {
+      // Open scene selection modal for storyboards
+      setSelectedStoryboard(scene);
+      setShowSceneSelectionModal(true);
+    } else {
+      // Load single scene directly using store function
+      loadScene(sceneId);
+    }
+  };
+
+  const handleLoadSceneFromStoryboard = (sceneData, sceneType) => {
+    // Load the selected scene data into the current form
+    if (sceneData) {
+      Object.entries(sceneData).forEach(([key, value]) => {
+        setFieldValue(key, value);
+      });
+      if (showToast) {
+        showToast(`Loaded ${sceneType} from storyboard!`, 'success');
+      }
+    }
+  };
+
+  const handleCloseSceneSelection = () => {
+    setShowSceneSelectionModal(false);
+    setSelectedStoryboard(null);
+  };
+
   // Library categories with their respective data and handlers
   const libraryCategories = {
     characters: {
@@ -223,7 +258,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
       label: 'Scenes',
       data: savedScenes || [],
       saveHandler: saveScene,
-      loadHandler: loadScene,
+      loadHandler: handleSceneLoad,
       deleteHandler: deleteScene,
       color: 'indigo'
     },
@@ -726,7 +761,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
         title="View saved content and manage your library"
       >
         <span className="text-base">📚</span>
-        <span>Library</span>
+        <span>Library [UPDATED v2.0]</span>
       </button>
     );
   }
@@ -739,7 +774,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
       <div className="modal-responsive lg:modal-mobile bg-white dark:bg-cinema-panel lg:rounded-lg shadow-xl dark:shadow-glow-soft lg:max-w-6xl w-full lg:max-h-[85vh] max-h-screen overflow-hidden border border-teal-200 dark:border-teal-700/50 lg:mt-4">
         
         {/* Header */}
-        <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border">
+        <div className="flex items-center justify-between responsive-spacing border-b border-gray-200 dark:border-cinema-border">
           <div className="flex items-center responsive-gap">
             <span className="text-2xl">📚</span>
             <div>
@@ -761,7 +796,7 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
           </div>
           <button
             onClick={() => onToggle?.(false)}
-            className="mobile-minimal text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text rounded-full"
+            className="p-2 text-gray-500 hover:text-gray-700 dark:text-cinema-text-muted dark:hover:text-cinema-text hover:bg-gray-100 dark:hover:bg-cinema-border rounded-full transition-all"
             aria-label="Close library"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1279,6 +1314,16 @@ const LibrarySystem = ({ showToast, headerMode = false, isOpen = false, onToggle
         specType={relatedSpecType}
         onResult={handleRelatedResult}
       />
+
+      {/* Scene Selection Modal for Storyboards */}
+      {showSceneSelectionModal && selectedStoryboard && (
+        <SceneSelectionModal
+          isOpen={showSceneSelectionModal}
+          onClose={handleCloseSceneSelection}
+          storyboardData={selectedStoryboard}
+          onLoadScene={handleLoadSceneFromStoryboard}
+        />
+      )}
     </div>
   );
 };
