@@ -26,11 +26,11 @@ const Logo = ({
         height={logoHeight}
         aria-label="JSON Prompt Studio"
       >
-        <g fill="#fff" fontFamily="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" textAnchor="middle">
+        <g fill="currentColor" fontFamily="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" textAnchor="middle" className="text-light-text dark:text-cinema-text">
           <text x="180" y="58" fontSize="44" fontWeight="800" dominantBaseline="middle">
             JSON <tspan fill="#34E2D3">{'{}'}</tspan>
           </text>
-          <text x="180" y="95" fontSize="14" fontWeight="600" letterSpacing="3" fill="#A7C2CE">PROMPT STUDIO</text>
+          <text x="180" y="95" fontSize="14" fontWeight="600" letterSpacing="3" className="fill-light-text-muted dark:fill-cinema-text-muted">PROMPT STUDIO</text>
         </g>
       </svg>
     </div>
