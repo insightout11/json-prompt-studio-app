@@ -36,8 +36,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="format-detection" content="telephone=no">
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://jsonpromptstudio.com">
@@ -211,8 +209,11 @@
         }
     </script>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Async loaded to avoid render blocking -->
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdn.tailwindcss.com"></noscript>
+    
+    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
