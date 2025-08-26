@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 import { useStore } from './store';
-import usePromptStore from './store';
 import { useToast } from './useToast';
 
 const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
-  const { exportData } = usePromptStore();
+  const { exportData, savedCharacters } = useStore();
   const { showSuccess } = useToast();
   
   // State management
@@ -22,6 +21,8 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
   const [isComplete, setIsComplete] = useState(false);
   const [finalCharacter, setFinalCharacter] = useState(null);
   const [showRelatedModal, setShowRelatedModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveName, setSaveName] = useState('');
 
   const maxSteps = 6;
   
@@ -54,6 +55,7 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
     setFinalCharacter(null);
     setShowRelatedModal(false);
     setShowSaveModal(false);
+    setSaveName('');
   };
 
   // Helper function to safely render complex objects
@@ -182,9 +184,36 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
     onClose();
   };
 
-  const handleSaveJSON = () => {
-    exportData('current');
-    showSuccess('Character saved successfully!');
+  const handleSaveToLibrary = () => {
+    setShowSaveModal(true);
+  };
+
+  const handleSaveConfirm = () => {
+    if (saveName.trim() && finalCharacter) {
+      // Create a character entry for the library
+      const characterData = {
+        id: Date.now().toString(),
+        name: saveName.trim(),
+        timestamp: Date.now(),
+        data: {
+          // Convert generated character to form field format
+          character_type: 'human', // default
+          ...finalCharacter.formFields || {},
+          // Store the full generated character data as well
+          generatedCharacter: finalCharacter
+        },
+        projectIds: []
+      };
+
+      // Add to saved characters
+      const updatedCharacters = [...savedCharacters, characterData].slice(-20);
+      localStorage.setItem('savedCharacters', JSON.stringify(updatedCharacters));
+      useStore.setState({ savedCharacters: updatedCharacters });
+      
+      showSuccess(`Character "${saveName}" saved to library!`);
+      setShowSaveModal(false);
+      setSaveName('');
+    }
   };
 
 
@@ -490,10 +519,10 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
                     Apply Character to Scene 🎬
                   </button>
                   <button
-                    onClick={handleSaveJSON}
-                    className="px-6 py-3 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg transition-all"
+                    onClick={handleSaveToLibrary}
+                    className="px-6 py-3 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 text-white rounded-lg transition-all"
                   >
-                    💾 Save JSON
+                    💾 Save to Library
                   </button>
                   <button
                     onClick={resetModal}
@@ -604,6 +633,41 @@ const ProgressiveCharacterModal = ({ isOpen, onClose, onResult, currentJson }) =
         </div>
       </div>
       
+      {/* Save to Library Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft transition-all duration-300">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text transition-colors duration-300">
+              Save Character to Library
+            </h3>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder="Enter character name..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal mb-4 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300"
+              onKeyPress={(e) => e.key === 'Enter' && handleSaveConfirm()}
+              autoFocus
+            />
+            <div className="flex space-x-3">
+              <button
+                onClick={handleSaveConfirm}
+                disabled={!saveName.trim()}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 dark:hover:shadow-glow-teal disabled:bg-gray-300 dark:disabled:bg-cinema-border text-white rounded-md transition-all duration-300"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-cinema-card dark:hover:bg-cinema-border dark:border dark:border-cinema-border text-white dark:text-cinema-text rounded-md transition-all duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Related Generator Modal */}
       <RelatedGeneratorModal
         isOpen={showRelatedModal}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import { useStore } from './store';
-import usePromptStore from './store';
 import { useToast } from './useToast';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 
@@ -9,7 +8,7 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
   const getAvailableContexts = useStore(state => state.getAvailableContexts);
-  const { exportData } = usePromptStore();
+  const { exportData, savedScenes, fieldValues, generateRandomSeed } = useStore();
   const { showSuccess } = useToast();
   
   // State management following progressive pattern
@@ -23,6 +22,13 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
   const [isComplete, setIsComplete] = useState(false);
   const [finalStoryboard, setFinalStoryboard] = useState(null);
   const [showRelatedModal, setShowRelatedModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveName, setSaveName] = useState('');
+  const [selectedApplyOption, setSelectedApplyOption] = useState('overview');
+  
+  // Multi-scene navigation state
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [showSceneOverview, setShowSceneOverview] = useState(true);
 
   const maxSteps = 6;
   
@@ -72,6 +78,105 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
     setIsComplete(false);
     setFinalStoryboard(null);
     setShowRelatedModal(false);
+    setShowSaveModal(false);
+    setSaveName('');
+    setCurrentSceneIndex(0);
+    setShowSceneOverview(true);
+  };
+
+  // Scene navigation helpers
+  const getScenes = () => {
+    return finalStoryboard?.scenes || [];
+  };
+
+  const getCurrentScene = () => {
+    const scenes = getScenes();
+    return scenes[currentSceneIndex] || null;
+  };
+
+  const handleSceneNavigation = (direction) => {
+    const scenes = getScenes();
+    if (direction === 'next' && currentSceneIndex < scenes.length - 1) {
+      setCurrentSceneIndex(currentSceneIndex + 1);
+    } else if (direction === 'prev' && currentSceneIndex > 0) {
+      setCurrentSceneIndex(currentSceneIndex - 1);
+    }
+  };
+
+  const handleExportScene = (sceneIndex = null) => {
+    const scenes = getScenes();
+    const targetScene = sceneIndex !== null ? scenes[sceneIndex] : getCurrentScene();
+    
+    if (targetScene && targetScene.formFields) {
+      // Get consistency guide from the storyboard for shared characteristics
+      const consistencyGuide = finalStoryboard?.consistency_guide || {};
+      
+      // Generate or use locked seed for visual consistency across scenes
+      const baseSeed = fieldValues.seed || generateRandomSeed();
+      const sceneSeed = fieldValues.lock_identity ? baseSeed : baseSeed + targetScene.scene_number;
+      
+      // Create a complete JSON prompt for this specific scene with full consistency features
+      const sceneJson = {
+        // Core scene content
+        ...targetScene.formFields,
+        
+        // Consistency features for visual coherence
+        seed: sceneSeed,
+        lock_identity: fieldValues.lock_identity !== undefined ? fieldValues.lock_identity : true,
+        lock_style: fieldValues.lock_style !== undefined ? fieldValues.lock_style : true,
+        creativity: fieldValues.creativity || 0.2, // Lower creativity for consistency
+        
+        // Visual consistency from storyboard
+        palette: fieldValues.palette || consistencyGuide.color_palette || 'cinematic, professional',
+        negative: fieldValues.negative || 'blurry, distorted, amateur, inconsistent lighting',
+        
+        // Camera specifications from scene data
+        camera_lens_mm: targetScene.formFields?.camera_lens_mm || 35,
+        camera_move: targetScene.formFields?.camera_move || 'static',
+        camera_speed: targetScene.formFields?.camera_speed || 'normal',
+        duration_s: targetScene.duration_seconds || targetScene.formFields?.duration_s || 5,
+        fps: fieldValues.fps || 24,
+        
+        // Scene metadata for organization
+        scene_number: targetScene.scene_number,
+        scene_title: targetScene.title,
+        storyboard_title: finalStoryboard?.title || 'Storyboard Scene',
+        total_scenes: scenes.length,
+        
+        // Additional consistency data
+        lighting_style: consistencyGuide.lighting_style || targetScene.lighting || 'cinematic',
+        character_consistency: consistencyGuide.character_identity || 'maintain character appearance across scenes',
+        
+        // Aspect ratio and technical specs
+        aspect_ratio: '16:9',
+        
+        // Scene transitions (helpful for maintaining flow)
+        transitions: targetScene.transitions,
+        ...(targetScene.scene_number > 1 && { previous_scene_context: `Previous scene: ${scenes[targetScene.scene_number - 2]?.title}` }),
+        ...(targetScene.scene_number < scenes.length && { next_scene_context: `Next scene: ${scenes[targetScene.scene_number]?.title}` })
+      };
+
+      // Export this scene as JSON
+      const blob = new Blob([JSON.stringify(sceneJson, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${finalStoryboard?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'storyboard'}_scene_${targetScene.scene_number}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showSuccess(`Scene ${targetScene.scene_number} exported with consistency features!`);
+    }
+  };
+
+  const handleExportAllScenes = () => {
+    const scenes = getScenes();
+    scenes.forEach((scene, index) => {
+      setTimeout(() => handleExportScene(index), index * 500); // Stagger downloads
+    });
+    showSuccess(`All ${scenes.length} scenes exported!`);
   };
 
   const handleInitialSubmit = async () => {
@@ -168,24 +273,84 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
     }
   };
 
-  const handleApplyStoryboard = () => {
+  const handleApplyStoryboard = (sceneIndex = null) => {
     if (finalStoryboard && onResult) {
-      // Apply storyboard data, merging with current JSON
+      let dataToApply;
+      
+      if (sceneIndex !== null) {
+        // Apply specific scene data
+        const scenes = getScenes();
+        const targetScene = scenes[sceneIndex];
+        if (targetScene && targetScene.formFields) {
+          dataToApply = targetScene.formFields;
+        } else {
+          console.error('Scene not found or missing formFields:', targetScene);
+          return;
+        }
+      } else {
+        // Apply storyboard overview data (original behavior)
+        dataToApply = finalStoryboard.formFields || finalStoryboard;
+      }
+
       const updatedJson = {
         ...currentJson || {},
-        ...finalStoryboard.formFields || finalStoryboard
+        ...dataToApply
       };
       onResult(updatedJson);
       
-      // Save storyboard context for future use
-      setBuilderContext('storyboard', finalStoryboard.formFields || finalStoryboard);
+      // Save context for future use
+      setBuilderContext('storyboard', dataToApply);
     }
     onClose();
   };
 
-  const handleSaveJSON = () => {
-    exportData('current');
-    showSuccess('Storyboard saved successfully!');
+  const handleSaveToLibrary = () => {
+    setShowSaveModal(true);
+  };
+
+  const handleSaveConfirm = () => {
+    if (saveName.trim() && finalStoryboard) {
+      // Create a comprehensive storyboard entry for the library
+      const scenes = getScenes();
+      const sceneData = {
+        id: Date.now().toString(),
+        name: saveName.trim(),
+        timestamp: Date.now(),
+        type: 'storyboard', // Mark this as a multi-scene storyboard
+        data: {
+          // Overview data (for backward compatibility with existing scenes)
+          ...finalStoryboard.formFields || finalStoryboard,
+          // Complete storyboard with all scenes
+          storyboard: {
+            overview: finalStoryboard,
+            scenes: scenes,
+            sceneCount: scenes.length,
+            totalDuration: finalStoryboard.total_duration || finalStoryboard.target_duration,
+            metadata: {
+              createdAt: Date.now(),
+              generator: 'storyboard-builder',
+              version: '2.0'
+            }
+          }
+        },
+        projectIds: []
+      };
+
+      // Add to saved scenes
+      const updatedScenes = [...savedScenes, sceneData].slice(-20);
+      
+      try {
+        localStorage.setItem('savedScenes', JSON.stringify(updatedScenes));
+        useStore.setState({ savedScenes: updatedScenes });
+        
+        showSuccess(`Storyboard "${saveName}" saved to library with ${scenes.length} scenes!`);
+        setShowSaveModal(false);
+        setSaveName('');
+      } catch (error) {
+        console.error('Error saving to library:', error);
+        showSuccess('Error saving storyboard to library. Please try again.');
+      }
+    }
   };
 
   const handleRelatedResult = (relatedStoryboard) => {
@@ -423,44 +588,336 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
                 )}
               </div>
             ) : (
-              /* Completion State */
+              /* Multi-Scene Storyboard Completion State */
               <div data-storyboard-results className="space-y-6">
                 <div className="text-center">
                   <div className="text-6xl mb-4">🎬</div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-cinema-text mb-2">
-                    Storyboard Complete!
+                    {finalStoryboard?.title || 'Storyboard Complete!'}
                   </h3>
                   <p className="text-gray-600 dark:text-cinema-text-muted">
-                    Your detailed storyboard has been generated based on your responses.
+                    {finalStoryboard?.description || 'Your detailed multi-scene storyboard has been generated.'}
                   </p>
+                  
+                  {finalStoryboard && (
+                    <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center space-x-1">
+                        <span>📽️</span>
+                        <span>{getScenes().length} scenes</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>⏱️</span>
+                        <span>{finalStoryboard.total_duration || finalStoryboard.target_duration}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>🎯</span>
+                        <span>{finalStoryboard.overall_tone}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {finalStoryboard && (
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-6">
-                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-4">
-                      Generated Storyboard
+                {finalStoryboard && getScenes().length > 0 ? (
+                  <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-700/50 rounded-xl p-6">
+                    {/* Overview/Individual Scene Toggle */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex bg-white dark:bg-cinema-card rounded-lg border p-1">
+                        <button
+                          onClick={() => setShowSceneOverview(true)}
+                          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                            showSceneOverview
+                              ? 'bg-blue-500 text-white shadow-sm'
+                              : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                          }`}
+                        >
+                          📋 Overview
+                        </button>
+                        <button
+                          onClick={() => setShowSceneOverview(false)}
+                          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                            !showSceneOverview
+                              ? 'bg-blue-500 text-white shadow-sm'
+                              : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
+                          }`}
+                        >
+                          🎬 Scene Details
+                        </button>
+                      </div>
+
+                      {/* Export All Button */}
+                      <button
+                        onClick={handleExportAllScenes}
+                        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-medium rounded-lg transition-all duration-300 shadow-sm"
+                      >
+                        📦 Export All Scenes
+                      </button>
+                    </div>
+
+                    {showSceneOverview ? (
+                      /* Scene Overview Grid */
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {getScenes().map((scene, index) => (
+                          <div
+                            key={scene.scene_number || index}
+                            className="bg-white dark:bg-cinema-card rounded-lg border border-gray-200 dark:border-gray-600 p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                            onClick={() => {
+                              setCurrentSceneIndex(index);
+                              setShowSceneOverview(false);
+                            }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                Scene {scene.scene_number}
+                              </h4>
+                              <div className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                {scene.duration_seconds || scene.duration}s
+                              </div>
+                            </div>
+                            <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                              {scene.title}
+                            </h5>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">
+                              {typeof scene.description === 'string' 
+                                ? scene.description 
+                                : JSON.stringify(scene.description, null, 2)}
+                            </p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  📍 {typeof scene.setting === 'string' 
+                                    ? scene.setting?.slice(0, 30) + '...' 
+                                    : JSON.stringify(scene.setting)?.slice(0, 30) + '...'}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleApplyStoryboard(index);
+                                  }}
+                                  className="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded transition-all"
+                                >
+                                  Apply Scene
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleExportScene(index);
+                                  }}
+                                  className="flex-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded transition-all"
+                                >
+                                  Export
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Individual Scene Detail View */
+                      <div className="space-y-6">
+                        {/* Scene Navigation */}
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={() => handleSceneNavigation('prev')}
+                            disabled={currentSceneIndex === 0}
+                            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 rounded-lg transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            <span>Previous</span>
+                          </button>
+
+                          <div className="text-center">
+                            <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Scene {currentSceneIndex + 1} of {getScenes().length}
+                            </div>
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                              {getCurrentScene()?.title}
+                            </h4>
+                          </div>
+
+                          <button
+                            onClick={() => handleSceneNavigation('next')}
+                            disabled={currentSceneIndex === getScenes().length - 1}
+                            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 dark:text-gray-300 rounded-lg transition-all"
+                          >
+                            <span>Next</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Scene Details */}
+                        {getCurrentScene() && (
+                          <div className="bg-white dark:bg-cinema-card rounded-lg border p-6 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-4">
+                                <div>
+                                  <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">📝 Description</h5>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                                    {typeof getCurrentScene().description === 'string' 
+                                      ? getCurrentScene().description 
+                                      : JSON.stringify(getCurrentScene().description, null, 2)}
+                                  </p>
+                                </div>
+                                
+                                <div>
+                                  <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">📍 Setting</h5>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                    {typeof getCurrentScene().setting === 'string' 
+                                      ? getCurrentScene().setting 
+                                      : JSON.stringify(getCurrentScene().setting, null, 2)}
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">👥 Characters</h5>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                    {typeof getCurrentScene().characters === 'string' 
+                                      ? getCurrentScene().characters 
+                                      : JSON.stringify(getCurrentScene().characters, null, 2)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                <div>
+                                  <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">🎭 Mood & Atmosphere</h5>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                    {typeof getCurrentScene().mood === 'string' 
+                                      ? getCurrentScene().mood 
+                                      : JSON.stringify(getCurrentScene().mood, null, 2)}
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">📹 Camera Work</h5>
+                                  <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                    {typeof getCurrentScene().camera_work === 'string' 
+                                      ? getCurrentScene().camera_work 
+                                      : JSON.stringify(getCurrentScene().camera_work, null, 2)}
+                                  </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">⏱️ Duration</h5>
+                                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                      {getCurrentScene().duration_seconds || getCurrentScene().duration} seconds
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">💡 Lighting</h5>
+                                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                      {getCurrentScene().lighting || 'Natural'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {getCurrentScene().key_visual_elements && (
+                              <div>
+                                <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">✨ Key Visual Elements</h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {getCurrentScene().key_visual_elements.map((element, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                                      {element}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-4 border-t border-gray-200 dark:border-gray-600 space-y-3">
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                Transitions: {getCurrentScene().transitions || 'Cut to next scene'}
+                              </div>
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={() => handleApplyStoryboard(currentSceneIndex)}
+                                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                  <span>Apply Scene {getCurrentScene().scene_number}</span>
+                                </button>
+                                <button
+                                  onClick={() => handleExportScene()}
+                                  className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  <span>Export Scene {getCurrentScene().scene_number}</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : finalStoryboard ? (
+                  /* Debug Section - Show what we actually have */
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                      Debug Info - Storyboard Data
                     </h4>
-                    <div className="bg-white dark:bg-cinema-card rounded border p-4 max-h-64 overflow-y-auto">
-                      <pre className="text-sm text-gray-800 dark:text-cinema-text whitespace-pre-wrap">
-                        {JSON.stringify(finalStoryboard.formFields || finalStoryboard, null, 2)}
-                      </pre>
+                    <div className="text-sm text-yellow-700 dark:text-yellow-300">
+                      <p>Scenes found: {getScenes().length}</p>
+                      <p>Storyboard keys: {Object.keys(finalStoryboard).join(', ')}</p>
+                      <details className="mt-2">
+                        <summary className="cursor-pointer">Show Raw Data</summary>
+                        <pre className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-800/30 rounded text-xs overflow-auto max-h-64">
+                          {JSON.stringify(finalStoryboard, null, 2)}
+                        </pre>
+                      </details>
                     </div>
                   </div>
-                )}
+                ) : null}
 
+                {/* Scene Selection for Apply */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-3">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Choose what to apply to your JSON:</h4>
+                  <select
+                    value={selectedApplyOption}
+                    onChange={(e) => setSelectedApplyOption(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="overview">📋 Storyboard Overview</option>
+                    {getScenes().map((scene, index) => (
+                      <option key={index} value={`scene-${index}`}>
+                        🎬 Scene {scene.scene_number}: {scene.title?.slice(0, 40)}...
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Main Action Buttons */}
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
-                      onClick={handleApplyStoryboard}
+                      onClick={() => {
+                        const sceneIndex = selectedApplyOption.startsWith('scene-') 
+                          ? parseInt(selectedApplyOption.split('-')[1]) 
+                          : null;
+                        handleApplyStoryboard(sceneIndex);
+                      }}
                       className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
-                      Apply Storyboard to Scene 🎬
+                      {selectedApplyOption === 'overview' ? 'Apply Overview to Scene 🎬' : 
+                       `Apply ${getScenes()[parseInt(selectedApplyOption.split('-')[1])]?.title || 'Selected Scene'} 🎬`}
                     </button>
                     <button
-                      onClick={handleSaveJSON}
-                      className="px-6 py-3 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg transition-all"
+                      onClick={handleSaveToLibrary}
+                      className="px-6 py-3 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 text-white rounded-lg transition-all"
                     >
-                      💾 Save JSON
+                      💾 Save to Library
                     </button>
                     <button
                       onClick={handleStartOver}
@@ -501,6 +958,57 @@ const StoryboardBuilderModal = ({ isOpen, onClose, onResult, currentJson }) => {
         </div>
       </div>
       
+      {/* Save to Library Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style={{zIndex: 9999}}>
+          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft transition-all duration-300 relative">            
+            {/* Close X button - absolute positioned */}
+            <button
+              onClick={() => setShowSaveModal(false)}
+              className="absolute w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all"
+              style={{
+                top: '16px',
+                right: '16px',
+                zIndex: 10,
+                position: 'absolute'
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text transition-colors duration-300 pr-10">
+              Save Storyboard to Library
+            </h3>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder="Enter storyboard name..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal mb-4 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300"
+              onKeyPress={(e) => e.key === 'Enter' && handleSaveConfirm()}
+              autoFocus
+            />
+            <div className="flex space-x-3">
+              <button
+                onClick={handleSaveConfirm}
+                disabled={!saveName.trim()}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 dark:hover:shadow-glow-teal disabled:bg-gray-300 dark:disabled:bg-cinema-border text-white rounded-md transition-all duration-300"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-cinema-card dark:hover:bg-cinema-border dark:border dark:border-cinema-border text-white dark:text-cinema-text rounded-md transition-all duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Related Generator Modal */}
       {showRelatedModal && finalStoryboard && (
         <RelatedGeneratorModal

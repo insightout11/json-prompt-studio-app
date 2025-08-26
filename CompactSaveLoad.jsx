@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import usePromptStore from './store';
+import SceneSelectionModal from './SceneSelectionModal';
 
 const CompactSaveLoad = () => {
   const { 
@@ -15,6 +16,8 @@ const CompactSaveLoad = () => {
   const [activeTab, setActiveTab] = useState('quick-actions');
   const [showScenePackModal, setShowScenePackModal] = useState(false);
   const [selectedScenePack, setSelectedScenePack] = useState(null);
+  const [showSceneSelectionModal, setShowSceneSelectionModal] = useState(false);
+  const [selectedStoryboard, setSelectedStoryboard] = useState(null);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -88,10 +91,43 @@ const CompactSaveLoad = () => {
   const handleLoadItem = (type, id) => {
     if (type === 'character') {
       loadCharacter(id);
+      setShowDropdown(false);
     } else {
-      loadScene(id);
+      // Check if this is a storyboard with multiple scenes
+      const scene = savedScenes.find(s => s.id === id);
+      const isStoryboard = scene?.type === 'storyboard' && scene?.data?.storyboard?.scenes;
+      
+      console.log('Loading item:', { id, isStoryboard, sceneType: scene?.type, hasScenes: !!scene?.data?.storyboard?.scenes });
+      
+      if (isStoryboard) {
+        // Open scene selection modal for storyboards
+        console.log('Opening scene selection modal for storyboard:', scene.name);
+        setSelectedStoryboard(scene);
+        setShowSceneSelectionModal(true);
+        setShowDropdown(false);
+      } else {
+        // Load single scene directly using store function
+        console.log('Loading single scene:', scene?.name);
+        loadScene(id);
+        setShowDropdown(false);
+      }
     }
-    setShowDropdown(false);
+  };
+
+  const handleLoadSceneFromStoryboard = (sceneData, sceneType) => {
+    // Load the selected scene data into the current form
+    if (sceneData) {
+      // Use the existing applySceneWithMergeStrategy or setFieldValue functions
+      Object.entries(sceneData).forEach(([key, value]) => {
+        setFieldValue(key, value);
+      });
+      console.log(`Loaded ${sceneType} from storyboard:`, sceneData);
+    }
+  };
+
+  const handleCloseSceneSelection = () => {
+    setShowSceneSelectionModal(false);
+    setSelectedStoryboard(null);
   };
 
   return (
@@ -99,12 +135,12 @@ const CompactSaveLoad = () => {
       {/* Main Dropdown Button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white text-sm font-medium rounded-md transition-all duration-300 h-10 shadow-lg hover:shadow-xl"
+        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white text-sm font-medium rounded-md transition-all duration-300 h-10 shadow-lg hover:shadow-xl"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5" />
         </svg>
-        <span>Library</span>
+        <span>Library [FRESH UPDATE]</span>
         <svg className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -261,17 +297,53 @@ const CompactSaveLoad = () => {
 
             {activeTab === 'scenes' && (
               <div className="space-y-2">
+                <div className="text-xs text-green-600 font-mono">DEBUG: Updated storyboard library v2.0</div>
                 {savedScenes.length === 0 ? (
                   <div className="text-center text-gray-500 dark:text-cinema-text-muted py-4 text-sm">
                     No saved scenes yet.
                   </div>
                 ) : (
-                  savedScenes.map((scene) => (
+                  savedScenes.map((scene) => {
+                    // Debug ALL saved scenes to see their structure
+                    console.log('Scene in library:', {
+                      name: scene.name,
+                      type: scene.type,
+                      hasData: !!scene.data,
+                      dataKeys: scene.data ? Object.keys(scene.data) : [],
+                      hasStoryboardKey: !!scene.data?.storyboard,
+                      storyboardKeys: scene.data?.storyboard ? Object.keys(scene.data.storyboard) : []
+                    });
+                    
+                    const isStoryboard = scene.type === 'storyboard' && scene.data?.storyboard?.scenes;
+                    const sceneCount = isStoryboard ? scene.data.storyboard.sceneCount || scene.data.storyboard.scenes.length : 1;
+                    const totalDuration = isStoryboard ? scene.data.storyboard.totalDuration : null;
+                    
+                    console.log('Storyboard detection result:', { isStoryboard, sceneCount, totalDuration });
+                    
+                    return (
                     <div key={scene.id} className="bg-gray-50 dark:bg-cinema-card rounded-lg p-3 border border-gray-200 dark:border-cinema-border">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-sm text-gray-900 dark:text-cinema-text truncate">
-                          {scene.name}
-                        </h4>
+                        <div className="flex items-center space-x-2 flex-1">
+                          {/* Storyboard icon */}
+                          {isStoryboard ? (
+                            <span className="text-purple-500 dark:text-purple-400" title="Multi-Scene Storyboard">
+                              🎬
+                            </span>
+                          ) : (
+                            <span className="text-blue-500 dark:text-blue-400" title="Single Scene">
+                              🎭
+                            </span>
+                          )}
+                          <h4 className="font-medium text-sm text-gray-900 dark:text-cinema-text truncate">
+                            {scene.name}
+                          </h4>
+                          {/* Scene count badge for storyboards */}
+                          {isStoryboard && (
+                            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                              {sceneCount} scenes
+                            </span>
+                          )}
+                        </div>
                         <button
                           onClick={() => deleteScene(scene.id)}
                           className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
@@ -281,9 +353,17 @@ const CompactSaveLoad = () => {
                           </svg>
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-cinema-text-muted mb-2">
-                        {formatDate(scene.timestamp)}
-                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs text-gray-500 dark:text-cinema-text-muted">
+                          {formatDate(scene.timestamp)}
+                        </p>
+                        {/* Duration badge for storyboards */}
+                        {isStoryboard && totalDuration && (
+                          <span className="text-xs text-gray-500 dark:text-cinema-text-muted">
+                            ⏱️ {totalDuration}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex space-x-1">
                         <button
                           onClick={() => handleLoadItem('scene', scene.id)}
@@ -302,7 +382,8 @@ const CompactSaveLoad = () => {
                         </button>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}
@@ -457,6 +538,14 @@ const CompactSaveLoad = () => {
           </div>
         </div>
       )}
+      
+      {/* Scene Selection Modal */}
+      <SceneSelectionModal
+        isOpen={showSceneSelectionModal}
+        onClose={handleCloseSceneSelection}
+        storyboardData={selectedStoryboard?.data}
+        onLoadScene={handleLoadSceneFromStoryboard}
+      />
     </div>
   );
 };

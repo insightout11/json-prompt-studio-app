@@ -291,6 +291,16 @@
             scroll-behavior: smooth;
         }
         
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            height: 100vh;
+        }
+        
         /* Performance optimizations */
         * {
             -webkit-font-smoothing: antialiased;
@@ -335,8 +345,8 @@
         /* Enhanced Animations & Background Effects */
         
         /* Floating gradient orbs */
-        .floating-orbs::before,
-        .floating-orbs::after {
+        .spotlight-effect::before,
+        .spotlight-effect::after {
             content: '';
             position: absolute;
             border-radius: 50%;
@@ -345,21 +355,21 @@
             animation: float-orb 25s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
         }
         
-        .floating-orbs::before {
+        .spotlight-effect::before {
             width: 300px;
             height: 300px;
             background: radial-gradient(circle, #00fff7, #a259ff, transparent);
-            top: 10%;
+            top: 5%;
             right: 10%;
             animation-delay: 0s;
         }
         
-        .floating-orbs::after {
+        .spotlight-effect::after {
             width: 400px;
             height: 400px;
             background: radial-gradient(circle, #a259ff, #d97706, transparent);
-            bottom: 15%;
-            left: -5%;
+            top: 25%;
+            left: 5%;
             animation-delay: -10s;
         }
         
@@ -776,7 +786,7 @@
         }
         
         /* Performance optimizations */
-        .floating-orbs,
+        .spotlight-effect,
         .mesh-gradient,
         .geometric-pattern,
         .dots-pattern,
@@ -802,8 +812,8 @@
             }
             
             /* Disable all background patterns and animations for reduced motion */
-            .floating-orbs::before,
-            .floating-orbs::after,
+            .spotlight-effect::before,
+            .spotlight-effect::after,
             .dots-pattern::before,
             .grid-pattern::after,
             .floating-shapes::before,
@@ -836,8 +846,8 @@
         
         /* High contrast mode support */
         @media (prefers-contrast: high) {
-            .floating-orbs::before,
-            .floating-orbs::after,
+            .spotlight-effect::before,
+            .spotlight-effect::after,
             .geometric-pattern,
             .dots-pattern::before,
             .grid-pattern::after,
@@ -899,34 +909,49 @@
     <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-cinema-black/90 backdrop-blur-md border-b border-cinema-border z-50" role="navigation" aria-label="Main navigation">
         <div class="container mx-auto px-4 lg:px-6">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 flex items-center justify-center logo-breathe">
-                        <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
-                    </div>
-                    <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
-                    <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="https://jsonpromptstudio.com/app" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
-                </div>
-                
-                <!-- CTA Button -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-6 py-2 rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
-                        Launch JSON Prompt Studio
-                    </a>
-                    
-                    <!-- Mobile menu button -->
-                    <button id="mobile-menu-btn" class="md:hidden text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+            <!-- Mobile Header Layout -->
+            <div class="md:hidden flex items-center justify-between h-16">
+                <!-- Mobile menu button (left) -->
+                <div class="w-16 flex justify-start">
+                    <button id="mobile-menu-btn" class="text-cinema-text-muted hover:text-cinema-teal transition-colors" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
+                </div>
+                
+                <!-- Logo (center) -->
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-16 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
+                </div>
+                
+                <!-- CTA Button (right) -->
+                <div class="w-16 flex justify-end">
+                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-3 py-0.5 rounded text-white font-medium hover:shadow-glow-teal-bright btn-primary text-center h-12 flex items-center justify-center text-sm">
+                        Launch
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Desktop Header Layout -->
+            <div class="hidden md:flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-20 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="flex items-center space-x-8">
+                    <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
+                    <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
+                    <a href="#faq" class="text-cinema-text-muted hover:text-cinema-teal nav-link">FAQ</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <div class="flex items-center">
+                    <a href="https://jsonpromptstudio.com/app" class="bg-gradient-to-r from-cinema-teal to-cinema-purple px-4 py-1.5 text-sm rounded-lg text-white font-medium hover:shadow-glow-teal-bright btn-primary">
+                        Launch JSON Prompt Studio
+                    </a>
                 </div>
             </div>
             
@@ -935,14 +960,15 @@
                 <div class="flex flex-col space-y-3">
                     <a href="#features" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Features</a>
                     <a href="#how-it-works" class="text-cinema-text-muted hover:text-cinema-teal nav-link">How it Works</a>
-                    <a href="https://jsonpromptstudio.com/app" class="text-cinema-text-muted hover:text-cinema-teal nav-link">Login</a>
+                    <a href="#faq" class="text-cinema-text-muted hover:text-cinema-teal nav-link">FAQ</a>
+                    
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <main id="main-content" class="pt-24 pb-16 lg:pt-32 lg:pb-24 gradient-bg mesh-gradient floating-orbs relative overflow-hidden parallax-slow" role="main" aria-label="Hero section">
+    <main id="main-content" class="pt-24 pb-24 lg:pt-32 lg:pb-32 gradient-bg mesh-gradient spotlight-effect relative overflow-hidden parallax-slow" role="main" aria-label="Hero section">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="max-w-4xl mx-auto text-center">
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
@@ -1335,7 +1361,7 @@
 
 
     <!-- FAQ Section -->
-    <section class="py-16 lg:py-24 bg-cinema-black" aria-label="Frequently asked questions">
+    <section id="faq" class="py-16 lg:py-24 bg-cinema-black" aria-label="Frequently asked questions">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-12">
@@ -1649,7 +1675,7 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-cinema-purple rounded-full animate-pulse" style="animation-delay: 1s;"></div>
-                        <span class="text-sm">Export in Multiple Formats</span>
+                        <span class="text-sm">Save & Organize Elements</span>
                     </div>
                 </div>
             </div>
@@ -1657,16 +1683,13 @@
     </section>
 
     <!-- Footer -->
-    <footer class="py-12 lg:py-16 bg-cinema-panel border-t border-cinema-border">
+    <footer class="py-6 lg:py-8 bg-cinema-panel border-t border-cinema-border">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0">
                 <!-- Logo and tagline -->
                 <div class="text-center lg:text-left">
-                    <div class="flex items-center justify-center lg:justify-start space-x-3 mb-3">
-                        <div class="w-8 h-8 flex items-center justify-center">
-                            <img src="/favicon.svg" alt="JSON Prompt Studio Logo" class="w-8 h-8 object-contain">
-                        </div>
-                        <span class="text-xl font-bold text-cinema-text">JSON Prompt Studio</span>
+                    <div class="flex items-center justify-center lg:justify-start mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" aria-label="JSON Prompt Studio" class="h-20 w-auto"><g fill="#fff" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" text-anchor="middle"><text x="180" y="58" font-size="44" font-weight="800" dominant-baseline="middle">JSON <tspan fill="#34E2D3">{}</tspan></text><text x="180" y="95" font-size="14" font-weight="600" letter-spacing="3" fill="#A7C2CE">PROMPT STUDIO</text></g></svg>
                     </div>
                     <p class="text-cinema-text-muted">Prompt like a director, not a guesser.</p>
                 </div>
@@ -1675,8 +1698,8 @@
                 <div class="flex flex-wrap justify-center gap-8">
                     <a href="/terms-of-service.html" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Terms</a>
                     <a href="/privacy-policy.html" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Privacy</a>
-                    <a href="mailto:insightout11@gmail.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Support</a>
-                    <a href="https://twitter.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Twitter</a>
+                    <a href="mailto:support@jsonpromptstudio.com" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">Support</a>
+                    <a href="https://x.com/jsnpromptstudio" class="text-cinema-text-muted hover:text-cinema-teal transition-colors duration-300">X</a>
                 </div>
             </div>
             
@@ -1961,7 +1984,7 @@
         // Performance optimization: Pause animations when page is not visible
         document.addEventListener('visibilitychange', () => {
             const animatedElements = document.querySelectorAll([
-                '.floating-orbs', '.mesh-gradient', '.geometric-pattern', 
+                '.spotlight-effect', '.mesh-gradient', '.geometric-pattern', 
                 '.dots-pattern', '.grid-pattern', '.circuit-pattern', '.floating-shapes'
             ].join(', '));
 

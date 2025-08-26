@@ -1494,7 +1494,7 @@ Make the scene visually distinct, emotionally engaging, and suitable for video p
         builderContextSection += '\nINTEGRATE these elements into the storyboard to create cohesive narrative.\n';
       }
 
-      const systemPrompt = `You are an expert storyboard creator. Generate a comprehensive storyboard based on the story concept and user responses.
+      const systemPrompt = `You are an expert storyboard creator specializing in commercial video production. Generate a comprehensive multi-scene storyboard that tells a complete story with professional production specifications.
 
 ORIGINAL STORY CONCEPT: "${originalDescription}"
 
@@ -1502,46 +1502,68 @@ USER RESPONSES:
 ${responseSummary}
 ${builderContextSection}
 
-Create a detailed storyboard that combines all these elements into a cohesive visual narrative. Focus on:
-- Scene-by-scene breakdown
-- Visual storytelling elements
-- Character actions and emotions
-- Setting and atmosphere details
-- Camera work and cinematography
-- Pacing and narrative flow
+Create a detailed storyboard that breaks down into individual scenes, each production-ready with specific timing, camera work, and visual consistency. Focus on:
+- Complete scene-by-scene breakdown (aim for 3-7 scenes based on concept)
+- Professional camera specifications and movements
+- Exact timing for commercial/video production
+- Visual consistency across all scenes
+- Character continuity and emotional progression
+- Commercial pacing and narrative flow
 
 Return your response in this EXACT JSON format:
 {
   "title": "Compelling storyboard title",
-  "description": "Brief overview of the storyboard",
+  "description": "Brief overview of the complete storyboard",
   "scenes": [
     {
       "scene_number": 1,
-      "title": "Scene title",
-      "description": "Detailed scene description",
-      "setting": "Location and environment",
-      "characters": "Characters present and their actions",
+      "title": "Descriptive scene title",
+      "description": "Detailed scene description with specific actions and dialogue",
+      "setting": "Specific location and environment details",
+      "characters": "Characters present, their positions, actions, and expressions",
       "mood": "Emotional tone and atmosphere",
-      "camera_work": "Camera angles and movements",
-      "duration": "Estimated scene duration",
-      "key_elements": ["Visual element 1", "Visual element 2"]
+      "camera_work": "Specific camera angle, movement, and framing (e.g., 'Wide shot, 24mm lens, slow dolly in')",
+      "duration_seconds": 4.5,
+      "lighting": "Lighting setup and mood",
+      "key_visual_elements": ["Specific visual element 1", "Key prop or detail 2", "Important color or texture 3"],
+      "transitions": "How this scene transitions to the next",
+      "formFields": {
+        "scene": "Complete scene description for JSON prompt generation",
+        "setting": "Detailed setting for this specific scene",
+        "character": "Character details and actions in this scene",
+        "mood": "Scene-specific mood",
+        "style": "Visual style for this scene",
+        "camera_lens_mm": 24,
+        "camera_move": "dolly_in",
+        "camera_speed": "slow",
+        "duration_s": 4.5,
+        "actions": "Specific character actions",
+        "emotions": "Character emotions in this scene"
+      }
     }
   ],
-  "overall_tone": "Overall mood and style",
-  "target_duration": "Estimated total duration",
-  "production_notes": "Important notes for production",
+  "overall_tone": "Overall mood and visual style",
+  "total_duration": "Exact total duration in seconds",
+  "production_notes": "Important notes for maintaining consistency across scenes",
+  "consistency_guide": {
+    "character_identity": "Key details to maintain character consistency",
+    "visual_style": "Style elements to keep consistent",
+    "color_palette": "Primary colors to use throughout",
+    "lighting_style": "Lighting approach for all scenes"
+  },
   "formFields": {
-    "scene": "First scene detailed description",
+    "scene": "Overview description combining all scenes",
     "setting": "Primary setting",
     "character": "Main character details",
     "mood": "Overall mood",
     "style": "Visual style notes",
     "storyboard_title": "Storyboard title",
-    "scene_count": "Number of scenes"
+    "scene_count": "Number of scenes",
+    "aspect_ratio": "16:9"
   }
 }
 
-Make the storyboard cinematic, detailed, and ready for video production.`;
+CRITICAL: Generate 3-7 detailed scenes based on the concept. Each scene must have complete formFields for individual JSON prompt generation. Ensure scenes flow together as a cohesive narrative with proper pacing for the target duration.`;
 
       const messages = [
         {

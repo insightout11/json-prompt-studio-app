@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import aiApiService from './aiApiService';
 import RelatedGeneratorModal from './RelatedGeneratorModal';
 import { useStore } from './store';
-import usePromptStore from './store';
 import { useToast } from './useToast';
 
 const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
   // Store access for builder context tracking
   const setBuilderContext = useStore(state => state.setBuilderContext);
-  const { exportData } = usePromptStore();
+  const { exportData, savedStyles } = useStore();
   const { showSuccess } = useToast();
   
   // State management
@@ -22,6 +21,8 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
   const [isComplete, setIsComplete] = useState(false);
   const [finalStyle, setFinalStyle] = useState(null);
   const [showRelatedModal, setShowRelatedModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveName, setSaveName] = useState('');
 
   const maxSteps = 6;
   
@@ -72,6 +73,7 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
     setFinalStyle(null);
     setShowRelatedModal(false);
     setShowSaveModal(false);
+    setSaveName('');
   };
 
   const handleInitialSubmit = async () => {
@@ -187,9 +189,36 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
     setShowRelatedModal(true);
   };
 
-  const handleSaveJSON = () => {
-    exportData('current');
-    showSuccess('Style saved successfully!');
+  const handleSaveToLibrary = () => {
+    setShowSaveModal(true);
+  };
+
+  const handleSaveConfirm = () => {
+    if (saveName.trim() && finalStyle) {
+      // Create a style entry for the library
+      const styleData = {
+        id: Date.now().toString(),
+        name: saveName.trim(),
+        timestamp: Date.now(),
+        data: {
+          // Convert generated style to form field format
+          style_type: 'cinematic', // default
+          ...finalStyle.formFields || {},
+          // Store the full generated style data as well
+          generatedStyle: finalStyle
+        },
+        projectIds: []
+      };
+
+      // Add to saved styles
+      const updatedStyles = [...savedStyles, styleData].slice(-20);
+      localStorage.setItem('savedStyles', JSON.stringify(updatedStyles));
+      useStore.setState({ savedStyles: updatedStyles });
+      
+      showSuccess(`Style "${saveName}" saved to library!`);
+      setShowSaveModal(false);
+      setSaveName('');
+    }
   };
 
 
@@ -427,10 +456,10 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
                       Generate Related Styles
                     </button>
                     <button
-                      onClick={handleSaveJSON}
-                      className="px-4 py-2 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md"
+                      onClick={handleSaveToLibrary}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 text-white rounded-md"
                     >
-                      💾 Save JSON
+                      💾 Save to Library
                     </button>
                   </div>
                   
@@ -472,6 +501,41 @@ const ProgressiveStyleModal = ({ isOpen, onClose, onResult, currentJson }) => {
           </div>
         </div>
       </div>
+
+      {/* Save to Library Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-cinema-panel rounded-lg p-6 w-96 border border-transparent dark:border-cinema-border shadow-xl dark:shadow-glow-soft transition-all duration-300">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-cinema-text transition-colors duration-300">
+              Save Style to Library
+            </h3>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder="Enter style name..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-cinema-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cinema-teal mb-4 bg-white dark:bg-cinema-card text-gray-900 dark:text-cinema-text transition-all duration-300"
+              onKeyPress={(e) => e.key === 'Enter' && handleSaveConfirm()}
+              autoFocus
+            />
+            <div className="flex space-x-3">
+              <button
+                onClick={handleSaveConfirm}
+                disabled={!saveName.trim()}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-cinema-teal dark:hover:bg-cinema-teal/90 dark:hover:shadow-glow-teal disabled:bg-gray-300 dark:disabled:bg-cinema-border text-white rounded-md transition-all duration-300"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-cinema-card dark:hover:bg-cinema-border dark:border dark:border-cinema-border text-white dark:text-cinema-text rounded-md transition-all duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Related Generator Modal */}
       {showRelatedModal && finalStyle && (
