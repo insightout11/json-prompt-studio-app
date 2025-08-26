@@ -18,19 +18,20 @@ const Logo = ({
   const logoHeight = height || config.height;
 
   return (
-    <div className={`inline-block ${className}`}>
+    <div className={`inline-block text-light-text dark:text-cinema-text ${className}`}>
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 360 120" 
         width={logoWidth} 
         height={logoHeight}
         aria-label="JSON Prompt Studio"
+        className="fill-current"
       >
-        <g fill="currentColor" fontFamily="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" textAnchor="middle" className="text-light-text dark:text-cinema-text">
+        <g fontFamily="Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" textAnchor="middle">
           <text x="180" y="58" fontSize="44" fontWeight="800" dominantBaseline="middle">
             JSON <tspan fill="#34E2D3">{'{}'}</tspan>
           </text>
-          <text x="180" y="95" fontSize="14" fontWeight="600" letterSpacing="3" className="fill-light-text-muted dark:fill-cinema-text-muted">PROMPT STUDIO</text>
+          <text x="180" y="95" fontSize="14" fontWeight="600" letterSpacing="3" opacity="0.7">PROMPT STUDIO</text>
         </g>
       </svg>
     </div>
