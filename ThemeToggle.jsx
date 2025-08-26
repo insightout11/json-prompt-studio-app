@@ -11,7 +11,7 @@ const ThemeToggle = () => {
         relative inline-flex items-center px-3 py-2 rounded-md font-medium text-sm transition-all duration-300 group
         ${isDarkMode 
           ? 'bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal' 
-          : 'bg-light-panel text-light-text border border-light-border hover:bg-light-card hover:shadow-light-card'
+          : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:shadow-md'
         }
       `}
       aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
