@@ -40,9 +40,8 @@
         }
     </script>
     
-    <!-- Tailwind CSS - Async loaded to avoid render blocking -->
-    <link rel="stylesheet" href="https://cdn.tailwindcss.com" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdn.tailwindcss.com"></noscript>
+    <!-- Tailwind CSS - Deferred to avoid render blocking -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <script>
         tailwind.config = {
             theme: {
