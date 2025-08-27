@@ -5,6 +5,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 
+// Import our new API handlers
+import previewHandler from './api/preview.js';
+import previewStatusHandler from './api/preview-status.js';
+import creditsHandler from './api/credits.js';
+import enhanceHandler from './api/enhance.js';
+import storyboardUseHandler from './api/storyboard/use.js';
+
 // Load environment variables
 dotenv.config();
 
@@ -116,6 +123,13 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
+// Image Preview API Routes
+app.post('/api/preview', previewHandler);
+app.get('/api/preview-status', previewStatusHandler);
+app.all('/api/credits', creditsHandler);
+app.post('/api/enhance', enhanceHandler);
+app.post('/api/storyboard/use', storyboardUseHandler);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -123,7 +137,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     apis: {
       groq: !!process.env.GROQ_API_KEY,
-      openai: !!process.env.OPENAI_API_KEY
+      openai: !!process.env.OPENAI_API_KEY,
+      horde: !!process.env.HORDE_API_KEY,
+      gemini: !!process.env.GEMINI_API_KEY
     }
   });
 });

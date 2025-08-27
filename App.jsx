@@ -28,6 +28,7 @@ import IntegratedHeader from './IntegratedHeader';
 import EditableJsonOutput from './EditableJsonOutput';
 import ConsistencyPanel from './ConsistencyPanel';
 import ConsistencyBadge from './ConsistencyBadge';
+import PreviewTray from './PreviewTray';
 
 const App = () => {
   const { 
@@ -1233,6 +1234,15 @@ const App = () => {
                 
                 {/* JSON Editor */}
                 <EditableJsonOutput showToast={{ showSuccess, showError, showWarning, showInfo }} />
+                
+                {/* Image Preview Tray */}
+                <PreviewTray 
+                  showToast={{ showSuccess, showError, showWarning, showInfo }}
+                  onImageGenerated={(image) => {
+                    // You can handle image generation callbacks here
+                    analytics.track('image_generated', { provider: image.provider });
+                  }}
+                />
                 
                 {/* Aspect Ratio Control - Mobile Only (370px and below) */}
                 <div className="min-[371px]:hidden mt-3 flex items-center justify-center space-x-2">
