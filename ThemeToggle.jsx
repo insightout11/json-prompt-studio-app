@@ -3,6 +3,9 @@ import { useTheme } from './ThemeContext';
 
 const ThemeToggle = () => {
   const { isDarkMode, toggleTheme } = useTheme();
+  
+  // Debug: Log the current theme state
+  console.log('ThemeToggle render - isDarkMode:', isDarkMode);
 
   return (
     <button

@@ -40,7 +40,7 @@ const IntegratedHeader = ({ showToast, onViralGenerator, onRandomize, onCloseRan
         className={`relative inline-flex items-center min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 max-[767px]:px-3 max-[767px]:py-2 rounded-md font-medium min-[1280px]:text-sm min-[1024px]:max-[1279px]:text-sm min-[768px]:max-[1023px]:text-xs max-[767px]:text-sm transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-cinema-teal ${
           showDropdown
             ? 'bg-light-primary dark:bg-cinema-teal text-white shadow-light-primary dark:shadow-glow-teal'
-            : 'bg-transparent text-cinema-text hover:bg-cinema-card hover:shadow-glow-teal'
+            : 'bg-transparent text-slate-800 dark:text-cinema-text hover:bg-slate-50 dark:hover:bg-cinema-card hover:shadow-md dark:hover:shadow-glow-teal'
         }`}
         aria-label="Project and library menu"
         aria-expanded={showDropdown}

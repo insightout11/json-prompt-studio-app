@@ -9,7 +9,10 @@ const CinematicModeToggle = ({ className = "" }) => {
       onClick={toggleTheme}
       className={`
         relative inline-flex items-center min-[1280px]:px-4 min-[1280px]:py-2 min-[1024px]:max-[1279px]:px-2.5 min-[1024px]:max-[1279px]:py-1.5 min-[768px]:max-[1023px]:px-2 min-[768px]:max-[1023px]:py-1 min-[420px]:max-[767px]:px-3 min-[420px]:max-[767px]:py-2 min-[341px]:max-[419px]:px-2 min-[341px]:max-[419px]:py-2 max-[340px]:px-1 max-[340px]:py-1 rounded-md font-medium min-[1280px]:text-sm min-[1024px]:max-[1279px]:text-sm min-[768px]:max-[1023px]:text-xs max-[767px]:text-sm transition-all duration-300 group
-        bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal
+        ${isDarkMode 
+          ? 'bg-cinema-panel text-cinema-text border border-cinema-border hover:bg-cinema-card hover:shadow-glow-teal' 
+          : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 hover:shadow-md'
+        }
         ${className}
       `}
       aria-label={`Switch to ${isDarkMode ? 'light' : 'cinematic'} mode`}
