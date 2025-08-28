@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import aiApiService from './aiApiService';
+import { useSubscription } from './StripeIntegration';
 
 const ImageToJson = ({ currentJson, onResult }) => {
+  const { isPro, user } = useSubscription();
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -73,15 +74,33 @@ const ImageToJson = ({ currentJson, onResult }) => {
     }
   };
 
-  // Analyze image with AI
+  // Analyze image with AI (Pro-only feature using Gemini)
   const analyzeImage = async () => {
     if (!uploadedImage || !imagePreview) return;
+
+    // Pro-only feature check
+    if (!isPro) {
+      setError('Image analysis is a Pro feature. Upgrade to Pro to analyze images and extract JSON scene data.');
+      return;
+    }
 
     setIsAnalyzing(true);
     setError(null);
 
     try {
-      const result = await aiApiService.analyzeImage(imagePreview);
+      const response = await fetch('/api/image-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64: imagePreview,
+          userId: user?.id || null,
+          userTier: isPro ? 'pro' : 'free'
+        })
+      });
+
+      const result = await response.json();
       
       if (result.success && result.fields) {
         setAnalysisResult(result);

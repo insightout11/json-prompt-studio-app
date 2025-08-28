@@ -24,6 +24,7 @@ import analytics from './analytics';
 import TutorialOverlay from './TutorialOverlay';
 import { ToastContainer } from './Toast';
 import { useToast } from './useToast';
+import { useSession } from './useSession';
 import IntegratedHeader from './IntegratedHeader';
 import EditableJsonOutput from './EditableJsonOutput';
 import ConsistencyPanel from './ConsistencyPanel';
@@ -107,9 +108,11 @@ const App = () => {
   // Toast notifications
   const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
   
-  // All users now have pro access
-  const isPro = true;
-  const { subscription, toggleProStatus, forceProStatus, resetUser, refreshUser } = subscriptionHook;
+  // Session management for user authentication
+  const { user: sessionUser, isLoading: sessionLoading, isLoggedIn, checkJustUpgraded } = useSession();
+  
+  // Get subscription data including isPro status
+  const { isPro, subscription, toggleProStatus, forceProStatus, resetUser, refreshUser } = subscriptionHook;
   const randomizeDropdownRef = useRef(null);
 
   // Tutorial action handler
@@ -237,7 +240,13 @@ const App = () => {
     if (typeof window !== 'undefined' && import.meta.env.DEV) {
       window.devTogglePro = () => {
         console.log('🔧 DEV: Console command - toggling Pro status');
-        return toggleProStatus();
+        const result = toggleProStatus();
+        // Force page refresh to sync React state with localStorage
+        setTimeout(() => {
+          console.log('🔧 DEV: Refreshing page to sync React state');
+          window.location.reload();
+        }, 500);
+        return result;
       };
       window.devForcePro = () => {
         console.log('🔧 DEV: Console command - forcing Pro status');
@@ -308,6 +317,32 @@ const App = () => {
       return () => clearTimeout(timer);
     }
   }, [sceneOptions]);
+
+  // Handle authentication success and welcome toast (temporarily disabled)
+  /*
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authSuccess = urlParams.get('auth') === 'success';
+    const hasJustUpgraded = checkJustUpgraded();
+    
+    if (authSuccess && hasJustUpgraded && isLoggedIn) {
+      // Show welcome toast with bonus credits info
+      showSuccess('🎉 Welcome! You received 10 bonus generations to try premium quality.', 8000);
+      
+      // Clean up URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      // Analytics
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'welcome_toast_shown', {
+          source: 'magic_link_signup',
+          user_id: sessionUser?.id
+        });
+      }
+    }
+  }, [showSuccess, isLoggedIn, sessionUser, checkJustUpgraded]);
+  */
 
   const [copyLoading, setCopyLoading] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);
@@ -1237,10 +1272,11 @@ const App = () => {
                 
                 {/* Image Preview Tray */}
                 <PreviewTray 
+                  aspectRatio={aspectRatio}
                   showToast={{ showSuccess, showError, showWarning, showInfo }}
                   onImageGenerated={(image) => {
                     // You can handle image generation callbacks here
-                    analytics.track('image_generated', { provider: image.provider });
+                    analytics.trackEvent('image_generated', { provider: image.provider });
                   }}
                 />
                 

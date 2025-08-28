@@ -1,5 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { create } from 'zustand';
 import { userService } from './userService';
+
+// Global subscription store using Zustand
+const useSubscriptionStore = create((set, get) => ({
+  user: null,
+  isLoading: false,
+  
+  // Initialize store
+  initialize: () => {
+    const user = userService.getCurrentUser();
+    console.log('🔧 DEV: Zustand store initialized with user:', user);
+    set({ user });
+  },
+  
+  // Refresh user data
+  refreshUser: () => {
+    const user = userService.getCurrentUser();
+    console.log('🔧 DEV: Zustand store refreshUser called with:', user);
+    set({ user });
+    return user;
+  },
+  
+  // Set loading state
+  setLoading: (isLoading) => set({ isLoading })
+}));
 
 const StripeIntegration = ({ 
   plan = 'pro', 
@@ -176,7 +201,10 @@ export const useSubscription = () => {
 
   // Refresh user data from userService
   const refreshUser = () => {
+    console.log('🔧 DEV: refreshUser called');
     const currentUser = userService.getCurrentUser();
+    console.log('🔧 DEV: refreshUser - new user data:', currentUser);
+    console.log('🔧 DEV: refreshUser - isPro:', currentUser.isPro);
     setUser(currentUser);
     return currentUser;
   };
@@ -184,8 +212,10 @@ export const useSubscription = () => {
   // Listen for localStorage changes to sync state across components
   React.useEffect(() => {
     const handleStorageChange = (e) => {
+      console.log('🔧 DEV: handleStorageChange called', e.key);
       // Only respond to changes to our user storage key
       if (e.key === userService.storageKey || e.key === null) {
+        console.log('🔧 DEV: Storage key matches, calling refreshUser');
         refreshUser();
       }
     };
@@ -195,6 +225,7 @@ export const useSubscription = () => {
 
     // Custom event for same-tab updates (since storage event doesn't fire in same tab)
     const handleCustomUserUpdate = () => {
+      console.log('🔧 DEV: handleCustomUserUpdate called');
       refreshUser();
     };
 
@@ -290,8 +321,8 @@ export const useSubscription = () => {
     return updatedUser;
   };
 
-  // All users now have pro access - no restrictions
-  const isPro = true;
+  // Get isPro status from user data (respects dev overrides)
+  const isPro = user?.isPro || false;
   const isYearly = user?.subscription?.billingCycle === 'yearly';
   const subscription = user?.subscription || null;
 

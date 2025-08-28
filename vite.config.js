@@ -30,9 +30,17 @@ export default defineConfig({
     host: true, // Allow external connections
     proxy: {
       '/api': {
-        target: 'http://localhost:3002',
-        changeOrigin: true,
-        secure: false
+        target: 'http://localhost:5188',
+        changeOrigin: false,
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            // Forward all cookies from the original request
+            if (req.headers.cookie) {
+              proxyReq.setHeader('Cookie', req.headers.cookie);
+            }
+          });
+        }
       }
     }
   },

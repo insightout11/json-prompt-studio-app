@@ -29,12 +29,22 @@ function getDeviceFingerprint(req) {
 }
 
 // Rate limiting check
-function checkRateLimit(fingerprint, userId = null) {
+function checkRateLimit(fingerprint, userId = null, userTier = 'anonymous') {
   const today = new Date().toDateString();
   const key = userId ? `user:${userId}:${today}` : `device:${fingerprint}:${today}`;
   
   const current = rateLimitStore.get(key) || 0;
-  const limit = 10; // 10 per day for free users
+  
+  // Different limits per tier
+  const limits = {
+    anonymous: 3,    // 3 premium trials
+    new_user: 10,    // 10 premium bonus
+    free: -1,        // Unlimited (not used here)
+    pro: 500,        // 500 per month (handled separately)
+    team: 1000       // 1000 per month (handled separately)
+  };
+  
+  const limit = limits[userTier] || limits.anonymous;
   
   return {
     allowed: current < limit,
@@ -82,7 +92,7 @@ async function generateWithHorde(prompt, options = {}) {
         height,
         steps: 25, // Increased steps for better quality
         cfg_scale: 8.0, // Slightly higher CFG for better adherence
-        seed: seed || undefined,
+        seed: seed ? seed.toString() : undefined,
         sampler_name: 'k_dpmpp_2m',
         karras: true,
         clip_skip: 1
@@ -152,10 +162,8 @@ async function generateWithGemini(prompt, options = {}) {
     variations
   });
 
-  // Placeholder Gemini API call
-  // TODO: Replace with actual Google Gemini Image API when available
   try {
-    console.log(`[GEMINI PLACEHOLDER] Generating ${variations} image(s) with Nano-Banana model:`, {
+    console.log(`[GEMINI IMAGE] Generating ${variations} image(s) with gemini-2.5-flash-image-preview:`, {
       jobId,
       prompt: enhancedPrompt,
       width,
@@ -163,40 +171,123 @@ async function generateWithGemini(prompt, options = {}) {
       seed
     });
 
-    // Simulate Pro tier processing with high quality results
-    setTimeout(() => {
-      const images = [];
-      for (let i = 0; i < variations; i++) {
-        images.push({
-          img: `https://picsum.photos/${width}/${height}?random=${Date.now() + i}&pro=true`,
-          seed: seed || Math.floor(Math.random() * 1000000),
-          model: 'nano-banana-v2.5',
-          width,
-          height,
-          quality_score: 0.95 + (Math.random() * 0.05), // 95-100% quality
-          enhancement: enhancementType
-        });
-      }
+    // Call Gemini Image Generation API  
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': process.env.GEMINI_API_KEY,
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: enhancedPrompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          candidateCount: variations,
+          ...(seed && { seed: Math.abs(seed) % 2147483647 })
+        }
+      })
+    });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`[GEMINI] Raw response structure:`, JSON.stringify(data, null, 2));
+
+    // Process Gemini response to extract images
+    const images = [];
+    let textResponse = null;
+    let refusalReason = null;
+    
+    if (data.candidates && data.candidates.length > 0) {
+      for (let i = 0; i < data.candidates.length; i++) {
+        const candidate = data.candidates[i];
+        
+        // Check for content policy violations or other refusal reasons
+        if (candidate.finishReason === 'PROHIBITED_CONTENT') {
+          refusalReason = 'Content policy violation - please try a different prompt';
+          break;
+        } else if (candidate.finishReason === 'SAFETY') {
+          refusalReason = 'Safety filter triggered - please modify your prompt';
+          break;
+        } else if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+          refusalReason = `Generation stopped due to: ${candidate.finishReason}`;
+          break;
+        }
+        
+        if (candidate.content && candidate.content.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.inlineData && part.inlineData.data) {
+              images.push({
+                img: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`,
+                seed: seed || Math.floor(Math.random() * 1000000),
+                model: 'gemini-2.5-flash-image-preview',
+                width,
+                height,
+                quality_score: 0.95 + (Math.random() * 0.05),
+                enhancement: enhancementType
+              });
+            } else if (part.text) {
+              // Gemini returned text instead of image (likely refused generation)
+              textResponse = part.text;
+            }
+          }
+        }
+      }
+    }
+
+    if (images.length > 0) {
+      // Update job status with completed images
       jobStatusCache.set(jobId, {
         status: 'completed',
         provider: 'gemini',
         images,
-        submittedAt: Date.now() - 8000,
+        submittedAt: Date.now() - 2000,
         completedAt: Date.now(),
         metadata: {
-          model: 'nano-banana-v2.5',
-          variations: variations,
+          model: 'gemini-2.5-flash-image-preview',
+          variations: images.length,
           enhanced: true,
           quality: 'premium'
         }
       });
-    }, Math.random() * 5000 + 5000); // 5-10 seconds for Pro tier
-
-    return { jobId, status: 'processing' };
+      
+      return { jobId, status: 'completed' };
+    } else {
+      // No images generated, likely refused by Gemini
+      const errorMessage = refusalReason || textResponse || 'Gemini declined to generate this image';
+      
+      jobStatusCache.set(jobId, {
+        status: 'failed',
+        provider: 'gemini',
+        error: errorMessage,
+        textResponse,
+        submittedAt: Date.now() - 2000,
+        failedAt: Date.now()
+      });
+      
+      throw new Error(errorMessage);
+    }
 
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('Gemini image generation error:', error);
+    
+    // Update job status with error
+    jobStatusCache.set(jobId, {
+      status: 'failed',
+      provider: 'gemini',
+      error: error.message,
+      submittedAt: Date.now() - 1000,
+      failedAt: Date.now()
+    });
+    
     throw new Error(`Gemini generation failed: ${error.message}`);
   }
 }
@@ -215,20 +306,58 @@ function enhancePromptForPro(originalPrompt, enhancementType = 'quality') {
 
 // Main preview endpoint
 export default async function handler(req, res) {
+  console.log(`🚀 Preview API called: ${req.method} ${req.url}`);
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    // Check session from cookies
+    const sessionId = req.headers.cookie?.split(';').find(c => c.trim().startsWith('session='))?.split('=')[1];
+    let userTier = 'anonymous';
+    let userId = null;
+    
+    if (sessionId) {
+      console.log(`🔍 Checking session: ${sessionId.substring(0, 8)}...`);
+      
+      // For development, we'll use a simple shared session check
+      // In production, this would use a shared database/cache
+      try {
+        // Make internal request to session endpoint to validate
+        const sessionCheck = await fetch('http://localhost:3001/api/auth/session', {
+          method: 'GET',
+          headers: {
+            'Cookie': `session=${sessionId}`,
+            'User-Agent': 'Internal-API-Call'
+          }
+        });
+        
+        if (sessionCheck.ok) {
+          const sessionData = await sessionCheck.json();
+          userTier = sessionData.tier || 'anonymous';
+          userId = sessionData.id;
+          console.log(`✅ Session valid: ${sessionData.email} (${userTier})`);
+          console.log(`🎯 Using userTier: ${userTier}, userId: ${userId}`);
+        } else {
+          console.log(`❌ Session invalid: ${sessionCheck.status}`);
+        }
+      } catch (err) {
+        console.log('❌ Session check failed:', err.message);
+      }
+    } else {
+      console.log('🔍 No session cookie found');
+    }
+    
+    console.log(`🔍 Final userTier before rate check: ${userTier}`);
+
     const {
       prompt,
-      provider = 'horde', // 'horde' for free, 'gemini' for pro
+      provider = userTier === 'anonymous' ? 'horde' : userTier === 'free' ? 'horde' : 'gemini',
       width = 512,
       height = 512,
       seed = null,
       variations = 1,
-      userId = null,
-      userTier = 'free',
       storyboardSlotId = null
     } = req.body;
 
@@ -239,25 +368,29 @@ export default async function handler(req, res) {
     // Get device fingerprint for rate limiting
     const fingerprint = getDeviceFingerprint(req);
 
-    // Check rate limits for free users
-    if (userTier === 'free') {
-      const rateCheck = checkRateLimit(fingerprint, userId);
+    // Check rate limits for limited tiers (anonymous and new_user get premium trials with limits)
+    if (userTier === 'anonymous' || userTier === 'new_user') {
+      const rateCheck = checkRateLimit(fingerprint, userId, userTier);
       
       if (!rateCheck.allowed) {
         return res.status(429).json({
-          error: 'Daily limit reached',
+          error: userTier === 'anonymous' ? 'Trial limit reached - Sign up for more!' : 'Welcome bonus used up - Continue with free tier or upgrade!',
           limit: rateCheck.limit,
           current: rateCheck.current,
-          resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          resetTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          suggestedAction: userTier === 'anonymous' ? 'signup' : 'continue_free'
         });
       }
 
-      // Show soft limit warning at 8/10
-      if (rateCheck.current >= 8) {
+      // Show soft limit warning for premium trials
+      const softLimit = userTier === 'anonymous' ? 2 : 8; // 2/3 for anonymous, 8/10 for new_user
+      if (rateCheck.current >= softLimit) {
         res.setHeader('X-Soft-Limit-Warning', 'true');
         res.setHeader('X-Remaining-Credits', rateCheck.remaining.toString());
       }
     }
+    // Free tier has no limits (unlimited Horde usage)
+    // Pro/Team tiers have their own credit system handled separately
 
     // Generate cache key
     const cacheKey = generateCacheKey(provider, prompt, seed, `${width}x${height}`, '1:1');
@@ -277,28 +410,64 @@ export default async function handler(req, res) {
 
     let result;
 
-    // Route to appropriate provider
-    if (provider === 'horde' || userTier === 'free') {
-      result = await generateWithHorde(prompt, { width: 512, height: 512, seed });
-    } else if (provider === 'gemini' && userTier === 'pro') {
-      result = await generateWithGemini(prompt, { width, height, seed, variations });
-    } else {
-      return res.status(400).json({ error: 'Invalid provider for user tier' });
+    // Route to appropriate provider based on new tier system
+    try {
+      // Premium quality for anonymous trials, new users, and pro users
+      if (userTier === 'anonymous' || userTier === 'new_user' || userTier === 'pro' || userTier === 'team') {
+        result = await generateWithGemini(prompt, { width, height, seed, variations });
+      } 
+      // Free tier uses Horde (or alternative)
+      else if (userTier === 'free') {
+        result = await generateWithHorde(prompt, { width: 512, height: 512, seed });
+      } 
+      // Handle explicit provider override (maintaining backward compatibility)
+      else if (provider === 'horde') {
+        result = await generateWithHorde(prompt, { width: 512, height: 512, seed });
+      } else if (provider === 'gemini') {
+        result = await generateWithGemini(prompt, { width, height, seed, variations });
+      } else {
+        return res.status(400).json({ error: 'Invalid provider for user tier' });
+      }
+    } catch (error) {
+      console.error('Provider generation error:', error);
+      return res.status(400).json({
+        error: 'Image generation failed',
+        details: error.message
+      });
     }
 
-    // Increment usage for free users
-    if (userTier === 'free') {
+    // Increment usage for limited tiers (anonymous and new_user have usage limits)
+    if (userTier === 'anonymous' || userTier === 'new_user') {
       incrementUsage(fingerprint, userId);
     }
+    // Free tier has unlimited usage, so no increment needed
+    // Pro/Team usage is handled by separate credit system
 
-    // Return job info for polling
-    res.json({
+    // Determine actual provider used based on tier
+    const actualProvider = (userTier === 'free') ? 'horde' : 'gemini';
+    
+    // Return job info for polling (or immediate results for Gemini)
+    const response = {
       jobId: result.jobId,
       status: result.status,
-      provider,
+      provider: actualProvider,
       storyboardSlotId,
-      estimatedWait: provider === 'horde' ? '30-120 seconds' : '5-15 seconds'
-    });
+      estimatedWait: actualProvider === 'horde' ? '30-120 seconds' : '5-15 seconds'
+    };
+
+    // For Gemini jobs that complete immediately, include the image data
+    console.log('[DEBUG] Provider:', actualProvider, 'Result status:', result.status, 'Result:', result);
+    if (actualProvider === 'gemini' && result.status === 'completed') {
+      const jobStatus = jobStatusCache.get(result.jobId);
+      console.log('[DEBUG] Job status from cache:', jobStatus);
+      if (jobStatus && jobStatus.status === 'completed') {
+        response.images = jobStatus.images;
+        response.metadata = jobStatus.metadata;
+        console.log('[DEBUG] Added images to response:', response.images?.length);
+      }
+    }
+
+    res.json(response);
 
   } catch (error) {
     console.error('Preview generation error:', error);

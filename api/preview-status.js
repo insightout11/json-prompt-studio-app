@@ -133,8 +133,9 @@ export default async function handler(req, res) {
     
     if (!jobInfo) {
       // Try to determine provider from job ID format
-      // Horde IDs are typically UUID format, Gemini might be different
+      // Horde IDs are typically UUID format, Gemini IDs start with 'gemini_'
       const isHordeId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
+      const isGeminiId = jobId.startsWith('gemini_');
       
       if (isHordeId) {
         const status = await checkHordeStatus(jobId);
@@ -142,6 +143,14 @@ export default async function handler(req, res) {
           jobId,
           ...status,
           provider: 'horde'
+        });
+      } else if (isGeminiId) {
+        // For Gemini jobs, assume completed since they're processed synchronously
+        return res.json({
+          jobId,
+          status: 'completed',
+          provider: 'gemini',
+          message: 'Gemini job completed synchronously - check original response'
         });
       } else {
         return res.status(404).json({ error: 'Job not found' });

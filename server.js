@@ -11,6 +11,12 @@ import previewStatusHandler from './api/preview-status.js';
 import creditsHandler from './api/credits.js';
 import enhanceHandler from './api/enhance.js';
 import storyboardUseHandler from './api/storyboard/use.js';
+import imageAnalysisHandler from './api/image-analysis.js';
+import editImageHandler from './api/edit-image.js';
+import magicLinkHandler from './api/auth/magic-link.js';
+import callbackHandler from './api/auth/callback.js';
+import sessionHandler from './api/auth/session.js';
+import googleHandler, { initiateGoogleAuth } from './api/auth/google.js';
 
 // Load environment variables
 dotenv.config();
@@ -129,6 +135,15 @@ app.get('/api/preview-status', previewStatusHandler);
 app.all('/api/credits', creditsHandler);
 app.post('/api/enhance', enhanceHandler);
 app.post('/api/storyboard/use', storyboardUseHandler);
+app.post('/api/image-analysis', imageAnalysisHandler);
+app.post('/api/edit-image', editImageHandler);
+
+// Authentication API Routes
+app.post('/api/auth/magic-link', magicLinkHandler);
+app.get('/api/auth/callback', callbackHandler);
+app.get('/api/auth/session', sessionHandler);
+app.get('/api/auth/google', initiateGoogleAuth);
+app.get('/api/auth/google/callback', googleHandler);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
