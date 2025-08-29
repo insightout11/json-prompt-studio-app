@@ -374,7 +374,7 @@ class AIApiService {
     const baseURL = isLocal 
       ? '/api/ai'
       : 'https://jsonpromptstudio.com/api/ai';
-    const defaultModel = useGemini ? 'gemini-2.0-flash-exp' : (useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant');
+    const defaultModel = useGemini ? 'gemini-2.5-flash' : (useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant');
 
     const requestPayload = {
       provider,
@@ -1966,7 +1966,7 @@ JSON FORMAT:
       ];
 
       const response = await this.makeRequest(messages, {
-        model: 'gemini-2.0-flash-exp', // Use Gemini Flash 2.0 for vision capabilities
+        model: 'gemini-2.5-flash', // Use Gemini Flash 2.5 for vision capabilities
         forceGemini: true, // Use Gemini instead of OpenAI for better image handling
         temperature: 0.2, // Lower temperature for more consistent, detailed analysis
         maxTokens: 2500, // Increased for detailed character descriptions

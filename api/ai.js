@@ -134,7 +134,7 @@ async function handleOpenAIRequest(req, res) {
 }
 
 async function handleGeminiRequest(req, res) {
-  const { messages, model = 'gemini-2.0-flash-exp', temperature = 0.7, max_tokens = 2000 } = req.body;
+  const { messages, model = 'gemini-2.5-flash', temperature = 0.7, max_tokens = 2000 } = req.body;
 
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'Google Gemini API key not configured' });
