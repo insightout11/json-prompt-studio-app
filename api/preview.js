@@ -325,7 +325,7 @@ export default async function handler(req, res) {
       // In production, this would use a shared database/cache
       try {
         // Make internal request to session endpoint to validate
-        const sessionCheck = await fetch('http://localhost:3001/api/auth/session', {
+        const sessionCheck = await fetch('http://localhost:5188/api/auth/session', {
           method: 'GET',
           headers: {
             'Cookie': `session=${sessionId}`,
