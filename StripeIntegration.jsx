@@ -68,12 +68,13 @@ const StripeIntegration = ({
       // Use the plan directly (only 'pro' plan available)
       const lookupKey = `${plan}_${billingCycle}`; // e.g., "pro_monthly"
       
-      const response = await fetch('/api/create-checkout-session', {
+      const response = await fetch('/api/stripe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action: 'create-checkout-session',
           lookup_key: lookupKey,
           trial_days: trialDays,
           billing_cycle_anchor: billingCycleAnchor,
