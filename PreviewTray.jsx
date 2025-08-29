@@ -437,6 +437,10 @@ const PreviewTray = ({
 
   const handlePreview = async () => {
     const prompt = composePromptFromJson();
+    console.log('🎯 PreviewTray: Generated prompt:', prompt ? `"${prompt.substring(0, 100)}..."` : 'null/empty');
+    console.log('🎯 PreviewTray: Prompt length:', prompt?.length || 0);
+    console.log('🎯 PreviewTray: Prompt type:', typeof prompt);
+    
     if (!prompt.trim()) {
       addToast('Please generate your JSON first to create a preview', 'warning');
       return;
@@ -451,6 +455,20 @@ const PreviewTray = ({
     // Calculate dimensions based on aspect ratio
     const dimensions = getDimensionsForAspectRatio(aspectRatio, selectedModel);
     
+    const requestBody = {
+      prompt: prompt.trim(),
+      provider: selectedModel === 'auto' ? null : selectedModel, // Let API decide for 'auto'
+      width: dimensions.width,
+      height: dimensions.height,
+      seed: sceneSeed,
+      variations: 1,
+      userId: user?.id,
+      userTier: user?.tier || (isPro ? 'pro' : (user ? 'free' : 'anonymous')),
+      storyboardSlotId
+    };
+    
+    console.log('📦 PreviewTray: Request body being sent:', JSON.stringify(requestBody, null, 2));
+    
     try {
       const response = await fetch('/api/preview', {
         method: 'POST',
@@ -458,17 +476,7 @@ const PreviewTray = ({
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          provider: selectedModel === 'auto' ? null : selectedModel, // Let API decide for 'auto'
-          width: dimensions.width,
-          height: dimensions.height,
-          seed: sceneSeed,
-          variations: 1,
-          userId: user?.id,
-          userTier: user?.tier || (isPro ? 'pro' : (user ? 'free' : 'anonymous')),
-          storyboardSlotId
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
