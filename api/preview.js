@@ -313,44 +313,26 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Check session from cookies
+    // Simplified session handling for serverless environment
     const sessionId = req.headers.cookie?.split(';').find(c => c.trim().startsWith('session='))?.split('=')[1];
     let userTier = 'anonymous';
     let userId = null;
     
-    if (sessionId) {
-      console.log(`🔍 Checking session: ${sessionId.substring(0, 8)}...`);
-      
-      // For development, we'll use a simple shared session check
-      // In production, this would use a shared database/cache
-      try {
-        // Make internal request to session endpoint to validate
-        const sessionCheck = await fetch('http://localhost:5188/api/auth/session', {
-          method: 'GET',
-          headers: {
-            'Cookie': `session=${sessionId}`,
-            'User-Agent': 'Internal-API-Call'
-          }
-        });
-        
-        if (sessionCheck.ok) {
-          const sessionData = await sessionCheck.json();
-          userTier = sessionData.tier || 'anonymous';
-          userId = sessionData.id;
-          console.log(`✅ Session valid: ${sessionData.email} (${userTier})`);
-          console.log(`🎯 Using userTier: ${userTier}, userId: ${userId}`);
-        } else {
-          console.log(`❌ Session invalid: ${sessionCheck.status}`);
-        }
-      } catch (err) {
-        console.log('❌ Session check failed:', err.message);
-      }
+    // For now, allow all preview requests to proceed
+    // In production, proper session validation would be implemented
+    if (sessionId && sessionId.length > 10) {
+      userTier = 'free'; // Treat valid sessions as free tier users
+      userId = sessionId.substring(0, 16);
+      console.log(`✅ Session found, using tier: ${userTier}`);
     } else {
-      console.log('🔍 No session cookie found');
+      console.log(`🔍 No session or anonymous user, using tier: ${userTier}`);
     }
     
-    console.log(`🔍 Final userTier before rate check: ${userTier}`);
+    console.log(`🎯 Using userTier: ${userTier}`);
 
+    console.log('📋 Request body keys:', Object.keys(req.body || {}));
+    console.log('📋 Request body:', JSON.stringify(req.body).substring(0, 200) + '...');
+    
     const {
       prompt,
       provider = userTier === 'anonymous' ? 'horde' : userTier === 'free' ? 'horde' : 'gemini',
@@ -359,10 +341,17 @@ export default async function handler(req, res) {
       seed = null,
       variations = 1,
       storyboardSlotId = null
-    } = req.body;
+    } = req.body || {};
+
+    console.log('🎯 Extracted prompt:', prompt ? `"${prompt.substring(0, 50)}..."` : 'null/undefined');
+    console.log('🎯 Prompt type:', typeof prompt);
 
     if (!prompt || typeof prompt !== 'string') {
-      return res.status(400).json({ error: 'Valid prompt is required' });
+      console.log('❌ Invalid prompt:', { prompt, type: typeof prompt });
+      return res.status(400).json({ 
+        error: 'Valid prompt is required',
+        received: { prompt: prompt, type: typeof prompt, body: req.body }
+      });
     }
 
     // Get device fingerprint for rate limiting
