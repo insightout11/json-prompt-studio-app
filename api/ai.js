@@ -26,6 +26,16 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Check request body size (Vercel has ~1MB limit on Hobby plan)
+    const bodySize = JSON.stringify(req.body).length;
+    if (bodySize > 900000) { // 900KB safety margin
+      return res.status(413).json({ 
+        error: 'Request payload too large', 
+        details: `Request size: ${Math.round(bodySize/1024)}KB, limit: 900KB`,
+        suggestion: 'Try reducing image size or breaking request into smaller parts'
+      });
+    }
+
     const { provider, messages, model, temperature, max_tokens, prompt } = req.body;
 
     // Route to appropriate AI service based on provider
@@ -34,6 +44,8 @@ export default async function handler(req, res) {
         return await handleGroqRequest(req, res);
       case 'openai':
         return await handleOpenAIRequest(req, res);
+      case 'gemini':
+        return await handleGeminiRequest(req, res);
       case 'simple':
         return await handleSimpleRequest(req, res);
       default:
@@ -118,6 +130,94 @@ async function handleOpenAIRequest(req, res) {
   } catch (error) {
     console.error('OpenAI API call failed:', error);
     return res.status(500).json({ error: 'Failed to call OpenAI API', details: error.message });
+  }
+}
+
+async function handleGeminiRequest(req, res) {
+  const { messages, model = 'gemini-2.0-flash-exp', temperature = 0.7, max_tokens = 2000 } = req.body;
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({ error: 'Google Gemini API key not configured' });
+  }
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'Messages array is required' });
+  }
+
+  try {
+    // Convert OpenAI format to Gemini format
+    const geminiMessages = messages.map(msg => {
+      if (msg.role === 'system') {
+        return { role: 'user', parts: [{ text: msg.content }] };
+      } else if (msg.role === 'user') {
+        // Handle both text and image content
+        if (Array.isArray(msg.content)) {
+          const parts = msg.content.map(content => {
+            if (content.type === 'text') {
+              return { text: content.text };
+            } else if (content.type === 'image_url') {
+              // Extract base64 data from data URL
+              const base64Data = content.image_url.url.split(',')[1];
+              return {
+                inline_data: {
+                  mime_type: 'image/jpeg', // Assume JPEG for now
+                  data: base64Data
+                }
+              };
+            }
+            return content;
+          });
+          return { role: 'user', parts };
+        } else {
+          return { role: 'user', parts: [{ text: msg.content }] };
+        }
+      } else if (msg.role === 'assistant') {
+        return { role: 'model', parts: [{ text: msg.content }] };
+      }
+      return msg;
+    });
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: geminiMessages,
+        generationConfig: {
+          temperature,
+          maxOutputTokens: max_tokens
+        }
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Gemini API request failed');
+    }
+
+    // Convert Gemini response to OpenAI format for compatibility
+    const openAIFormat = {
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated'
+        },
+        finish_reason: 'stop'
+      }],
+      usage: {
+        prompt_tokens: 0, // Gemini doesn't provide token counts
+        completion_tokens: 0,
+        total_tokens: 0
+      }
+    };
+
+    return res.status(200).json(openAIFormat);
+
+  } catch (error) {
+    console.error('Gemini API call failed:', error);
+    return res.status(500).json({ error: 'Failed to call Gemini API', details: error.message });
   }
 }
 

@@ -363,7 +363,8 @@ class AIApiService {
   async makeRequest(messages, options = {}) {
     // Determine which provider to use
     const useOpenAI = options.forceOpenAI || options.model?.includes('gpt-');
-    const provider = useOpenAI ? 'openai' : 'groq';
+    const useGemini = options.forceGemini || options.model?.includes('gemini-');
+    const provider = useGemini ? 'gemini' : (useOpenAI ? 'openai' : 'groq');
     
 
     await this.enforceRateLimit();
@@ -373,10 +374,10 @@ class AIApiService {
     const baseURL = isLocal 
       ? '/api/ai'
       : 'https://jsonpromptstudio.com/api/ai';
-    const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant';
+    const defaultModel = useGemini ? 'gemini-2.0-flash-exp' : (useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant');
 
     const requestPayload = {
-      provider: useOpenAI ? 'openai' : 'groq',
+      provider,
       model: options.model || defaultModel,
       messages: messages,
       max_tokens: options.maxTokens || 2000,
@@ -1965,8 +1966,8 @@ JSON FORMAT:
       ];
 
       const response = await this.makeRequest(messages, {
-        model: 'gpt-4o', // Use GPT-4o for vision capabilities
-        forceOpenAI: true, // Force OpenAI for image analysis
+        model: 'gemini-2.0-flash-exp', // Use Gemini Flash 2.0 for vision capabilities
+        forceGemini: true, // Use Gemini instead of OpenAI for better image handling
         temperature: 0.2, // Lower temperature for more consistent, detailed analysis
         maxTokens: 2500, // Increased for detailed character descriptions
         timeout: 90000 // Override default timeout for image analysis (90 seconds instead of 30)
