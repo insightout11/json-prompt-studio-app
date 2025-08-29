@@ -91,23 +91,19 @@ Return only the improved JSON object with the same structure. Add a "optimizatio
     }
 
     // Debug and validate mode parameter
-    console.log('Raw mode parameter:', mode, 'Type:', typeof mode);
     
     // Ensure mode is a string and valid
     let validMode = mode;
     if (typeof mode !== 'string') {
-      console.error('Mode is not a string:', mode);
       validMode = 'enhance'; // fallback to default
     }
     
     // Validate mode exists in our list
     const validModes = ['enhance', 'platform', 'style', 'viral', 'technical'];
     if (!validModes.includes(validMode)) {
-      console.error('Invalid mode:', validMode);
       validMode = 'enhance'; // fallback to default
     }
 
-    console.log('Using validated mode:', validMode);
 
     setIsOptimizing(true);
     setError(null);
@@ -117,7 +113,6 @@ Return only the improved JSON object with the same structure. Add a "optimizatio
     abortControllerRef.current = new AbortController();
 
     try {
-      console.log(`Optimizing prompt with mode: ${validMode}`);
       const response = await aiApiService.optimizePrompt(
         jsonPrompt, 
         validMode, 

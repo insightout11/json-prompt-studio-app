@@ -45,13 +45,6 @@ class AIApiService {
       }
     }
     
-    // Development logging
-    if (import.meta?.env?.DEV) {
-      console.log('🔑 API Keys initialized:', {
-        groq: !!this.groqApiKey,
-        openai: !!this.openaiApiKey
-      });
-    }
   }
 
   setGroqApiKey(key) {
@@ -114,7 +107,6 @@ class AIApiService {
 
   // Simple but effective JSON repair for common AI response issues
   simpleJsonRepair(jsonString) {
-    console.log('🔧 Applying simple JSON repair...');
     
     let repaired = jsonString
       // Convert common measurement patterns to avoid quote issues
@@ -137,10 +129,8 @@ class AIApiService {
     
     try {
       JSON.parse(repaired);
-      console.log('✅ Simple JSON repair successful!');
       return repaired;
     } catch (e) {
-      console.log('❌ Simple repair failed:', e.message);
       return jsonString;
     }
   }
@@ -148,16 +138,13 @@ class AIApiService {
   // Helper function to clean and parse JSON responses
   // Robust JSON repair function using state machine parsing
   repairJsonQuotes(jsonString) {
-    console.log('🔧 Repairing JSON quotes...');
     
     try {
       // First try a simple parse to see if it's already valid
       JSON.parse(jsonString);
-      console.log('✅ JSON is already valid, no repair needed');
       return jsonString;
     } catch (e) {
-      console.log('🔧 JSON needs repair, error:', e.message);
-      console.log('🔧 Error at position:', e.message.match(/position (\d+)/)?.[1]);
+      // JSON needs repair
     }
     
     let result = '';
@@ -217,15 +204,10 @@ class AIApiService {
       i++;
     }
     
-    console.log('🔧 Repair complete. Testing validity...');
-    
     try {
       JSON.parse(result);
-      console.log('✅ JSON repair successful!');
       return result;
     } catch (e) {
-      console.log('❌ JSON repair failed, trying fallback...', e.message);
-      console.log('❌ Failed repaired JSON (first 600 chars):', result.substring(0, 600));
       
       // Fallback: enhanced pattern-based escape approach
       let fallback = jsonString
@@ -246,10 +228,8 @@ class AIApiService {
       
       try {
         JSON.parse(fallback);
-        console.log('✅ Fallback JSON repair successful!');
         return fallback;
       } catch (e2) {
-        console.log('❌ All repair attempts failed:', e2.message);
         return jsonString; // Return original if all repairs fail
       }
     }
@@ -257,8 +237,6 @@ class AIApiService {
 
   parseJsonResponse(content) {
     try {
-      console.log('🔍 Raw AI Response (first 500 chars):', content.substring(0, 500));
-      console.log('🔍 Full response length:', content.length);
       
       // Clean the response to extract JSON
       let cleanedResponse = content.trim();
@@ -279,7 +257,6 @@ class AIApiService {
         const match = cleanedResponse.match(pattern);
         if (match && match[1]) {
           cleanedResponse = match[1];
-          console.log('🔍 Extracted JSON with pattern matching:', cleanedResponse.substring(0, 200) + '...');
           break;
         }
       }
@@ -304,13 +281,11 @@ class AIApiService {
         
         if (jsonEnd !== -1) {
           cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
-          console.log('🔍 Using balanced brace extraction, cleaned response length:', cleanedResponse.length);
         } else {
           // Fallback to simple last brace if balance check fails
           const lastBrace = cleanedResponse.lastIndexOf('}');
           if (lastBrace > jsonStart) {
             cleanedResponse = cleanedResponse.substring(jsonStart, lastBrace + 1);
-            console.log('🔍 Using fallback extraction, cleaned response length:', cleanedResponse.length);
           }
         }
       }
@@ -322,27 +297,20 @@ class AIApiService {
         .replace(/\n```\s*$/g, '') // Remove trailing code block markers
         .trim();
       
-      console.log('🔍 Final cleaned response (first 300 chars):', cleanedResponse.substring(0, 300));
       
       // Try simple repair first, then comprehensive repair if needed
       let repairedResponse = this.simpleJsonRepair(cleanedResponse);
       
       // If simple repair failed, try comprehensive repair
       if (repairedResponse === cleanedResponse) {
-        console.log('🔧 Simple repair unchanged, trying comprehensive repair...');
         repairedResponse = this.repairJsonQuotes(cleanedResponse);
       }
       
       const result = JSON.parse(repairedResponse);
-      console.log('✅ Successfully parsed JSON:', Object.keys(result));
       return result;
       
     } catch (parseError) {
       console.error('❌ JSON parsing error:', parseError.message);
-      console.error('📝 Original content length:', content.length);
-      console.error('📝 Original content (first 1000 chars):', content.substring(0, 1000));
-      console.error('📝 Content ends with:', content.slice(-200));
-      console.error('🔧 Parse error details:', parseError);
       
       // Try multiple desperate attempts to find valid JSON
       const desperatePatterns = [
@@ -357,12 +325,7 @@ class AIApiService {
         try {
           const desperateMatch = content.match(desperatePatterns[i]);
           if (desperateMatch) {
-            console.log(`🚨 Attempting desperate JSON extraction with pattern ${i + 1}...`);
-            
             candidateJson = desperateMatch[0];
-            
-            // Try to fix common JSON issues
-            console.log('🔧 Attempting to fix JSON formatting issues...');
             
             // Try simple repair first, then comprehensive repair if needed
             candidateJson = this.simpleJsonRepair(candidateJson);
@@ -374,7 +337,6 @@ class AIApiService {
             
             // Fix incomplete JSON by attempting to close it properly
             if (!candidateJson.trim().endsWith('}')) {
-              console.log('🔧 Attempting to fix incomplete JSON...');
               // Count open vs closed braces
               const openBraces = (candidateJson.match(/\{/g) || []).length;
               const closeBraces = (candidateJson.match(/\}/g) || []).length;
@@ -382,20 +344,13 @@ class AIApiService {
               
               if (missingBraces > 0) {
                 candidateJson += '}'.repeat(missingBraces);
-                console.log(`🔧 Added ${missingBraces} closing braces`);
               }
             }
             
             const desperateResult = JSON.parse(candidateJson);
-            console.log(`🎯 Desperate extraction succeeded with pattern ${i + 1}!`);
             return desperateResult;
           }
         } catch (desperateError) {
-          console.error(`💥 Pattern ${i + 1} failed:`, desperateError.message);
-          if (candidateJson) {
-            console.error(`💥 Failed candidate JSON (first 500 chars):`, candidateJson.substring(0, 500));
-            console.error(`💥 Failed candidate JSON (around error pos):`, candidateJson.substring(Math.max(0, 319-50), 319+50));
-          }
           continue; // Try next pattern
         }
       }
@@ -410,16 +365,6 @@ class AIApiService {
     const useOpenAI = options.forceOpenAI || options.model?.includes('gpt-');
     const provider = useOpenAI ? 'openai' : 'groq';
     
-    // Enhanced debug logging for testing
-    if (import.meta?.env?.DEV) {
-      console.log(`🤖 AI Provider: ${provider.toUpperCase()} via server proxy`);
-      console.log(`📝 Request: ${messages[0]?.content?.substring(0, 100)}...`);
-      console.log(`⚙️ Options:`, { 
-        model: options.model, 
-        forceOpenAI: options.forceOpenAI,
-        temperature: options.temperature 
-      });
-    }
 
     await this.enforceRateLimit();
 
@@ -457,7 +402,6 @@ class AIApiService {
     
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        if (import.meta?.env?.DEV) console.log(`${provider.toUpperCase()} API Request via server proxy attempt ${attempt}/${this.maxRetries}`);
         
         const response = await fetch(baseURL, requestOptions);
         
@@ -477,14 +421,6 @@ class AIApiService {
           throw new Error(`Invalid response format from ${provider.toUpperCase()} API`);
         }
 
-        // Success logging
-        if (import.meta?.env?.DEV) {
-          console.log(`✅ ${provider.toUpperCase()} Success via server:`, {
-            model: data.model,
-            usage: data.usage,
-            responseLength: data.choices[0].message.content.length
-          });
-        }
 
         return {
           content: data.choices[0].message.content,

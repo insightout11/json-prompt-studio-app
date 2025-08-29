@@ -8,6 +8,19 @@ import SignupPrompt from './SignupPrompt';
 // Tiny component: PreviewControls
 const PreviewControls = ({ model, onChangeModel, onPreview, proCredits, isGenerating, isPro }) => {
   const [showUpsell, setShowUpsell] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  // Check screen size for responsive text
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth <= 370);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   const handleModelChange = (newModel) => {
     if (newModel === 'gemini' && !isPro) {
@@ -30,7 +43,7 @@ const PreviewControls = ({ model, onChangeModel, onPreview, proCredits, isGenera
               onChange={(e) => handleModelChange(e.target.value)}
               className="appearance-none bg-cinema-card border border-cinema-border rounded-lg px-3 py-2 text-sm font-medium text-cinema-text focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-8"
             >
-              <option value="auto">Auto (Recommended)</option>
+              <option value="auto">{isSmallScreen ? 'Auto' : 'Auto (Recommended)'}</option>
               <option value="horde">Standard Quality</option>
               <option value="gemini">Premium Quality</option>
             </select>
@@ -46,7 +59,7 @@ const PreviewControls = ({ model, onChangeModel, onPreview, proCredits, isGenera
             onClick={onPreview}
             loading={isGenerating}
             disabled={isGenerating}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 max-[370px]:py-1.5 max-[370px]:px-3 max-[370px]:text-sm rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
             {isGenerating ? 'Generating...' : 'Preview Image'}
           </LoadingButton>
@@ -652,7 +665,7 @@ const PreviewTray = ({
   };
 
   return (
-    <div className="preview-tray bg-cinema-panel rounded-lg border border-cinema-border">
+    <div className="preview-tray bg-cinema-panel rounded-lg border border-cinema-border" data-tutorial="preview-tray">
       <div className="p-4 space-y-4">
         {/* Preview Controls */}
         <PreviewControls 

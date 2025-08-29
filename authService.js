@@ -194,8 +194,6 @@ class AuthService {
     try {
       if (import.meta?.env?.DEV) {
         // In development, just log the "email"
-        console.log(`Mock verification email sent to: ${email}`);
-        console.log('Verification link: /verify?token=mock_token_123');
         return { success: true, message: 'Verification email sent (check console)' };
       }
 

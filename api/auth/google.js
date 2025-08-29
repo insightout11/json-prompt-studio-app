@@ -119,7 +119,6 @@ export default async function handler(req, res) {
       throw new Error('Google account email not verified');
     }
 
-    console.log(`🔵 Google OAuth: ${email} (${name})`);
 
     // Find or create user (same logic as magic link)
     let user = users.get(email);
@@ -146,7 +145,6 @@ export default async function handler(req, res) {
       };
 
       users.set(email, user);
-      console.log(`👤 Created new Google user: ${email} (${userId})`);
     } else {
       // Update existing user with Google info
       user.name = user.name || name;
@@ -154,14 +152,12 @@ export default async function handler(req, res) {
       user.googleId = googleId;
       user.lastLoginAt = new Date().toISOString();
       users.set(email, user);
-      console.log(`👤 Google user login: ${email} (${user.id})`);
     }
 
     // Grant new user bonus (idempotent)
     let bonusGranted = null;
     if (isNewUser && !user.hasUsedNewUserBonus) {
       bonusGranted = grantNewUserBonus(user.id, email);
-      console.log(`🎁 Granted ${bonusGranted.creditsGranted} bonus credits to ${email}`);
       
       // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
@@ -196,13 +192,6 @@ export default async function handler(req, res) {
 
     // Analytics
     if (isNewUser) {
-      console.log('📈 Analytics: signup_completed', {
-        method: 'google',
-        user_id: user.id,
-        email_domain: email.split('@')[1],
-        has_name: !!name,
-        has_avatar: !!avatarUrl
-      });
     }
 
     // Redirect back to app with success

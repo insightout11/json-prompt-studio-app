@@ -127,7 +127,6 @@ const App = () => {
         }
         break;
       default:
-        console.log('Unknown tutorial action:', action);
     }
   };
 
@@ -182,7 +181,6 @@ const App = () => {
       clearAll();
       // Trigger reset for SceneBuilderChecklist counters
       setResetSceneBuilderTrigger(prev => {
-        console.log('🔄 Triggering SceneBuilder reset, old value:', prev, 'new value:', prev + 1);
         return prev + 1;
       });
       showSuccess('All data cleared successfully!');
@@ -230,7 +228,6 @@ const App = () => {
   // Initialize API service with environment variables
   useEffect(() => {
     if (import.meta.env.VITE_GROQ_API_KEY || import.meta.env.VITE_OPENAI_API_KEY) {
-      console.log('🔧 Initializing API service with environment variables from App.jsx');
       aiApiService.initializeApiKeys(import.meta.env);
     }
   }, []);
@@ -239,35 +236,28 @@ const App = () => {
   useEffect(() => {
     if (typeof window !== 'undefined' && import.meta.env.DEV) {
       window.devTogglePro = () => {
-        console.log('🔧 DEV: Console command - toggling Pro status');
         const result = toggleProStatus();
         // Force page refresh to sync React state with localStorage
         setTimeout(() => {
-          console.log('🔧 DEV: Refreshing page to sync React state');
           window.location.reload();
         }, 500);
         return result;
       };
       window.devForcePro = () => {
-        console.log('🔧 DEV: Console command - forcing Pro status');
         return forceProStatus();
       };
       window.devStatus = () => {
-        console.log('🔧 DEV: Current status - isPro:', isPro);
         return { isPro, subscription };
       };
       window.devResetTutorial = () => {
-        console.log('🔧 DEV: Resetting tutorial');
         localStorage.removeItem('hasSeenTutorial');
         setShowTutorial(true);
         return 'Tutorial reset and shown';
       };
       window.devShowTutorial = () => {
-        console.log('🔧 DEV: Showing tutorial directly');
         setShowTutorial(true);
         return 'Tutorial shown';
       };
-      console.log('🔧 DEV: Console commands available - devTogglePro(), devForcePro(), devStatus(), devResetTutorial(), devShowTutorial()');
     }
   }, [toggleProStatus, forceProStatus, isPro, subscription]);
 
@@ -424,13 +414,11 @@ const App = () => {
 
   // Apply selected scene option with smart merging
   const handleApplySceneOption = (option, optionIndex, strategy = null) => {
-    console.log('Applying scene option:', option);
     
     if (option.json && typeof option.json === 'object') {
       // Use the specified strategy or the current merge strategy setting
       const usedStrategy = strategy || mergeStrategy;
       
-      console.log('Applying JSON with strategy:', usedStrategy, option.json);
       
       // Apply scene with the chosen merge strategy
       applySceneWithMergeStrategy(option.json, usedStrategy);
@@ -609,14 +597,9 @@ const App = () => {
 
   // Show loading screen first
   if (isLoading) {
-    if (import.meta.env.DEV) console.log('App: Showing loading screen');
     return <LoadingScreen onComplete={() => setIsLoading(false)} />;
   }
 
-  if (import.meta.env.DEV) {
-    console.log('App: Loading complete, rendering main app');
-    console.log('App: isPro =', isPro);
-  }
 
   // Render randomize dropdown
   const renderRandomizeDropdown = (mobileMode = false, onMobileClose = null) => (
@@ -628,7 +611,6 @@ const App = () => {
     >
       <button
         onPointerDown={(e) => {
-          console.log('🎯 POINTER DOWN CHARACTER BUTTON');
           e.preventDefault();
           e.stopPropagation();
           randomizeCharacterFields();
@@ -908,11 +890,9 @@ const App = () => {
                 showToast={{ showSuccess, showError, showWarning, showInfo }}
                 onViralGenerator={() => setShowViralGenerator(true)}
                 onRandomize={() => {
-                  console.log('🔄 onRandomize called, current state:', showRandomizeDropdown);
                   setShowRandomizeDropdown(!showRandomizeDropdown);
                 }}
                 onCloseRandomizer={() => {
-                  console.log('🔄 onCloseRandomizer called');
                   setShowRandomizeDropdown(false);
                 }}
                 showRandomizeDropdown={showRandomizeDropdown}

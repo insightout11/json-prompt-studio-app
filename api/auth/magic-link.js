@@ -35,10 +35,6 @@ function checkRateLimit(email, ip) {
 async function sendMagicLinkEmail(email, token, redirectUrl) {
   const magicLink = `${redirectUrl}/api/auth/callback?token=${token}`;
   
-  console.log('🔗 Magic Link Email (Development Mode)');
-  console.log('To:', email);
-  console.log('Link:', magicLink);
-  console.log('─'.repeat(60));
   
   // In production, use a real email service like Resend, SendGrid, etc.
   /*
@@ -160,6 +156,5 @@ setInterval(() => {
   }
   
   if (cleaned > 0) {
-    console.log(`🧹 Cleaned up ${cleaned} expired/used verification tokens`);
   }
 }, 5 * 60 * 1000); // Clean every 5 minutes

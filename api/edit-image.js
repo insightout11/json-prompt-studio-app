@@ -20,12 +20,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
   const jobId = `edit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
   
   try {
-    console.log(`[GEMINI EDIT] Editing image with gemini-2.5-flash-image-preview:`, {
-      jobId,
-      originalPrompt,
-      editDescription,
-      originalImageUrl: originalImageUrl ? originalImageUrl.substring(0, 50) + '...' : 'null'
-    });
 
     // Extract base64 image data from data URL
     let base64ImageData = null;
@@ -40,11 +34,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
         if (mimeMatch) {
           mimeType = mimeMatch[1];
         }
-        console.log(`[GEMINI EDIT] Extracted base64 data:`, {
-          mimeType,
-          dataLength: base64ImageData.length,
-          dataPreview: base64ImageData.substring(0, 100) + '...'
-        });
       }
     }
 
@@ -76,12 +65,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
       }
     };
 
-    console.log(`[GEMINI EDIT] Sending multimodal request:`, {
-      mimeType,
-      dataLength: base64ImageData.length,
-      editInstruction,
-      hasImage: !!base64ImageData
-    });
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent`, {
       method: 'POST',
@@ -99,7 +82,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
     }
 
     const data = await response.json();
-    console.log(`[GEMINI EDIT] Raw response received:`, JSON.stringify(data, null, 2));
 
     // Process Gemini response to extract edited image
     let editedImage = null;
@@ -109,18 +91,14 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
       const candidate = data.candidates[0];
       
       // Check for safety filters or other finish reasons
-      console.log('[GEMINI EDIT] Candidate finish reason:', candidate.finishReason);
       if (candidate.finishReason === 'PROHIBITED_CONTENT') {
         throw new Error('Content policy violation - please try a different edit description');
       } else if (candidate.finishReason === 'SAFETY') {
         throw new Error('Safety filter triggered - please modify your edit description');
-      } else if (candidate.finishReason && candidate.finishReason !== 'STOP') {
-        console.log('[GEMINI EDIT] Unexpected finish reason:', candidate.finishReason);
       }
       
       if (candidate.content && candidate.content.parts) {
         for (const part of candidate.content.parts) {
-          console.log('[GEMINI EDIT] Processing part:', JSON.stringify(part, null, 2));
           if (part.inlineData && part.inlineData.data) {
             editedImage = {
               img: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`,
@@ -132,18 +110,15 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
               isEdit: true,
               editType: 'multimodal_image_edit'
             };
-            console.log('[GEMINI EDIT] Found image data, size:', part.inlineData.data.length);
             break;
           } else if (part.text) {
             textResponse = part.text;
-            console.log('[GEMINI EDIT] Found text response:', textResponse);
           }
         }
       }
     }
 
     if (editedImage) {
-      console.log('[GEMINI EDIT] Successfully generated edited image');
       return {
         success: true,
         editedImage,
@@ -152,8 +127,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
     } else {
       // Gemini refused to edit the image or returned text instead of image
       const errorMessage = textResponse || 'Gemini declined to edit this image';
-      console.log('[GEMINI EDIT] Edit refused or returned text instead of image:', errorMessage);
-      console.log('[GEMINI EDIT] Text response was:', textResponse);
       throw new Error(`Cannot edit image: ${errorMessage}`);
     }
 
@@ -165,7 +138,6 @@ async function editImageWithGemini(originalImageUrl, originalPrompt, editDescrip
 
 // Main edit-image endpoint
 export default async function handler(req, res) {
-  console.log('[EDIT IMAGE] Endpoint hit with method:', req.method);
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -189,28 +161,18 @@ export default async function handler(req, res) {
 
     // Allow Pro users, anonymous trial users, and new users to edit images  
     if (userTier !== 'pro' && userTier !== 'anonymous' && userTier !== 'new_user') {
-      console.log('[EDIT IMAGE] Access denied for userTier:', userTier);
       return res.status(403).json({ 
         error: 'Image editing requires Pro subscription or free trial access',
         receivedUserTier: userTier
       });
     }
 
-    console.log('[EDIT IMAGE] Processing edit request:', {
-      originalPrompt: originalPrompt.substring(0, 100) + '...',
-      editDescription,
-      userTier,
-      userId,
-      originalImageUrl,
-      fullRequestBody: req.body
-    });
 
     // Check cache first
     const cacheKey = generateEditCacheKey(originalImageUrl, editDescription);
     if (editCache.has(cacheKey)) {
       const cached = editCache.get(cacheKey);
       if (Date.now() - cached.timestamp < 6 * 60 * 60 * 1000) { // 6 hours cache
-        console.log('[EDIT IMAGE] Returning cached result');
         return res.json({
           ...cached.data,
           cached: true

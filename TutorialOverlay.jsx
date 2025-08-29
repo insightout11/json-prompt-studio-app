@@ -637,6 +637,59 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
       position: 'left'
     },
     {
+      id: 'image-preview',
+      title: '🖼️ Visualize Your Scenes — Image Preview',
+      content: () => (
+        <div>
+          <p className="mb-3">Turn your JSON into visual previews! Perfect for validating your scenes before final production:</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">🎨</span>
+              <span><strong>Preview Image Button</strong> — Generate visuals from your current JSON</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">⚡</span>
+              <span><strong>Auto Mode</strong> — Smart quality selection (free community or Pro instant)</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">🔄</span>
+              <span><strong>Regenerate & Edit</strong> — Refine images with natural language (Pro)</span>
+            </div>
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="w-6">💾</span>
+              <span><strong>Download & Save</strong> — Export your visual previews instantly</span>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 mb-3">
+            <p className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">✨ Pro Features:</p>
+            <ul className="text-sm text-purple-700 dark:text-purple-200 space-y-1">
+              <li>• <strong>Premium Quality:</strong> Instant Gemini 2.5 Flash Image generation</li>
+              <li>• <strong>Natural Language Editing:</strong> "Make it darker" or "Add rain"</li>
+              <li>• <strong>150 generations/month</strong> with professional consistency</li>
+            </ul>
+          </div>
+          
+          <div className="bg-teal-50 dark:bg-teal-900/20 rounded-lg p-3 border border-teal-200 dark:border-teal-700 mb-3">
+            <p className="text-sm font-medium text-teal-800 dark:text-teal-300 mb-1">🎯 Perfect Workflow:</p>
+            <p className="text-sm text-teal-700 dark:text-teal-200">
+              <strong>1.</strong> Create JSON → <strong>2.</strong> Preview Visually → <strong>3.</strong> Refine & Edit → <strong>4.</strong> Export Final
+            </p>
+          </div>
+          
+          
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+            <p className="text-xs text-blue-800 dark:text-blue-200">
+              💡 <strong>Tip:</strong> Image previews help you catch issues early and inspire new creative directions before investing in final production!
+            </p>
+          </div>
+        </div>
+      ),
+      target: '[data-tutorial="preview-tray"]',
+      position: 'bottom',
+      disableScroll: false
+    },
+    {
       id: 'completion',
       title: '🚀 Ready to Create!',
       content: () => (
@@ -650,6 +703,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
               <li>• Build detailed prompts with Scene Builder</li>
               <li>• Use AI Tools for creative enhancement</li>
               <li>• Master Consistency controls for repeatable results</li>
+              <li>• Preview your scenes visually with Image Preview</li>
               <li>• Organize everything with Projects</li>
             </ul>
           </div>
@@ -737,6 +791,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
     const isAiTools = stepData && stepData.id === 'ai-tools';
     const isJsonOutput = stepData && stepData.id === 'json-output';
     const isConsistencyControls = stepData && stepData.id === 'consistency-controls';
+    const isImagePreview = stepData && stepData.id === 'image-preview';
     
     // Enhanced spacing for AI tools to ensure complete clearance
     const aiToolsTargetPadding = isAiTools ? 120 : targetPadding;
@@ -746,6 +801,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
                          isTextInput ? targetPos.top - 50 : // Position much higher for text input
                          isAiTools ? 150 : // EMERGENCY: Force AI tools tooltip to TOP of viewport
                          isConsistencyControls ? 50 : // EMERGENCY: Force consistency controls tooltip to TOP of viewport
+                         isImagePreview ? targetPos.top + (targetPos.height / 2) : // Center for image preview
                          isJsonOutput ? Math.max(targetPos.top - 100, 100) : // Special positioning for JSON output step
                          targetPos.top + (targetPos.height / 2);
     
@@ -999,6 +1055,9 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialAction, isAdvancedMode,
   const getArrowClass = () => {
     // For AI Tools Hub (centered), no arrow needed
     if (currentStepData.id === 'ai-tools') return '';
+    
+    // For Image Preview (bottom position), arrow should point up
+    if (currentStepData.id === 'image-preview') return 'arrow-top';
     
     if (!targetPosition || !tooltipPosition || typeof tooltipPosition.top === 'string') return '';
     

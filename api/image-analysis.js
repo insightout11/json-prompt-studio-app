@@ -85,14 +85,12 @@ Analyze this image and extract video generation parameters:`;
       }
     };
 
-    console.log(`[GEMINI IMAGE ANALYSIS] Processing image for user: ${userId}`);
 
     // Generate content using Gemini Vision
     const result = await model.generateContent([systemPrompt, imagePart]);
     const response = await result.response;
     const text = response.text();
 
-    console.log(`[GEMINI] Raw response: ${text.substring(0, 200)}...`);
 
     // Parse the JSON response
     let analysisData;
@@ -150,7 +148,6 @@ Analyze this image and extract video generation parameters:`;
     // Track Pro feature usage
     if (userId) {
       // You could implement usage tracking here
-      console.log(`[ANALYTICS] Pro feature used: image_analysis by ${userId}`);
     }
 
     res.json({

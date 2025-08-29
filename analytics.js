@@ -42,7 +42,6 @@ class Analytics {
     });
 
     this.isEnabled = true;
-    console.log('📊 Analytics: GA4 initialized');
   }
 
   // Google Search Console verification
@@ -81,10 +80,6 @@ class Analytics {
       });
     }
 
-    // Log for development
-    if (import.meta?.env?.DEV) {
-      console.log('📊 Analytics Event:', eventName, parameters);
-    }
   }
 
   // Track Pro feature usage

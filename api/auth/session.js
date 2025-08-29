@@ -48,7 +48,6 @@ export default async function handler(req, res) {
       isAuthenticated: true
     };
 
-    console.log(`📋 Session check for user: ${user.email} (${user.tier})`);
     
     res.json(userData);
 

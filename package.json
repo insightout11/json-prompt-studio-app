@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "start": "node server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run start\"",
-    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0 --ignore-pattern node_modules --ignore-pattern dist"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

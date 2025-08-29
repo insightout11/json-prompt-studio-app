@@ -29,7 +29,6 @@ function generateSessionId() {
 function migrateAnonymousUsage(userId, fingerprint) {
   // In production, this would migrate usage counters from device fingerprint to user ID
   // For development, we'll simulate this
-  console.log(`📊 Migrating anonymous usage from ${fingerprint} to user ${userId}`);
   
   // Simulate finding previous usage
   const today = new Date().toDateString();
@@ -101,19 +100,16 @@ export default async function handler(req, res) {
       };
 
       users.set(email, user);
-      console.log(`👤 Created new user: ${email} (${userId})`);
     } else {
       // Update last login
       user.lastLoginAt = new Date().toISOString();
       users.set(email, user);
-      console.log(`👤 User login: ${email} (${user.id})`);
     }
 
     // Grant new user bonus (idempotent)
     let bonusGranted = null;
     if (isNewUser && !user.hasUsedNewUserBonus) {
       bonusGranted = grantNewUserBonus(user.id, email);
-      console.log(`🎁 Granted ${bonusGranted.creditsGranted} bonus credits to ${email}`);
       
       // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
@@ -151,11 +147,6 @@ export default async function handler(req, res) {
 
     // Analytics
     if (isNewUser) {
-      console.log('📈 Analytics: signup_completed', {
-        method: 'email',
-        user_id: user.id,
-        email_domain: email.split('@')[1]
-      });
     }
 
     // Redirect back to app with success
