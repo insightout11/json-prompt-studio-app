@@ -307,6 +307,27 @@ function enhancePromptForPro(originalPrompt, enhancementType = 'quality') {
 // Main preview endpoint
 export default async function handler(req, res) {
   console.log(`🚀 Preview API called: ${req.method} ${req.url}`);
+  console.log('🌐 Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📦 Body type:', typeof req.body);
+  console.log('📦 Body constructor:', req.body?.constructor?.name);
+  
+  // CORS headers for development
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  if (req.method === 'GET') {
+    return res.status(200).json({ 
+      message: 'Preview API is working',
+      timestamp: new Date().toISOString(),
+      hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      hasHordeKey: !!process.env.HORDE_API_KEY
+    });
+  }
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -330,8 +351,16 @@ export default async function handler(req, res) {
     
     console.log(`🎯 Using userTier: ${userTier}`);
 
-    console.log('📋 Request body keys:', Object.keys(req.body || {}));
-    console.log('📋 Request body:', JSON.stringify(req.body).substring(0, 200) + '...');
+    // Handle request body parsing issues
+    let requestBody;
+    try {
+      requestBody = req.body || {};
+      console.log('📋 Request body keys:', Object.keys(requestBody));
+      console.log('📋 Request body:', JSON.stringify(requestBody).substring(0, 500) + '...');
+    } catch (err) {
+      console.log('❌ Error parsing request body:', err.message);
+      return res.status(400).json({ error: 'Invalid request body', details: err.message });
+    }
     
     const {
       prompt,
@@ -341,7 +370,7 @@ export default async function handler(req, res) {
       seed = null,
       variations = 1,
       storyboardSlotId = null
-    } = req.body || {};
+    } = requestBody;
 
     console.log('🎯 Extracted prompt:', prompt ? `"${prompt.substring(0, 50)}..."` : 'null/undefined');
     console.log('🎯 Prompt type:', typeof prompt);
