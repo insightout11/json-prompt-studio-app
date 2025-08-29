@@ -383,6 +383,23 @@ export default async function handler(req, res) {
       });
     }
 
+    // Check if API keys are configured
+    if (provider === 'gemini' && !process.env.GEMINI_API_KEY) {
+      console.log('❌ Gemini API key not configured');
+      return res.status(500).json({ 
+        error: 'Gemini API key not configured in production environment',
+        suggestion: 'Please configure GEMINI_API_KEY in Vercel environment variables'
+      });
+    }
+
+    if (provider === 'horde' && !process.env.HORDE_API_KEY) {
+      console.log('❌ Horde API key not configured');
+      return res.status(500).json({ 
+        error: 'Stable Horde API key not configured in production environment',
+        suggestion: 'Please configure HORDE_API_KEY in Vercel environment variables'
+      });
+    }
+
     // Get device fingerprint for rate limiting
     const fingerprint = getDeviceFingerprint(req);
 
