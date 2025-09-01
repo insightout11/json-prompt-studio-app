@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         message: 'Consolidated AI API endpoint is working', 
         timestamp: new Date().toISOString(),
         hasGroqApiKey: !!process.env.GROQ_API_KEY,
-        hasOpenAIApiKey: !!process.env.OPENAI_API_KEY
+        hasGeminiApiKey: !!process.env.GEMINI_API_KEY
       });
     }
 
@@ -42,8 +42,6 @@ export default async function handler(req, res) {
     switch (provider) {
       case 'groq':
         return await handleGroqRequest(req, res);
-      case 'openai':
-        return await handleOpenAIRequest(req, res);
       case 'gemini':
         return await handleGeminiRequest(req, res);
       case 'simple':
@@ -63,7 +61,7 @@ export default async function handler(req, res) {
 }
 
 async function handleGroqRequest(req, res) {
-  const { messages, model = 'llama-3.1-70b-versatile', temperature = 0.7, max_tokens = 2000 } = req.body;
+  const { messages, model = 'llama-3.1-8b-instant', temperature = 0.7, max_tokens = 2000 } = req.body;
 
   if (!process.env.GROQ_API_KEY) {
     return res.status(500).json({ error: 'Groq API key not configured' });
@@ -98,40 +96,6 @@ async function handleGroqRequest(req, res) {
   }
 }
 
-async function handleOpenAIRequest(req, res) {
-  const { messages, model = 'gpt-4o-mini', temperature = 0.7, max_tokens = 2000 } = req.body;
-
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'OpenAI API key not configured' });
-  }
-
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'Messages array is required' });
-  }
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature,
-        max_tokens
-      })
-    });
-
-    const data = await response.json();
-    return res.status(200).json(data);
-
-  } catch (error) {
-    console.error('OpenAI API call failed:', error);
-    return res.status(500).json({ error: 'Failed to call OpenAI API', details: error.message });
-  }
-}
 
 async function handleGeminiRequest(req, res) {
   const { messages, model = 'gemini-2.5-flash', temperature = 0.7, max_tokens = 2000 } = req.body;

@@ -1,4 +1,4 @@
-// Image Preview API - Generate images via Stable Horde (Free) or Gemini/Nano-Banana (Pro)
+// Image Preview API - Generate images via Gemini 2.5 Flash Image (All Users)
 import crypto from 'crypto';
 
 // Simple in-memory cache for development - in production use Redis
@@ -35,11 +35,11 @@ function checkRateLimit(fingerprint, userId = null, userTier = 'anonymous') {
   
   const current = rateLimitStore.get(key) || 0;
   
-  // Different limits per tier
+  // Different limits per tier (all using Gemini 2.5 Flash Image)
   const limits = {
-    anonymous: 3,    // 3 premium trials
-    new_user: 10,    // 10 premium bonus
-    free: -1,        // Unlimited (not used here)
+    anonymous: 3,    // 3 free Gemini generations before signup prompt
+    new_user: 10,    // 10 total Gemini generations after signup
+    free: -1,        // Unlimited Gemini generations (if applicable)
     pro: 500,        // 500 per month (handled separately)
     team: 1000       // 1000 per month (handled separately)
   };
@@ -63,74 +63,7 @@ function incrementUsage(fingerprint, userId = null) {
   rateLimitStore.set(key, current + 1);
 }
 
-// Stable Horde API integration
-async function generateWithHorde(prompt, options = {}) {
-  if (!process.env.HORDE_API_KEY) {
-    throw new Error('Stable Horde API key not configured');
-  }
-
-  const {
-    width = 512,
-    height = 512,
-    seed = null
-  } = options;
-
-  // Enhanced prompt for better quality
-  const enhancedPrompt = `${prompt}, high quality, detailed, masterpiece`;
-
-  // Submit job to Stable Horde
-  const submitResponse = await fetch('https://stablehorde.net/api/v2/generate/async', {
-    method: 'POST',
-    headers: {
-      'apikey': process.env.HORDE_API_KEY,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      prompt: enhancedPrompt,
-      params: {
-        width,
-        height,
-        steps: 25, // Increased steps for better quality
-        cfg_scale: 8.0, // Slightly higher CFG for better adherence
-        seed: seed ? seed.toString() : undefined,
-        sampler_name: 'k_dpmpp_2m',
-        karras: true,
-        clip_skip: 1
-      },
-      nsfw: false,
-      trusted_workers: true,
-      slow_workers: true, // Allow slower workers for better quality
-      censor_nsfw: true,
-      models: ['AlbedoBase XL (SDXL)'], // Use SDXL for better quality
-      r2: true, // Enable R2 storage for better reliability
-      shared: false
-    })
-  });
-
-  if (!submitResponse.ok) {
-    const error = await submitResponse.text();
-    console.error('Horde API error:', error);
-    throw new Error(`Horde submission failed: ${submitResponse.status}`);
-  }
-
-  const data = await submitResponse.json();
-  const jobId = data.id;
-  
-  if (!jobId) {
-    throw new Error('No job ID returned from Horde API');
-  }
-
-  // Store job status for polling
-  jobStatusCache.set(jobId, {
-    status: 'processing',
-    provider: 'horde',
-    submittedAt: Date.now(),
-    prompt: enhancedPrompt,
-    originalPrompt: prompt
-  });
-
-  return { jobId, status: 'processing' };
-}
+// Note: Stable Horde integration removed - using Gemini 2.5 Flash Image only
 
 // Google Gemini/Nano-Banana integration
 async function generateWithGemini(prompt, options = {}) {
@@ -325,7 +258,7 @@ export default async function handler(req, res) {
       message: 'Preview API is working',
       timestamp: new Date().toISOString(),
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
-      hasHordeKey: !!process.env.HORDE_API_KEY
+      provider: 'gemini-2.5-flash-image-preview'
     });
   }
   
@@ -362,15 +295,20 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid request body', details: err.message });
     }
     
+    // Extract request data and default provider to Gemini for all users
     const {
       prompt,
-      provider = userTier === 'anonymous' ? 'horde' : userTier === 'free' ? 'horde' : 'gemini',
+      provider: requestedProvider,
       width = 512,
       height = 512,
       seed = null,
       variations = 1,
       storyboardSlotId = null
     } = requestBody;
+
+    // Always use Gemini (nano-banana) for all users - no more Horde
+    const provider = 'gemini';
+    console.log('🎯 Provider set to:', provider, '(Gemini 2.5 Flash Image for all users)');
 
     console.log('🎯 Extracted prompt:', prompt ? `"${prompt.substring(0, 50)}..."` : 'null/undefined');
     console.log('🎯 Prompt type:', typeof prompt);
@@ -383,20 +321,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check if API keys are configured
-    if (provider === 'gemini' && !process.env.GEMINI_API_KEY) {
+    // Check if Gemini API key is configured (required for all image generation)
+    if (!process.env.GEMINI_API_KEY) {
       console.log('❌ Gemini API key not configured');
       return res.status(500).json({ 
         error: 'Gemini API key not configured in production environment',
         suggestion: 'Please configure GEMINI_API_KEY in Vercel environment variables'
-      });
-    }
-
-    if (provider === 'horde' && !process.env.HORDE_API_KEY) {
-      console.log('❌ Horde API key not configured');
-      return res.status(500).json({ 
-        error: 'Stable Horde API key not configured in production environment',
-        suggestion: 'Please configure HORDE_API_KEY in Vercel environment variables'
       });
     }
 
@@ -424,7 +354,7 @@ export default async function handler(req, res) {
         res.setHeader('X-Remaining-Credits', rateCheck.remaining.toString());
       }
     }
-    // Free tier has no limits (unlimited Horde usage)
+    // Free tier has no limits (unlimited Gemini usage)
     // Pro/Team tiers have their own credit system handled separately
 
     // Generate cache key
@@ -445,24 +375,10 @@ export default async function handler(req, res) {
 
     let result;
 
-    // Route to appropriate provider based on new tier system
+    // Route to appropriate provider - All users now use Gemini 2.5 Flash Image
     try {
-      // Premium quality for anonymous trials, new users, and pro users
-      if (userTier === 'anonymous' || userTier === 'new_user' || userTier === 'pro' || userTier === 'team') {
-        result = await generateWithGemini(prompt, { width, height, seed, variations });
-      } 
-      // Free tier uses Horde (or alternative)
-      else if (userTier === 'free') {
-        result = await generateWithHorde(prompt, { width: 512, height: 512, seed });
-      } 
-      // Handle explicit provider override (maintaining backward compatibility)
-      else if (provider === 'horde') {
-        result = await generateWithHorde(prompt, { width: 512, height: 512, seed });
-      } else if (provider === 'gemini') {
-        result = await generateWithGemini(prompt, { width, height, seed, variations });
-      } else {
-        return res.status(400).json({ error: 'Invalid provider for user tier' });
-      }
+      // All user tiers now use Gemini for premium image generation
+      result = await generateWithGemini(prompt, { width, height, seed, variations });
     } catch (error) {
       console.error('Provider generation error:', error);
       return res.status(400).json({
@@ -475,11 +391,11 @@ export default async function handler(req, res) {
     if (userTier === 'anonymous' || userTier === 'new_user') {
       incrementUsage(fingerprint, userId);
     }
-    // Free tier has unlimited usage, so no increment needed
+    // Free tier has unlimited Gemini usage, so no increment needed
     // Pro/Team usage is handled by separate credit system
 
-    // Determine actual provider used based on tier
-    const actualProvider = (userTier === 'free') ? 'horde' : 'gemini';
+    // All users now use Gemini 2.5 Flash Image
+    const actualProvider = 'gemini';
     
     // Return job info for polling (or immediate results for Gemini)
     const response = {
@@ -487,12 +403,12 @@ export default async function handler(req, res) {
       status: result.status,
       provider: actualProvider,
       storyboardSlotId,
-      estimatedWait: actualProvider === 'horde' ? '30-120 seconds' : '5-15 seconds'
+      estimatedWait: '5-15 seconds'
     };
 
-    // For Gemini jobs that complete immediately, include the image data
+    // Gemini jobs complete immediately, include the image data
     console.log('[DEBUG] Provider:', actualProvider, 'Result status:', result.status, 'Result:', result);
-    if (actualProvider === 'gemini' && result.status === 'completed') {
+    if (result.status === 'completed') {
       const jobStatus = jobStatusCache.get(result.jobId);
       console.log('[DEBUG] Job status from cache:', jobStatus);
       if (jobStatus && jobStatus.status === 'completed') {

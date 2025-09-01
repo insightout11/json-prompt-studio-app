@@ -5,9 +5,11 @@ import { buildPrompt } from './aiSystemPrompts.js';
 
 class AIApiService {
   constructor() {
+    console.log('🚨🚨🚨 BREAKTHROUGH! aiApiService constructor called - v4.0 FINAL 🚨🚨🚨');
+    console.log('🚨 SUCCESS TIMESTAMP:', new Date().toISOString());
+    console.log('🚨 IF YOU SEE THIS, THE CACHE IS CLEARED!');
     // API keys are now handled server-side
     this.groqApiKey = null;
-    this.openaiApiKey = null;
     this.maxRetries = 3;
     this.retryDelay = 1000; // ms
     this.timeout = 30000; // 30 seconds
@@ -20,28 +22,22 @@ class AIApiService {
 
   initializeApiKeys(envVars = null) {
     // Try to get API keys from provided environment variables or import.meta.env
-    let groqFromEnv, openaiFromEnv;
+    let groqFromEnv;
     
     if (envVars) {
       // Use provided environment variables (passed from component that has access)
       groqFromEnv = envVars.VITE_GROQ_API_KEY;
-      openaiFromEnv = envVars.VITE_OPENAI_API_KEY;
     } else {
       // Fallback to import.meta.env (might be undefined in some contexts)
       groqFromEnv = import.meta?.env?.VITE_GROQ_API_KEY;
-      openaiFromEnv = import.meta?.env?.VITE_OPENAI_API_KEY;
     }
     
     this.groqApiKey = groqFromEnv || null;
-    this.openaiApiKey = openaiFromEnv || null;
     
     // If not in environment, try localStorage (for user-provided keys)
     if (typeof window !== 'undefined') {
       if (!this.groqApiKey) {
         this.groqApiKey = localStorage.getItem('groq_api_key');
-      }
-      if (!this.openaiApiKey) {
-        this.openaiApiKey = localStorage.getItem('openai_api_key');
       }
     }
     
@@ -54,13 +50,6 @@ class AIApiService {
     }
   }
 
-  setOpenaiApiKey(key) {
-    this.openaiApiKey = key;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('openai_api_key', key);
-    }
-  }
-
   // Legacy method for backward compatibility
   setApiKey(key) {
     this.setGroqApiKey(key);
@@ -70,22 +59,15 @@ class AIApiService {
     return this.groqApiKey;
   }
 
-  getOpenaiApiKey() {
-    return this.openaiApiKey;
-  }
-
   // Legacy method for backward compatibility  
   getApiKey() {
-    return this.groqApiKey || this.openaiApiKey;
+    return this.groqApiKey;
   }
 
   hasGroqApiKey() {
     return true; // Server handles Groq API key
   }
 
-  hasOpenaiApiKey() {
-    return true; // Server handles OpenAI API key
-  }
 
   // Legacy method for backward compatibility - always return true for server-side mode
   hasApiKey() {
@@ -359,25 +341,32 @@ class AIApiService {
     }
   }
 
-  // Core API request with comprehensive error handling - supports both Groq and OpenAI
+  // Core API request with comprehensive error handling - Hybrid Groq + OpenAI + Gemini
   async makeRequest(messages, options = {}) {
-    // Determine which provider to use
+    console.log('🚀 aiApiService.makeRequest called with:', { messages: messages.length + ' messages', options });
+    
+    // Determine which provider to use - Restore OpenAI for better JSON generation
     const useOpenAI = options.forceOpenAI || options.model?.includes('gpt-');
     const useGemini = options.forceGemini || options.model?.includes('gemini-');
-    const provider = useGemini ? 'gemini' : (useOpenAI ? 'openai' : 'groq');
+    const provider = useOpenAI ? 'openai' : useGemini ? 'gemini' : 'groq';
+    
+    console.log('🎯 Using provider:', provider, 'baseURL will be:', 
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? (useOpenAI ? '/api/openai' : '/api/groq')
+        : (useOpenAI ? 'https://jsonpromptstudio.com/api/openai' : 'https://jsonpromptstudio.com/api/groq')
+    );
     
 
     await this.enforceRateLimit();
 
-    // Use deployed server endpoints instead of direct API calls
+    // Use direct endpoints like the original working version
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseURL = isLocal 
-      ? '/api/ai'
-      : 'https://jsonpromptstudio.com/api/ai';
-    const defaultModel = useGemini ? 'gemini-2.5-flash' : (useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant');
+      ? (useOpenAI ? '/api/openai' : '/api/groq')
+      : (useOpenAI ? 'https://jsonpromptstudio.com/api/openai' : 'https://jsonpromptstudio.com/api/groq');
+    const defaultModel = useOpenAI ? 'gpt-4o-mini' : 'llama-3.1-8b-instant';
 
     const requestPayload = {
-      provider,
       model: options.model || defaultModel,
       messages: messages,
       max_tokens: options.maxTokens || 2000,
@@ -419,10 +408,20 @@ class AIApiService {
 
         const data = await response.json();
         
+        // Debug logging
+        console.log('🔍 Raw API Response received:', JSON.stringify(data, null, 2));
+        console.log('🔍 API Response analysis:', {
+          provider,
+          hasChoices: !!data.choices,
+          choicesLength: data.choices?.length || 0,
+          firstChoice: data.choices?.[0],
+          contentLength: data.choices?.[0]?.message?.content?.length || 0,
+          contentPreview: data.choices?.[0]?.message?.content?.substring(0, 100) || 'No content'
+        });
+        
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
           throw new Error(`Invalid response format from ${provider.toUpperCase()} API`);
         }
-
 
         return {
           content: data.choices[0].message.content,

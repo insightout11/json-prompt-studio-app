@@ -88,31 +88,103 @@ const ImageToJson = ({ currentJson, onResult }) => {
     setError(null);
 
     try {
-      const response = await fetch('/api/image-analysis', {
+      // Create messages for Gemini vision analysis
+      const messages = [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analyze this image and extract detailed JSON scene data. Focus on identifying:
+              
+              1. Main subjects (characters, objects, creatures)
+              2. Setting and environment details
+              3. Visual style and mood
+              4. Colors, lighting, and atmosphere
+              5. Specific details that could be used in image generation prompts
+              
+              Return your analysis as a JSON object with this structure:
+              {
+                "fields": {
+                  "field_name": {
+                    "value": "detailed description",
+                    "confidence": 0.8,
+                    "reasoning": "why this was detected"
+                  }
+                },
+                "stats": {
+                  "highConfidence": count,
+                  "mediumConfidence": count,
+                  "lowConfidence": count
+                }
+              }
+              
+              Use field names like: scene, character_description, environment, lighting, mood, style, colors, etc.`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imagePreview
+              }
+            }
+          ]
+        }
+      ];
+
+      const response = await fetch('/api/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          imageBase64: imagePreview,
-          userId: user?.id || null,
-          userTier: isPro ? 'pro' : 'free'
+          provider: 'gemini',
+          messages,
+          model: 'gemini-2.5-flash',
+          temperature: 0.3,
+          max_tokens: 2000
         })
       });
 
-      const result = await response.json();
+      const aiResponse = await response.json();
       
-      if (result.success && result.fields) {
-        setAnalysisResult(result);
-        
-        // Auto-select high and medium confidence fields, user can review low confidence
-        const highConfidenceFields = Object.entries(result.fields)
-          .filter(([_, fieldData]) => fieldData.confidence >= 0.7)
-          .map(([fieldKey, _]) => fieldKey);
-        
-        setSelectedFields(new Set(highConfidenceFields));
+      if (aiResponse.choices?.[0]?.message?.content) {
+        try {
+          // Parse the JSON response from Gemini
+          const content = aiResponse.choices[0].message.content;
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            
+            if (result.fields) {
+              setAnalysisResult({
+                success: true,
+                fields: result.fields,
+                stats: result.stats || {
+                  highConfidence: Object.values(result.fields).filter(f => f.confidence > 0.8).length,
+                  mediumConfidence: Object.values(result.fields).filter(f => f.confidence >= 0.6 && f.confidence <= 0.8).length,
+                  lowConfidence: Object.values(result.fields).filter(f => f.confidence < 0.6).length
+                }
+              });
+              
+              // Auto-select high and medium confidence fields
+              const highConfidenceFields = Object.entries(result.fields)
+                .filter(([_, fieldData]) => fieldData.confidence >= 0.7)
+                .map(([fieldKey, _]) => fieldKey);
+              
+              setSelectedFields(new Set(highConfidenceFields));
+            } else {
+              setError('AI response did not contain expected field data.');
+            }
+          } else {
+            setError('AI response was not in the expected JSON format.');
+          }
+        } catch (parseErr) {
+          console.error('Failed to parse AI response:', parseErr);
+          setError('Failed to parse AI analysis. Please try again.');
+        }
       } else {
-        setError(result.error || 'Failed to analyze image. Please try again.');
+        setError('No analysis received from AI. Please try again.');
       }
     } catch (err) {
       console.error('Image analysis error:', err);
@@ -232,9 +304,9 @@ const ImageToJson = ({ currentJson, onResult }) => {
             <div className="text-center">
               <button
                 onClick={analyzeImage}
-                disabled={isAnalyzing || !aiApiService.hasApiKey()}
+                disabled={isAnalyzing}
                 className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${ 
-                  isAnalyzing || !aiApiService.hasApiKey()
+                  isAnalyzing
                     ? 'bg-gray-400 cursor-not-allowed text-white'
                     : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
                 }`}
@@ -250,22 +322,14 @@ const ImageToJson = ({ currentJson, onResult }) => {
                         Analyzing Image...
                       </span>
                       <span className="text-xs opacity-75">
-                        Processing with AI vision
+                        Processing with Gemini Vision
                       </span>
                     </div>
                   </div>
-                ) : !aiApiService.hasApiKey() ? (
-                  '🔑 API Key Required'
                 ) : (
                   '🔍 Analyze with AI'
                 )}
               </button>
-              
-              {!aiApiService.hasApiKey() && (
-                <p className="text-xs text-gray-500 dark:text-cinema-text-muted mt-2">
-                  Set your OpenAI API key in settings to use this feature
-                </p>
-              )}
             </div>
           )}
         </div>

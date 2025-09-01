@@ -6,54 +6,12 @@ import LoadingButton from './LoadingButton';
 import SignupPrompt from './SignupPrompt';
 
 // Tiny component: PreviewControls
-const PreviewControls = ({ model, onChangeModel, onPreview, proCredits, isGenerating, isPro }) => {
-  const [showUpsell, setShowUpsell] = useState(false);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-
-  // Check screen size for responsive text
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth <= 370);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-  
-  const handleModelChange = (newModel) => {
-    if (newModel === 'gemini' && !isPro) {
-      setShowUpsell(true);
-      return;
-    }
-    setShowUpsell(false);
-    onChangeModel(newModel);
-  };
-
+const PreviewControls = ({ onPreview, proCredits, isGenerating, isPro }) => {
   return (
     <div className="space-y-2">
       {/* Main Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          {/* Model Dropdown */}
-          <div className="relative">
-            <select
-              value={model}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="appearance-none bg-cinema-card border border-cinema-border rounded-lg px-3 py-2 text-sm font-medium text-cinema-text focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-8"
-            >
-              <option value="auto">{isSmallScreen ? 'Auto' : 'Auto (Recommended)'}</option>
-              <option value="horde">Standard Quality</option>
-              <option value="gemini">Premium Quality</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
           {/* Preview Button */}
           <LoadingButton
             onClick={onPreview}
@@ -77,36 +35,8 @@ const PreviewControls = ({ model, onChangeModel, onPreview, proCredits, isGenera
 
       {/* Composed prompt line */}
       <p className="text-xs text-cinema-text-muted">
-        Composed from your JSON.
+        Generated with Gemini • Composed from your JSON
       </p>
-
-      {/* Upsell Popover */}
-      {showUpsell && (
-        <div className="bg-cinema-card border border-cinema-border rounded-lg shadow-lg p-4 mt-2">
-          <div className="text-sm">
-            <p className="font-medium text-cinema-text mb-2">
-              Get 150 premium generations per month + natural language editing (~$0.10/gen value). 
-            </p>
-            <div className="flex space-x-2">
-              <button 
-                className="px-3 py-1.5 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700 transition-colors"
-                onClick={() => setShowUpsell(false)}
-              >
-                See plans
-              </button>
-              <button 
-                className="px-3 py-1.5 bg-cinema-border text-cinema-text text-xs rounded-lg hover:bg-cinema-card transition-colors"
-                onClick={() => {
-                  setShowUpsell(false);
-                  onChangeModel('auto');
-                }}
-              >
-                Use Auto
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -205,17 +135,10 @@ const PreviewResult = ({ image, onRegenerate, onUseInStoryboard, onDownload, onE
           {/* Provider Badge - Top Left */}
           <div className="absolute top-2 left-2 z-10">
             <span 
-              className={`px-2 py-1 text-xs font-medium rounded ${
-                image.provider === 'gemini'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-cinema-teal text-white'
-              }`}
-              title={image.provider === 'gemini' 
-                ? "Pro previews use Google Gemini 2.5 Flash (Nano-Banana) for sharper details, consistent characters, and instant results."
-                : "Community queue results"
-              }
+              className="px-2 py-1 text-xs font-medium rounded bg-purple-600 text-white"
+              title="Generated with Google Gemini 2.5 Flash for high quality results"
             >
-              {image.provider === 'gemini' ? 'Pro' : 'Free'}
+              Gemini
             </span>
           </div>
 
@@ -265,10 +188,7 @@ const PreviewResult = ({ image, onRegenerate, onUseInStoryboard, onDownload, onE
 
       {/* Helper Text */}
       <div className="text-xs text-cinema-text-muted text-center">
-        {image.provider === 'gemini' 
-          ? "Generated with premium quality Google Gemini 2.5 Flash Image."
-          : "Community queue — results may vary. Sign up for premium quality results instantly."
-        }
+        Generated with Google Gemini 2.5 Flash for high-quality results.
       </div>
     </div>
   );
@@ -291,7 +211,6 @@ const PreviewTray = ({
   const [currentImage, setCurrentImage] = useState(null);
   const [currentJobId, setCurrentJobId] = useState(null);
   const [proCredits, setProCredits] = useState(150);
-  const [selectedModel, setSelectedModel] = useState('auto');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [lastSceneSeed, setLastSceneSeed] = useState(null);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
@@ -334,8 +253,16 @@ const PreviewTray = ({
       const data = JSON.parse(jsonData);
       const parts = [];
 
-      // Character description
-      if (data.character_type) parts.push(`${data.character_type}`);
+      // Character description - make more specific for Gemini
+      if (data.character_type) {
+        let characterDesc = data.character_type;
+        // If it's just "animal", make it more specific
+        if (characterDesc.toLowerCase() === 'animal') {
+          characterDesc = data.animal_type || data.species || 'golden retriever dog';
+        }
+        parts.push(characterDesc);
+      }
+      
       if (data.age_range) parts.push(`${data.age_range}`);
       if (data.gender) parts.push(`${data.gender}`);
       if (data.ethnicity) parts.push(`${data.ethnicity}`);
@@ -358,9 +285,16 @@ const PreviewTray = ({
       // Technical
       if (data.camera_angle) parts.push(`${data.camera_angle} shot`);
       
-      return parts.join(', ');
+      const prompt = parts.join(', ');
+      
+      // Ensure prompt is specific enough for Gemini
+      if (prompt.trim().toLowerCase().includes('animal') && !prompt.includes('dog') && !prompt.includes('cat') && !prompt.includes('bird') && !prompt.includes('horse')) {
+        return prompt.replace(/\banimal\b/gi, 'golden retriever dog');
+      }
+      
+      return prompt;
     } catch (error) {
-      return 'A cinematic scene';
+      return 'A golden retriever dog, standing, looking forward, professional photography';
     }
   };
 
@@ -421,11 +355,7 @@ const PreviewTray = ({
         setCurrentJobId(null);
         const errorMsg = data.error || 'Image generation failed';
         
-        if (selectedModel === 'horde' && errorMsg.includes('worker')) {
-          addToast('Community worker unavailable. Retry or switch to Pro for instant preview.', 'error');
-        } else {
-          addToast(errorMsg, 'error');
-        }
+        addToast(errorMsg, 'error');
       } else if (data.status === 'processing') {
         setTimeout(() => pollJobStatus(jobId), 3000);
       }
@@ -453,11 +383,11 @@ const PreviewTray = ({
     setIsGenerating(true);
     
     // Calculate dimensions based on aspect ratio
-    const dimensions = getDimensionsForAspectRatio(aspectRatio, selectedModel);
+    const dimensions = getDimensionsForAspectRatio(aspectRatio, 'gemini');
     
     const requestBody = {
       prompt: prompt.trim(),
-      provider: selectedModel === 'auto' ? null : selectedModel, // Let API decide for 'auto'
+      provider: 'gemini', // Always use Gemini
       width: dimensions.width,
       height: dimensions.height,
       seed: sceneSeed,
@@ -677,8 +607,6 @@ const PreviewTray = ({
       <div className="p-4 space-y-4">
         {/* Preview Controls */}
         <PreviewControls 
-          model={selectedModel}
-          onChangeModel={setSelectedModel}
           onPreview={handlePreview}
           proCredits={proCredits}
           isGenerating={isGenerating}
@@ -704,7 +632,6 @@ const PreviewTray = ({
           onEdit={handleEdit}
           onCloseImage={handleCloseImage}
           isPro={isPro}
-          model={selectedModel}
           userTier={userTier}
         />
       </div>
