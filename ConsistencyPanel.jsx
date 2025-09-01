@@ -358,7 +358,7 @@ const ConsistencyPanel = ({
       )}
 
       {/* Custom CSS for slider styling */}
-      <style jsx>{`
+      <style>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           height: 20px;

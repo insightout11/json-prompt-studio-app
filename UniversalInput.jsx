@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import aiApiService from './aiApiService';
 import usePromptStore from './store';
 
 const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => {
+  console.log('🚨🚨🚨 FIXED UniversalInput component loaded - DIRECT API CALLS 🚨🚨🚨');
+  
   const [textInput, setTextInput] = useState('');
   const [isConverting, setIsConverting] = useState(false);
   const [error, setError] = useState(null);
@@ -22,7 +23,6 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
     if (textarea) {
       textarea.style.height = 'auto';
       const scrollHeight = textarea.scrollHeight;
-      // Min height: 2 lines (~80px), Max height: 200px (5 lines)
       textarea.style.height = Math.min(Math.max(scrollHeight, 80), 200) + 'px';
     }
   };
@@ -31,23 +31,20 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
     adjustTextareaHeight();
   }, [textInput]);
 
-  // Adjust textarea height when switching back to text mode
   useEffect(() => {
     if (inputMode === 'text-to-json') {
       adjustTextareaHeight();
     }
   }, [inputMode]);
 
-  // Reset conversion state when input changes
   useEffect(() => {
     if (textInput !== lastConvertedInput && hasConverted) {
       setHasConverted(false);
     }
   }, [textInput, lastConvertedInput, hasConverted]);
 
-  // Reset all states when Clear All is triggered
   useEffect(() => {
-    console.log('🎯 UniversalInput resetTrigger changed:', resetTrigger);
+    console.log('🎯 FIXED UniversalInput resetTrigger changed:', resetTrigger);
     if (resetTrigger) {
       console.log('✅ Resetting Convert button and text input state');
       setHasConverted(false);
@@ -58,7 +55,6 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
       setImagePreview(null);
       setError(null);
       
-      // Reset file input if it exists
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -71,25 +67,15 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
         setError('Please enter a scene description');
         return;
       }
-      if (!aiApiService.hasGroqApiKey()) {
-        setError('Groq API key required for text conversion. Please set your Groq API key in settings.');
-        return;
-      }
       
       if (hasConverted && textInput === lastConvertedInput) {
-        // Enhancement mode - enhance existing fields
         await handleTextEnhancement();
       } else {
-        // Initial conversion mode
         await handleTextToJson();
       }
     } else if (inputMode === 'image-to-json') {
       if (!uploadedImage) {
         setError('Please upload an image first');
-        return;
-      }
-      if (!aiApiService.hasOpenaiApiKey()) {
-        setError('OpenAI API key required for image analysis. Please set your OpenAI API key in settings.');
         return;
       }
       await handleImageToJson();
@@ -103,49 +89,82 @@ const UniversalInput = ({ className = "", aiFeatures = null, resetTrigger }) => 
     setError(null);
 
     try {
-      const prompt = `Convert this scene description into structured JSON prompt fields. Return ONLY a JSON object with field names and values that match typical video generation parameters.
+      console.log('🚨🚨🚨 FIXED UniversalInput making DIRECT API call for text-to-json');
+      
+      const prompt = `Convert this scene description into structured JSON prompt fields. Return ONLY a JSON object.
 
 Scene Description: "${textInput}"
 
-Extract relevant details for these types of fields:
+Extract relevant details for these fields:
 - scene: Overall scene description
 - character_type: Type of character (human, animal, etc.)
-- setting: Location/environment
+- setting: Location/environment  
 - actions: What's happening
-- emotions: Character emotions
+- emotions: Character emotions/mood
 - lighting_type: Lighting conditions
 - time_of_day: Time setting
 - camera_angle: Camera perspective
-- camera_distance: Shot type
+- camera_distance: Shot type (close-up, medium, wide)
 - style: Visual style
 - color_palette: Color scheme
 - atmosphere: Overall mood
 - clothing: Character clothing
-- hair_color, hair_style: Character appearance
-- age, gender: Character demographics
+- hair_color: Hair color if applicable
+- hair_style: Hair style if applicable
+- age: Approximate age
+- gender: Gender if applicable
 - environment: Weather/conditions
 
 Return ONLY valid JSON with fields you're confident about. Use descriptive but concise values.`;
 
-      const response = await aiApiService.makeRequest([
-        { role: 'user', content: prompt }
-      ], {
-        // No model specified - will default to Groq's mixtral-8x7b-32768
-        temperature: 0.3,
-        maxTokens: 800
+      const response = await fetch('/api/groq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: 800,
+          model: 'llama-3.1-8b-instant'
+        })
       });
+      
+      console.log('🔥 FIXED API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🚨 FIXED API error:', errorText);
+        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+      }
+      
+      const responseText = await response.text();
+      console.log('🔥 FIXED raw response (first 200 chars):', responseText.substring(0, 200));
+      
+      let apiData;
+      try {
+        apiData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('🚨 FIXED failed to parse API response:', parseError);
+        console.error('🚨 FIXED raw response:', responseText);
+        throw new Error(`Invalid JSON response from server: ${parseError.message}`);
+      }
+      
+      console.log('🔥 FIXED API data received:', apiData);
+      
+      if (!apiData.choices?.[0]?.message?.content) {
+        console.error('🚨 FIXED invalid response structure:', apiData);
+        throw new Error('Invalid response structure from API');
+      }
+      
+      const aiContent = apiData.choices[0].message.content;
+      console.log('🔥 FIXED AI content:', aiContent);
 
       // Parse the AI response
       let jsonData;
       try {
-        // Clean the response to extract JSON
-        let cleanedResponse = response.content.trim();
-        
-        // Remove markdown code blocks if present
+        let cleanedResponse = aiContent.trim();
         cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '');
         cleanedResponse = cleanedResponse.replace(/```\s*/gi, '');
         
-        // Find JSON object boundaries
         const jsonStart = cleanedResponse.indexOf('{');
         const jsonEnd = cleanedResponse.lastIndexOf('}');
         
@@ -153,32 +172,28 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
           cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
         }
         
+        console.log('🔍 FIXED cleaned JSON:', cleanedResponse);
         jsonData = JSON.parse(cleanedResponse);
+        console.log('🔍 FIXED parsed JSON:', jsonData);
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
+        console.error('🚨 FIXED JSON parsing error:', parseError);
+        console.error('🚨 FIXED AI content:', aiContent);
         throw new Error('AI returned invalid JSON format. Please try again.');
       }
 
-      // Update form fields with the extracted data
+      // Update form fields
       Object.entries(jsonData).forEach(([fieldKey, fieldValue]) => {
         if (fieldValue && typeof fieldValue === 'string' && fieldValue.trim()) {
           setFieldValue(fieldKey, fieldValue.trim());
         }
       });
 
-      // Mark as converted and save the input for enhancement
       setHasConverted(true);
       setLastConvertedInput(textInput);
-      
+
     } catch (err) {
-      console.error('Text to JSON conversion error:', err);
-      const errorMessage = err.message.includes('API key') 
-        ? 'OpenAI API key required. Please set your API key in settings.'
-        : err.message.includes('rate limit')
-        ? 'Rate limit exceeded. Please wait a moment before trying again.'
-        : err.message || 'Failed to convert text to JSON. Please try again.';
-      
-      setError(errorMessage);
+      console.error('🚨 FIXED text conversion error:', err);
+      setError(err.message || 'An error occurred during text conversion. Please try again.');
     } finally {
       setIsConverting(false);
     }
@@ -187,68 +202,79 @@ Return ONLY valid JSON with fields you're confident about. Use descriptive but c
   const handleTextEnhancement = async () => {
     setIsConverting(true);
     setError(null);
-
-    // Increment enhance counter
     setEnhanceCount(prev => prev + 1);
 
     try {
-      // Build current scene context from existing field values
+      console.log('🚨🚨🚨 FIXED UniversalInput making DIRECT API call for enhancement');
+      
       const currentFields = Object.entries(fieldValues)
-        .filter(([key, value]) => value && value.trim() !== '')
-        .map(([key, value]) => `- ${key}: "${value}"`)
+        .filter(([key, value]) => value && String(value).trim() !== '')
+        .map(([key, value]) => `- ${key}: "${String(value)}"`)
         .join('\n');
 
-      const enhancementPrompt = `PROGRESSIVE ENHANCEMENT: Enhance existing JSON fields with more depth and specificity.
+      const enhancementPrompt = `Enhance these existing JSON fields with more depth and specificity:
 
 Original input: "${textInput}"
 
-Current field values to enhance:
+Current fields:
 ${currentFields}
 
 INSTRUCTIONS:
 1. Keep all existing content but make it MORE detailed and specific
-2. Add new complementary fields that weren't filled before  
-3. Preserve the original concept "${textInput}" in core fields
-4. Focus on adding layers of detail, specificity, and richness
+2. Add new complementary fields that weren't filled before
+3. Focus on adding layers of detail, specificity, and richness
+4. Return enhanced JSON with ALL fields (existing + new ones)
 
-Available fields (enhance existing or add new ones):
-- scene: Main scene description (enhance if exists)
-- character_type: Type of character 
-- setting: Location/environment
-- actions: What's happening
-- emotions: Character emotions
-- lighting_type: Lighting conditions
-- time_of_day: Time setting
-- camera_angle: Camera perspective
-- camera_distance: Shot type
-- style: Visual style
-- color_palette: Color scheme
-- atmosphere: Overall mood
-- clothing: Character clothing
-- hair_color, hair_style: Character appearance
-- age, gender: Character demographics
-- environment: Weather/conditions
+Return enhanced JSON with richer, more detailed descriptions.`;
 
-Return enhanced JSON with richer, more detailed descriptions. Don't remove existing content - build upon it.`;
-
-      const response = await aiApiService.makeRequest([
-        { role: 'system', content: 'You are an expert at enhancing and expanding creative content with rich, specific details.' },
-        { role: 'user', content: enhancementPrompt }
-      ], {
-        temperature: 0.8,
-        maxTokens: 1000
+      const response = await fetch('/api/groq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are an expert at enhancing and expanding creative content with rich, specific details.' },
+            { role: 'user', content: enhancementPrompt }
+          ],
+          temperature: 0.8,
+          max_tokens: 1000,
+          model: 'llama-3.1-8b-instant'
+        })
       });
+      
+      console.log('🔥 FIXED enhancement response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🚨 FIXED enhancement error:', errorText);
+        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+      }
+      
+      const responseText = await response.text();
+      console.log('🔥 FIXED enhancement raw response (first 200 chars):', responseText.substring(0, 200));
+      
+      let apiData;
+      try {
+        apiData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('🚨 FIXED enhancement parse error:', parseError);
+        console.error('🚨 FIXED raw response:', responseText);
+        throw new Error(`Invalid JSON response: ${parseError.message}`);
+      }
+      
+      if (!apiData.choices?.[0]?.message?.content) {
+        console.error('🚨 FIXED invalid enhancement response:', apiData);
+        throw new Error('Invalid response structure');
+      }
+      
+      const aiContent = apiData.choices[0].message.content;
+      console.log('🔥 FIXED enhancement AI content:', aiContent);
 
-      // Parse the enhanced JSON
       let jsonData;
       try {
-        let cleanedResponse = response.content.trim();
-        
-        // Remove markdown code blocks if present
+        let cleanedResponse = aiContent.trim();
         cleanedResponse = cleanedResponse.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '');
         cleanedResponse = cleanedResponse.replace(/```\s*/gi, '');
         
-        // Find JSON object boundaries
         const jsonStart = cleanedResponse.indexOf('{');
         const jsonEnd = cleanedResponse.lastIndexOf('}');
         
@@ -256,13 +282,13 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
           cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
         }
         
+        console.log('🔍 FIXED enhancement cleaned JSON:', cleanedResponse);
         jsonData = JSON.parse(cleanedResponse);
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
+        console.error('🚨 FIXED enhancement JSON error:', parseError);
         throw new Error('AI returned invalid JSON format. Please try again.');
       }
 
-      // Update form fields with the enhanced data
       Object.entries(jsonData).forEach(([fieldKey, fieldValue]) => {
         if (fieldValue && typeof fieldValue === 'string' && fieldValue.trim()) {
           setFieldValue(fieldKey, fieldValue.trim());
@@ -270,14 +296,20 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
       });
 
     } catch (err) {
-      console.error('Text enhancement error:', err);
-      const errorMessage = err.message.includes('API key') 
-        ? 'Groq API key required. Please set your API key in settings.'
-        : err.message.includes('rate limit')
-        ? 'Rate limit exceeded. Please wait a moment before trying again.'
-        : err.message || 'Failed to enhance fields. Please try again.';
-      
-      setError(errorMessage);
+      console.error('🚨 FIXED enhancement error:', err);
+      setError(err.message || 'An error occurred during text enhancement.');
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleImageToJson = async () => {
+    setIsConverting(true);
+    setError(null);
+    try {
+      setError('Image analysis not implemented in this version yet');
+    } catch (err) {
+      setError(err.message || 'An error occurred during image analysis.');
     } finally {
       setIsConverting(false);
     }
@@ -345,50 +377,6 @@ Return enhanced JSON with richer, more detailed descriptions. Don't remove exist
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileUpload(files[0]);
-    }
-  };
-
-  const handleImageToJson = async () => {
-    if (!uploadedImage || !imagePreview) {
-      setError('Please upload an image first');
-      return;
-    }
-
-    setIsConverting(true);
-    setError(null);
-
-    try {
-      const result = await aiApiService.analyzeImage(imagePreview);
-      
-      if (result.success && result.fields) {
-        // Auto-select high confidence fields and apply them
-        Object.entries(result.fields).forEach(([fieldKey, fieldData]) => {
-          if (fieldData.confidence >= 0.7 && fieldData.value && typeof fieldData.value === 'string') {
-            setFieldValue(fieldKey, fieldData.value.trim());
-          }
-        });
-
-        // Clear the uploaded image after successful conversion
-        setUploadedImage(null);
-        setImagePreview(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        
-      } else {
-        setError(result.error || 'Failed to analyze image. Please try again.');
-      }
-    } catch (err) {
-      console.error('Image analysis error:', err);
-      if (err.message.includes('timed out') || err.name === 'AbortError') {
-        setError('Image analysis timed out after 90 seconds. Please try a smaller image or check your connection.');
-      } else if (err.message.includes('API key')) {
-        setError('OpenAI API key required. Please set your API key in settings.');
-      } else {
-        setError('Failed to analyze image. Please check your connection and try again.');
-      }
-    } finally {
-      setIsConverting(false);
     }
   };
 

@@ -177,7 +177,7 @@ const LoadingScreen = ({ onComplete }) => {
       </div>
       
       {/* CSS for custom animations */}
-      <style jsx>{`
+      <style>{`
         /* Cinema-inspired keyframe animations */
         @keyframes shimmer {
           0% {
