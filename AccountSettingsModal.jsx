@@ -268,36 +268,38 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full my-8 min-h-fit max-h-[calc(100vh-4rem)] overflow-hidden flex flex-col md:flex-row">
           
           {/* Sidebar */}
-          <div className="w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+          <div className="w-full md:w-64 bg-gray-50 dark:bg-gray-900 md:border-r border-b md:border-b-0 border-gray-200 dark:border-gray-700 flex-shrink-0">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
                 ⚙️ Settings
               </h2>
             </div>
-            <nav className="space-y-1 px-3">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-3 py-2 text-left text-sm font-medium rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  <span className="mr-3">{tab.icon}</span>
-                  {tab.name}
-                </button>
-              ))}
+            <nav className="md:space-y-1 px-3 pb-3 md:pb-0">
+              <div className="flex md:flex-col space-x-1 md:space-x-0 md:space-y-1 overflow-x-auto md:overflow-x-visible">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-shrink-0 md:w-full flex items-center px-3 py-2 text-left text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <span className="mr-2 md:mr-3">{tab.icon}</span>
+                    <span className="hidden sm:inline">{tab.name}</span>
+                  </button>
+                ))}
+              </div>
             </nav>
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
