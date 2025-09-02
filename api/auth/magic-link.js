@@ -22,18 +22,57 @@ async function sendMagicLinkEmail(email, token) {
     return true;
   }
   
-  // For production, you would integrate with an email service
-  // Example services: SendGrid, Mailgun, AWS SES, Resend, etc.
-  console.log(`Magic link generated for ${email}: ${magicLink}`);
-  
-  // TODO: Replace with actual email service
-  // await sendEmail({
-  //   to: email,
-  //   subject: 'Sign in to JSON Prompt Studio',
-  //   html: `<p>Click this link to sign in: <a href="${magicLink}">Sign In</a></p>`
-  // });
-  
-  return true;
+  // For production, send actual email
+  try {
+    if (process.env.RESEND_API_KEY) {
+      // Use Resend for email delivery
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'JSON Prompt Studio <noreply@json-prompt-studio-app.vercel.app>',
+          to: [email],
+          subject: 'Sign in to JSON Prompt Studio',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #7c3aed;">JSON Prompt Studio</h1>
+              <p>Click the button below to sign in to your account:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${magicLink}" 
+                   style="background-color: #7c3aed; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                  Sign In
+                </a>
+              </div>
+              <p style="color: #666; font-size: 14px;">
+                This link will expire in 15 minutes. If you didn't request this, you can safely ignore this email.
+              </p>
+            </div>
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Resend API error: ${error}`);
+      }
+
+      console.log(`Magic link email sent successfully to ${email}`);
+      return true;
+    } else {
+      // Fallback: log to console if no email service configured
+      console.log(`\n🔗 PRODUCTION Magic Link for ${email}:`);
+      console.log(`${magicLink}`);
+      console.log(`(Email service not configured - add RESEND_API_KEY to environment)\n`);
+      return true;
+    }
+  } catch (error) {
+    console.error('Failed to send magic link email:', error);
+    // Still return true so the user gets feedback, but log the error
+    return true;
+  }
 }
 
 // Validate email format
@@ -130,9 +169,14 @@ export default async function handler(req, res) {
       // Send magic link email
       await sendMagicLinkEmail(email, token);
 
-      const message = process.env.NODE_ENV !== 'production' 
-        ? 'Magic link sent! Check the console/terminal for the link (development mode)'
-        : 'Magic link sent! Check your email for the sign-in link';
+      let message;
+      if (process.env.NODE_ENV !== 'production') {
+        message = 'Magic link sent! Check the console/terminal for the link (development mode)';
+      } else if (process.env.RESEND_API_KEY) {
+        message = 'Magic link sent! Check your email for the sign-in link';
+      } else {
+        message = 'Magic link generated! Email service not configured - check server logs';
+      }
         
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? 'https://json-prompt-studio-app.vercel.app'
