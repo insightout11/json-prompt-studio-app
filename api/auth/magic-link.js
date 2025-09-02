@@ -10,7 +10,7 @@ function generateMagicToken() {
 // Send magic link email
 async function sendMagicLinkEmail(email, token) {
   const baseUrl = process.env.NODE_ENV === 'production' 
-    ? 'https://json-prompt-studio-app.vercel.app'
+    ? 'https://jsonpromptstudio.com'
     : 'http://localhost:5188';
   const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
   
@@ -25,7 +25,9 @@ async function sendMagicLinkEmail(email, token) {
   // For production, send actual email
   try {
     if (process.env.RESEND_API_KEY) {
-      console.log('🔑 Resend API Key found, attempting to send email...');
+      console.log('🔑 Resend API Key found:', process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.substring(0, 8)}...` : 'MISSING');
+      console.log('🔑 Attempting to send email to:', email);
+      
       // Use Resend for email delivery
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -34,7 +36,7 @@ async function sendMagicLinkEmail(email, token) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'JSON Prompt Studio <noreply@json-prompt-studio-app.vercel.app>',
+          from: 'JSON Prompt Studio <noreply@jsonpromptstudio.com>',
           to: [email],
           subject: 'Sign in to JSON Prompt Studio',
           html: `
@@ -55,15 +57,19 @@ async function sendMagicLinkEmail(email, token) {
         }),
       });
 
+      console.log('🌐 Resend API response status:', response.status);
+      console.log('🌐 Resend API response headers:', [...response.headers.entries()]);
+      
       if (!response.ok) {
         const error = await response.text();
-        console.error(`Resend API error (${response.status}):`, error);
+        console.error(`❌ Resend API error (${response.status}):`, error);
+        console.error('❌ Full error response:', error);
         throw new Error(`Email delivery failed: ${response.status} - ${error}`);
       }
 
       const result = await response.json();
-      console.log(`✅ Magic link email sent successfully to ${email}:`, result);
-      console.log(`📧 Email should arrive from: JSON Prompt Studio <noreply@json-prompt-studio-app.vercel.app>`);
+      console.log(`✅ Magic link email sent successfully to ${email}:`, JSON.stringify(result, null, 2));
+      console.log(`📧 Email should arrive from: JSON Prompt Studio <noreply@jsonpromptstudio.com>`);
       console.log(`📬 Check spam/junk folder if not in inbox`);
       return true;
     } else {
@@ -111,13 +117,19 @@ export default async function handler(req, res) {
       const tokenData = magicTokens.get(token);
       
       if (!tokenData) {
-        return res.redirect('/app?auth_error=' + encodeURIComponent('Invalid or expired link'));
+        const errorUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://jsonpromptstudio.com/app?auth_error=' + encodeURIComponent('Invalid or expired link')
+          : 'http://localhost:5188/app?auth_error=' + encodeURIComponent('Invalid or expired link');
+        return res.redirect(errorUrl);
       }
 
       // Check if token is expired (15 minutes)
       if (Date.now() > tokenData.expiresAt) {
         magicTokens.delete(token);
-        return res.redirect('/app?auth_error=' + encodeURIComponent('Link has expired'));
+        const errorUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://jsonpromptstudio.com/app?auth_error=' + encodeURIComponent('Link has expired')
+          : 'http://localhost:5188/app?auth_error=' + encodeURIComponent('Link has expired');
+        return res.redirect(errorUrl);
       }
 
       // Create or update user
@@ -133,15 +145,25 @@ export default async function handler(req, res) {
       // Clean up used token
       magicTokens.delete(token);
 
-      // Set session cookie
-      res.setHeader('Set-Cookie', `session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+      // Set session cookie with proper domain for production
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieDomain = isProduction ? '; Domain=.jsonpromptstudio.com' : '';
+      res.setHeader('Set-Cookie', [
+        `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`
+      ]);
 
-      // Redirect to app
-      res.redirect('/app?auth_success=true');
+      // Redirect to app with success status  
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://jsonpromptstudio.com/app?auth=success&method=email'
+        : 'http://localhost:5188/app?auth=success&method=email';
+      res.redirect(redirectUrl);
 
     } catch (error) {
       console.error('Magic link validation error:', error);
-      res.redirect('/app?auth_error=' + encodeURIComponent('Authentication failed'));
+      const errorUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://jsonpromptstudio.com/app?auth_error=' + encodeURIComponent('Authentication failed')
+        : 'http://localhost:5188/app?auth_error=' + encodeURIComponent('Authentication failed');
+      res.redirect(errorUrl);
     }
     
     return;
@@ -184,7 +206,7 @@ export default async function handler(req, res) {
       }
         
       const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://json-prompt-studio-app.vercel.app'
+        ? 'https://jsonpromptstudio.com'
         : 'http://localhost:5188';
       const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
       
