@@ -36,7 +36,7 @@ async function sendMagicLinkEmail(email, token) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'JSON Prompt Studio <noreply@jsonpromptstudio.com>',
+          from: 'JSON Prompt Studio <onboarding@resend.dev>',
           to: [email],
           subject: 'Sign in to JSON Prompt Studio',
           html: `
@@ -69,7 +69,7 @@ async function sendMagicLinkEmail(email, token) {
 
       const result = await response.json();
       console.log(`✅ Magic link email sent successfully to ${email}:`, JSON.stringify(result, null, 2));
-      console.log(`📧 Email should arrive from: JSON Prompt Studio <noreply@jsonpromptstudio.com>`);
+      console.log(`📧 Email should arrive from: JSON Prompt Studio <onboarding@resend.dev>`);
       console.log(`📬 Check spam/junk folder if not in inbox`);
       return true;
     } else {
