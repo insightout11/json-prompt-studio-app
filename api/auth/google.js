@@ -211,8 +211,8 @@ export default async function handler(req, res) {
 
     // Set session cookie
     res.setHeader('Set-Cookie', [
-      `session=${sessionId}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
-      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}` // Short-lived flag for welcome toast
+      `session=${sessionId}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
+      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}` // Short-lived flag for welcome toast
     ]);
 
     // Analytics

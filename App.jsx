@@ -111,7 +111,35 @@ const App = () => {
   const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
   
   // Session management for user authentication
-  const { user: sessionUser, isLoading: sessionLoading, isLoggedIn, checkJustUpgraded } = useSession();
+  const { user: sessionUser, isLoading: sessionLoading, isLoggedIn, checkJustUpgraded, refreshSession } = useSession();
+  
+  // Handle OAuth redirect success
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authStatus = urlParams.get('auth');
+    const authMethod = urlParams.get('method');
+    const authError = urlParams.get('auth_error');
+
+    if (authStatus === 'success' && authMethod) {
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Refresh session to detect the new authentication
+      setTimeout(() => {
+        refreshSession();
+      }, 100);
+      
+      // Show success message
+      const methodName = authMethod === 'google' ? 'Google' : 'email';
+      showSuccess(`🎉 Successfully signed in with ${methodName}! You now have 10 premium generations.`, 6000);
+    } else if (authError) {
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Show error message
+      showError(`Authentication failed: ${decodeURIComponent(authError)}`, 8000);
+    }
+  }, [refreshSession, showSuccess, showError]);
   
   // Get subscription data including isPro status
   const { isPro, subscription, toggleProStatus, forceProStatus, resetUser, refreshUser } = subscriptionHook;

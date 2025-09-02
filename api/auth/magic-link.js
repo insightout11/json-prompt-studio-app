@@ -56,10 +56,12 @@ async function sendMagicLinkEmail(email, token) {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`Resend API error: ${error}`);
+        console.error(`Resend API error (${response.status}):`, error);
+        throw new Error(`Email delivery failed: ${response.status} - ${error}`);
       }
 
-      console.log(`Magic link email sent successfully to ${email}`);
+      const result = await response.json();
+      console.log(`Magic link email sent successfully to ${email}:`, result);
       return true;
     } else {
       // Fallback: log to console if no email service configured
