@@ -1,5 +1,5 @@
 // Session API - Get current user data from session
-import { users, sessions } from './callback.js';
+import { parseJWTSession } from './callback.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -7,49 +7,37 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get session ID from cookie
-    const sessionId = req.headers.cookie
+    // Get session token from cookie
+    const sessionToken = req.headers.cookie
       ?.split(';')
       ?.find(cookie => cookie.trim().startsWith('session='))
       ?.split('=')[1];
 
-    if (!sessionId) {
+    if (!sessionToken) {
       return res.status(401).json({ error: 'No session found' });
     }
 
-    // Look up session
-    const session = sessions.get(sessionId);
-    if (!session) {
-      return res.status(401).json({ error: 'Invalid session' });
+    // Parse JWT session token
+    const userData = parseJWTSession(sessionToken);
+    if (!userData) {
+      return res.status(401).json({ error: 'Invalid or expired session' });
     }
 
-    // Check if session is expired
-    if (Date.now() > session.expiresAt) {
-      sessions.delete(sessionId);
-      return res.status(401).json({ error: 'Session expired' });
-    }
-
-    // Get user data
-    const user = users.get(session.email);
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
-    }
-
-    // Return user data (excluding sensitive info)
-    const userData = {
-      id: user.id,
-      email: user.email,
-      tier: user.tier,
-      monthlyUsage: user.monthlyUsage,
-      hasUsedNewUserBonus: user.hasUsedNewUserBonus,
-      emailVerified: user.emailVerified,
-      createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt,
+    // Return user data (excluding sensitive info if needed)
+    const response = {
+      id: userData.userId,
+      email: userData.email,
+      name: userData.name,
+      avatarUrl: userData.avatarUrl,
+      tier: userData.tier,
+      monthlyUsage: userData.monthlyUsage,
+      hasUsedNewUserBonus: userData.hasUsedNewUserBonus,
+      authMethod: userData.authMethod,
+      emailVerified: true, // OAuth users are verified
       isAuthenticated: true
     };
 
-    
-    res.json(userData);
+    res.json(response);
 
   } catch (error) {
     console.error('Session API error:', error);

@@ -1,7 +1,7 @@
 // Google OAuth Authentication - Handle Google Sign-In
 import { google } from 'googleapis';
 import crypto from 'crypto';
-import { users, sessions } from './callback.js';
+import { users, sessions, createJWTSession } from './callback.js';
 
 // Initialize Google OAuth client
 let oauth2Client = null;
@@ -194,24 +194,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // Create session
-    const sessionId = generateSessionId();
-    const session = {
-      id: sessionId,
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      authMethod: 'google',
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
-    };
-
-    sessions.set(sessionId, session);
+    // Create JWT-based session token
+    const sessionToken = createJWTSession(user);
 
     // Set session cookie
     res.setHeader('Set-Cookie', [
-      `session=${sessionId}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
+      `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
       `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}` // Short-lived flag for welcome toast
     ]);
 

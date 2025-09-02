@@ -1,6 +1,6 @@
 // Magic Link Authentication - Send and validate email sign-in links
 import crypto from 'crypto';
-import { createOrUpdateUser, createSession, magicTokens } from './callback.js';
+import { createOrUpdateUser, createJWTSession, magicTokens } from './callback.js';
 
 // Generate magic link token
 function generateMagicToken() {
@@ -124,14 +124,14 @@ export default async function handler(req, res) {
         provider: 'email'
       });
 
-      // Create session
-      const session = createSession(user.id);
+      // Create JWT session token
+      const sessionToken = createJWTSession(user);
 
       // Clean up used token
       magicTokens.delete(token);
 
       // Set session cookie
-      res.setHeader('Set-Cookie', `session=${session.id}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+      res.setHeader('Set-Cookie', `session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
 
       // Redirect to app
       res.redirect('/?auth_success=true');

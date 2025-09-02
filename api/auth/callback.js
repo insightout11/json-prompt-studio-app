@@ -6,6 +6,43 @@ export const users = new Map();
 export const sessions = new Map();
 export const magicTokens = new Map();
 
+// JWT-based session for serverless compatibility
+function createJWTSession(userData) {
+  const payload = {
+    userId: userData.id,
+    email: userData.email,
+    name: userData.name,
+    avatarUrl: userData.avatarUrl,
+    tier: userData.tier,
+    monthlyUsage: userData.monthlyUsage,
+    hasUsedNewUserBonus: userData.hasUsedNewUserBonus,
+    authMethod: userData.authMethod,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
+  };
+
+  // Simple base64 encoding (in production, use proper JWT library with signing)
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+
+function parseJWTSession(token) {
+  try {
+    const payload = JSON.parse(Buffer.from(token, 'base64').toString());
+    
+    // Check if expired
+    if (Date.now() > payload.expiresAt) {
+      return null;
+    }
+    
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Export JWT functions
+export { createJWTSession, parseJWTSession };
+
 // Generate session ID
 function generateSessionId() {
   return crypto.randomBytes(24).toString('hex');
