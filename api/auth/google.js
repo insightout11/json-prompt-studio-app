@@ -9,7 +9,7 @@ let oauth2Client = null;
 function initGoogleOAuth() {
   if (!oauth2Client && process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     const redirectUri = process.env.NODE_ENV === 'production' 
-      ? 'https://json-prompt-studio-app.vercel.app/api/auth/google'
+      ? 'https://jsonpromptstudio.com/api/auth/google'
       : 'http://localhost:5188/api/auth/google';
       
     oauth2Client = new google.auth.OAuth2(
