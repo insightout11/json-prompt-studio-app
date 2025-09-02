@@ -201,10 +201,16 @@ export default async function handler(req, res) {
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '; Domain=.jsonpromptstudio.com' : '';
     
-    res.setHeader('Set-Cookie', [
-      `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`,
-      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}` // Short-lived flag for welcome toast
-    ]);
+    // Debug: Log what cookies we're trying to set
+    const sessionCookie = `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
+    const upgradedCookie = `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
+    
+    console.log('🍪 Setting session cookie:', sessionCookie);
+    console.log('🍪 Setting justUpgraded cookie:', upgradedCookie);
+    console.log('🍪 isProduction:', isProduction);
+    console.log('🍪 cookieDomain:', cookieDomain);
+    
+    res.setHeader('Set-Cookie', [sessionCookie, upgradedCookie]);
 
     // Analytics
     if (isNewUser) {
