@@ -96,6 +96,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.error('🚨 OAUTH CALLBACK START - Query params:', JSON.stringify(req.query));
     const { code, error, state } = req.query;
 
     if (error) {
@@ -205,10 +206,11 @@ export default async function handler(req, res) {
     const sessionCookie = `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
     const upgradedCookie = `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
     
-    console.log('🍪 Setting session cookie:', sessionCookie);
-    console.log('🍪 Setting justUpgraded cookie:', upgradedCookie);
-    console.log('🍪 isProduction:', isProduction);
-    console.log('🍪 cookieDomain:', cookieDomain);
+    console.error('🚨 OAUTH DEBUG - Session token length:', sessionToken?.length || 'UNDEFINED');
+    console.error('🚨 OAUTH DEBUG - isProduction:', isProduction);
+    console.error('🚨 OAUTH DEBUG - cookieDomain:', JSON.stringify(cookieDomain));
+    console.error('🚨 OAUTH DEBUG - sessionCookie:', sessionCookie.substring(0, 100) + '...');
+    console.error('🚨 OAUTH DEBUG - upgradedCookie:', upgradedCookie);
     
     res.setHeader('Set-Cookie', [sessionCookie, upgradedCookie]);
 
