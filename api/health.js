@@ -1,4 +1,5 @@
 // Health Check API - Vercel serverless function
+// Updated to trigger redeploy for Google OAuth environment variables
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
