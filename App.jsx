@@ -125,9 +125,12 @@ const App = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
       
       // Refresh session to detect the new authentication
+      console.log('🔄 Refreshing session after OAuth success...');
       setTimeout(() => {
-        refreshSession();
-      }, 100);
+        refreshSession().then(() => {
+          console.log('✅ Session refresh completed');
+        });
+      }, 500);
       
       // Show success message
       const methodName = authMethod === 'google' ? 'Google' : 'email';

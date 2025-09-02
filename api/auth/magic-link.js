@@ -25,6 +25,7 @@ async function sendMagicLinkEmail(email, token) {
   // For production, send actual email
   try {
     if (process.env.RESEND_API_KEY) {
+      console.log('🔑 Resend API Key found, attempting to send email...');
       // Use Resend for email delivery
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',

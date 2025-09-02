@@ -101,7 +101,7 @@ export default async function handler(req, res) {
     if (error) {
       console.error('Google OAuth error:', error);
       const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://json-prompt-studio-app.vercel.app/app'
+        ? 'https://jsonpromptstudio.com/app'
         : 'http://localhost:5188/app';
       const redirectUrl = new URL(baseUrl);
       redirectUrl.searchParams.set('auth', 'error');
@@ -197,10 +197,13 @@ export default async function handler(req, res) {
     // Create JWT-based session token
     const sessionToken = createJWTSession(user);
 
-    // Set session cookie
+    // Set session cookie  
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieDomain = isProduction ? '; Domain=.jsonpromptstudio.com' : '';
+    
     res.setHeader('Set-Cookie', [
-      `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
-      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}` // Short-lived flag for welcome toast
+      `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`,
+      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}` // Short-lived flag for welcome toast
     ]);
 
     // Analytics
@@ -209,7 +212,7 @@ export default async function handler(req, res) {
 
     // Redirect back to app with success
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://json-prompt-studio-app.vercel.app/app'
+      ? 'https://jsonpromptstudio.com/app'
       : 'http://localhost:5188/app';
     const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'success');
@@ -222,7 +225,7 @@ export default async function handler(req, res) {
     
     // Redirect to app with error
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://json-prompt-studio-app.vercel.app/app'
+      ? 'https://jsonpromptstudio.com/app'
       : 'http://localhost:5188/app';
     const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'error');
