@@ -26,6 +26,7 @@ import { ToastContainer } from './Toast';
 import { useToast } from './useToast';
 import { useSession } from './useSession';
 import IntegratedHeader from './IntegratedHeader';
+import SignupModal from './SignupModal';
 import EditableJsonOutput from './EditableJsonOutput';
 import ConsistencyPanel from './ConsistencyPanel';
 import ConsistencyBadge from './ConsistencyBadge';
@@ -74,6 +75,7 @@ const App = () => {
   const [showViralGenerator, setShowViralGenerator] = useState(false);
   const [showSceneExtender, setShowSceneExtender] = useState(false);
   const [sceneExtenderSuccess, setSceneExtenderSuccess] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
   
   // Scene extension states
   const [extensionLoading, setExtensionLoading] = useState(false);
@@ -874,8 +876,19 @@ const App = () => {
                 </div>
               </div>
 
-              {/* RIGHT SECTION - Consistency Badge & Cinematic Toggle */}
+              {/* RIGHT SECTION - Signup, Consistency Badge & Cinematic Toggle */}
               <div className="flex items-center justify-end flex-shrink-0 -mr-2 space-x-3">
+                {!isLoggedIn && (
+                  <button
+                    onClick={() => setShowSignupModal(true)}
+                    className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center space-x-1.5 shadow-sm hover:shadow-md"
+                    title="Sign up for 10 free premium generations"
+                  >
+                    <span className="text-sm">✨</span>
+                    <span className="hidden lg:inline">Sign Up Free</span>
+                    <span className="lg:hidden">Sign Up</span>
+                  </button>
+                )}
                 <ConsistencyBadge />
                 <CinematicModeToggle />
               </div>
@@ -1366,6 +1379,13 @@ const App = () => {
       </div>
 
       {/* MODALS */}
+      {showSignupModal && (
+        <SignupModal 
+          isOpen={showSignupModal}
+          onClose={() => setShowSignupModal(false)}
+        />
+      )}
+
       {showViralGenerator && (
         <ViralVideoGeneratorModal 
           onClose={() => setShowViralGenerator(false)}

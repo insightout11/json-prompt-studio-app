@@ -6,7 +6,10 @@ const SignupPrompt = ({
   isVisible = true,
   onDismiss = null,
   exhaustedCount = 3,
-  className = ""
+  className = "",
+  context = "exhausted", // "exhausted" | "immediate"
+  title = null,
+  subtitle = null
 }) => {
   const [showModal, setShowModal] = useState(false);
   const { addToast } = useToast();
@@ -17,7 +20,8 @@ const SignupPrompt = ({
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'signup_started', {
         method: 'email',
-        exhausted_at_count: exhaustedCount
+        context: context,
+        exhausted_at_count: context === "exhausted" ? exhaustedCount : null
       });
     }
   };
@@ -28,7 +32,8 @@ const SignupPrompt = ({
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'signup_started', {
           method: 'google',
-          exhausted_at_count: exhaustedCount
+          context: context,
+          exhausted_at_count: context === "exhausted" ? exhaustedCount : null
         });
       }
 
@@ -87,12 +92,30 @@ const SignupPrompt = ({
     if (onDismiss) onDismiss();
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'signup_prompt_dismissed', {
-        exhausted_at_count: exhaustedCount
+        context: context,
+        exhausted_at_count: context === "exhausted" ? exhaustedCount : null
       });
     }
   };
 
   if (!isVisible) return null;
+
+  // Dynamic content based on context
+  const getContent = () => {
+    if (context === "immediate") {
+      return {
+        heading: title || "Get 10 Free Premium Generations",
+        description: subtitle || "Sign up now to unlock premium AI image generation with advanced features and higher quality outputs."
+      };
+    } else {
+      return {
+        heading: title || "Get 10 Pro bonus generations", 
+        description: subtitle || `You've used ${exhaustedCount} free previews. Create a free account to try premium quality and edits.`
+      };
+    }
+  };
+
+  const content = getContent();
 
   return (
     <>
@@ -107,10 +130,10 @@ const SignupPrompt = ({
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-medium text-gray-900 mb-1">
-              Get 10 Pro bonus generations
+              {content.heading}
             </h3>
             <p className="text-sm text-gray-600 mb-3">
-              You've used {exhaustedCount} free previews. Create a free account to try premium quality and edits.
+              {content.description}
             </p>
             <div className="flex items-center space-x-2">
               <button
@@ -125,12 +148,14 @@ const SignupPrompt = ({
               >
                 Continue with Google
               </button>
-              <button
-                onClick={handleMaybeLater}
-                className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                Maybe later
-              </button>
+              {context === "exhausted" && (
+                <button
+                  onClick={handleMaybeLater}
+                  className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Maybe later
+                </button>
+              )}
             </div>
           </div>
         </div>
