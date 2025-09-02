@@ -7,18 +7,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.error('🚨 SESSION API - All cookies:', req.headers.cookie);
-    
     // Get session token from cookie
     const sessionToken = req.headers.cookie
       ?.split(';')
       ?.find(cookie => cookie.trim().startsWith('session='))
       ?.split('=')[1];
 
-    console.error('🚨 SESSION API - Session token found:', sessionToken ? `${sessionToken.substring(0, 20)}...` : 'NONE');
-
     if (!sessionToken) {
-      console.error('🚨 SESSION API - No session token in cookies');
       return res.status(401).json({ error: 'No session found' });
     }
 

@@ -96,7 +96,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.error('🚨 OAUTH CALLBACK START - Query params:', JSON.stringify(req.query));
     const { code, error, state } = req.query;
 
     if (error) {
@@ -202,18 +201,11 @@ export default async function handler(req, res) {
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieDomain = isProduction ? '; Domain=.jsonpromptstudio.com' : '';
     
-    // Debug: Log what cookies we're trying to set
-    const sessionCookie = `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
-    const upgradedCookie = `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`;
-    
-    console.error('🚨 OAUTH DEBUG - Session token length:', sessionToken?.length || 'UNDEFINED');
-    console.error('🚨 OAUTH DEBUG - isProduction:', isProduction);
-    console.error('🚨 OAUTH DEBUG - cookieDomain:', JSON.stringify(cookieDomain));
-    console.error('🚨 OAUTH DEBUG - sessionCookie full length:', sessionCookie.length);
-    console.error('🚨 OAUTH DEBUG - sessionCookie FULL:', sessionCookie);
-    console.error('🚨 OAUTH DEBUG - upgradedCookie:', upgradedCookie);
-    
-    res.setHeader('Set-Cookie', [sessionCookie, upgradedCookie]);
+    // Set session cookie
+    res.setHeader('Set-Cookie', [
+      `session=${sessionToken}; HttpOnly; Path=/; Max-Age=${30 * 24 * 60 * 60}; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`,
+      `justUpgraded=true; Path=/; Max-Age=60; SameSite=Lax${isProduction ? '; Secure' : ''}${cookieDomain}`
+    ]);
 
     // Analytics
     if (isNewUser) {

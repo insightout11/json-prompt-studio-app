@@ -56,51 +56,25 @@ export class SessionManager {
   async checkSession() {
     const sessionId = getSessionId();
     
-    console.log('🔍 SessionManager.checkSession() called');
-    console.log('🍪 All cookies:', document.cookie);
-    console.log('🍪 Session ID found:', sessionId ? `${sessionId.substring(0, 20)}...` : 'NONE');
-    
-    // IMPORTANT: Even if JavaScript can't read the HttpOnly session cookie,
-    // we still need to try the API call because the browser will send the HttpOnly cookie to the server!
-    console.log('🔄 Attempting session API call (HttpOnly cookies sent automatically)...');
+    // Always attempt API call since HttpOnly cookies are sent automatically
 
     // Fetch user data from API
     try {
       this.isLoading = true;
-      console.log('🌐 Making request to /api/auth/session...');
-      
-      let response;
-      try {
-        response = await fetch('/api/auth/session', {
-          credentials: 'include' // Include cookies
-        });
-        console.log('🌐 Fetch completed successfully');
-      } catch (fetchError) {
-        console.error('🚨 FETCH FAILED:', fetchError);
-        console.error('🚨 FETCH ERROR TYPE:', fetchError.constructor.name);
-        console.error('🚨 FETCH ERROR MESSAGE:', fetchError.message);
-        throw fetchError;
-      }
-
-      console.log('🌐 Session API response:', response.status, response.statusText);
+      const response = await fetch('/api/auth/session', {
+        credentials: 'include' // Include cookies
+      });
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ Session data received:', userData);
         this.currentUser = userData;
       } else {
-        console.log('❌ Session API failed:', response.status);
-        const errorText = await response.text();
-        console.log('❌ Session API error:', errorText);
         this.currentUser = null;
         // Clear invalid session cookies
         clearSession();
       }
     } catch (error) {
-      console.error('🚨 Session check failed:', error);
-      console.error('🚨 ERROR TYPE:', error.constructor.name);
-      console.error('🚨 ERROR MESSAGE:', error.message);
-      console.error('🚨 ERROR STACK:', error.stack);
+      console.error('Session check failed:', error);
       this.currentUser = null;
     } finally {
       this.isLoading = false;
