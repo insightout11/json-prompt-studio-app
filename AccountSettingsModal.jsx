@@ -8,23 +8,6 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [displayName, setDisplayName] = useState(user?.name || '');
-  const [preferences, setPreferences] = useState({
-    emailNotifications: {
-      accountActivity: true,
-      usageAlerts: true,
-      marketingUpdates: false
-    },
-    appNotifications: {
-      desktopNotifications: true,
-      soundAlerts: true
-    },
-    privacy: {
-      allowAnalytics: true,
-      shareUsageData: false
-    }
-  });
-  const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen) return null;
 
@@ -35,90 +18,6 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
     { id: 'danger', name: 'Account', icon: '⚠️' }
   ];
 
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: displayName,
-          preferences
-        })
-      });
-
-      if (response.ok) {
-        await refreshSession();
-        console.log('✅ Profile updated successfully');
-      } else {
-        const error = await response.json();
-        console.error('❌ Profile update failed:', error);
-      }
-    } catch (error) {
-      console.error('❌ Profile update error:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleExportData = async () => {
-    try {
-      const response = await fetch('/api/user/export', {
-        method: 'GET',
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `jsonpromptstudio-export-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        console.log('✅ Data exported successfully');
-      } else {
-        console.error('❌ Data export failed');
-      }
-    } catch (error) {
-      console.error('❌ Export error:', error);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/user/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          confirmation: 'DELETE_MY_ACCOUNT'
-        })
-      });
-
-      if (response.ok) {
-        console.log('✅ Account deleted successfully');
-        // Redirect to home page
-        window.location.href = '/';
-      } else {
-        const error = await response.json();
-        console.error('❌ Account deletion failed:', error);
-      }
-    } catch (error) {
-      console.error('❌ Account deletion error:', error);
-    } finally {
-      setIsLoading(false);
-      setShowDeleteConfirm(false);
-    }
-  };
 
   const handleLogoutAllDevices = async () => {
     setIsLoading(true);
@@ -173,8 +72,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
         <input
           type="text"
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          defaultValue={user?.name || ''}
           placeholder="Enter your display name"
         />
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -200,12 +98,8 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <button 
-          onClick={handleSaveProfile}
-          disabled={isSaving}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
-        >
-          {isSaving ? 'Saving...' : 'Save Changes'}
+        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          Save Changes
         </button>
       </div>
     </div>
@@ -217,48 +111,15 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
         <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Email Notifications</h4>
         <div className="space-y-3">
           <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-              checked={preferences.emailNotifications.accountActivity}
-              onChange={(e) => setPreferences(prev => ({
-                ...prev,
-                emailNotifications: {
-                  ...prev.emailNotifications,
-                  accountActivity: e.target.checked
-                }
-              }))}
-            />
+            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
             <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">Account activity</span>
           </label>
           <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-              checked={preferences.emailNotifications.usageAlerts}
-              onChange={(e) => setPreferences(prev => ({
-                ...prev,
-                emailNotifications: {
-                  ...prev.emailNotifications,
-                  usageAlerts: e.target.checked
-                }
-              }))}
-            />
+            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
             <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">Usage alerts</span>
           </label>
           <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-              checked={preferences.emailNotifications.marketingUpdates}
-              onChange={(e) => setPreferences(prev => ({
-                ...prev,
-                emailNotifications: {
-                  ...prev.emailNotifications,
-                  marketingUpdates: e.target.checked
-                }
-              }))}
-            />
+            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
             <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">Marketing updates</span>
           </label>
         </div>
@@ -268,45 +129,19 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
         <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">App Notifications</h4>
         <div className="space-y-3">
           <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-              checked={preferences.appNotifications.desktopNotifications}
-              onChange={(e) => setPreferences(prev => ({
-                ...prev,
-                appNotifications: {
-                  ...prev.appNotifications,
-                  desktopNotifications: e.target.checked
-                }
-              }))}
-            />
+            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
             <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">Desktop notifications</span>
           </label>
           <label className="flex items-center">
-            <input 
-              type="checkbox" 
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-              checked={preferences.appNotifications.soundAlerts}
-              onChange={(e) => setPreferences(prev => ({
-                ...prev,
-                appNotifications: {
-                  ...prev.appNotifications,
-                  soundAlerts: e.target.checked
-                }
-              }))}
-            />
+            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" defaultChecked />
             <span className="ml-3 text-sm text-gray-700 dark:text-gray-300">Sound alerts</span>
           </label>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button 
-          onClick={handleSaveProfile}
-          disabled={isSaving}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
-        >
-          {isSaving ? 'Saving...' : 'Save Preferences'}
+        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          Save Preferences
         </button>
       </div>
     </div>
@@ -333,21 +168,14 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
           You can export all your account data including prompts, generations, and settings.
         </p>
-        <button 
-          onClick={handleExportData}
-          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-        >
+        <button className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
           Export My Data
         </button>
       </div>
 
       <div className="flex justify-end">
-        <button 
-          onClick={handleSaveProfile}
-          disabled={isSaving}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
-        >
-          {isSaving ? 'Saving...' : 'Save Settings'}
+        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          Save Settings
         </button>
       </div>
     </div>
@@ -481,11 +309,14 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteAccount}
-                  disabled={isLoading}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors"
+                  onClick={() => {
+                    // TODO: Implement actual account deletion
+                    setShowDeleteConfirm(false);
+                    alert('Account deletion would be implemented here');
+                  }}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                 >
-                  {isLoading ? 'Deleting...' : 'Delete Account'}
+                  Delete Account
                 </button>
               </div>
             </div>

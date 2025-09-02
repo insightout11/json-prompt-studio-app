@@ -131,48 +131,113 @@ const ImageToJson = ({ currentJson, onResult }) => {
         }
       ];
 
-      const response = await fetch('/api/ai', {
+      // Use the existing /api/edit-image endpoint for vision analysis
+      // Instead of editing, we'll ask it to analyze and return JSON
+      const response = await fetch('/api/edit-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          provider: 'gemini',
-          messages,
-          model: 'gemini-2.5-flash',
-          temperature: 0.3,
-          max_tokens: 2000
+          originalImageUrl: imagePreview,
+          originalPrompt: 'Image analysis request',
+          editDescription: `Analyze this image and extract detailed JSON scene data. Focus on identifying:
+              
+1. Main subjects (characters, objects, creatures)
+2. Setting and environment details  
+3. Visual style and mood
+4. Colors, lighting, and atmosphere
+5. Specific details that could be used in image generation prompts
+
+Return ONLY a JSON object with this exact structure:
+{
+  "fields": {
+    "scene": {
+      "value": "detailed scene description",
+      "confidence": 0.8,
+      "reasoning": "why this was detected"
+    },
+    "character_description": {
+      "value": "character details", 
+      "confidence": 0.9,
+      "reasoning": "character analysis"
+    },
+    "environment": {
+      "value": "environment details",
+      "confidence": 0.7,
+      "reasoning": "environment analysis"  
+    },
+    "lighting": {
+      "value": "lighting description",
+      "confidence": 0.8,
+      "reasoning": "lighting analysis"
+    },
+    "mood": {
+      "value": "mood and atmosphere",
+      "confidence": 0.7,
+      "reasoning": "mood analysis"
+    },
+    "style": {
+      "value": "artistic style",
+      "confidence": 0.6,
+      "reasoning": "style analysis"
+    },
+    "colors": {
+      "value": "color palette",
+      "confidence": 0.8,
+      "reasoning": "color analysis"
+    }
+  },
+  "stats": {
+    "highConfidence": 3,
+    "mediumConfidence": 2,
+    "lowConfidence": 2
+  }
+}
+
+Do NOT generate or edit an image - only analyze and return the JSON data above.`
         })
       });
 
       const aiResponse = await response.json();
       
-      if (aiResponse.choices?.[0]?.message?.content) {
-        try {
-          // Parse the JSON response from Gemini
-          const content = aiResponse.choices[0].message.content;
-          const jsonMatch = content.match(/\{[\s\S]*\}/);
+      // Handle edit-image API response format
+      let content = null;
+      if (aiResponse.textResponse) {
+        content = aiResponse.textResponse;
+      } else if (aiResponse.success && aiResponse.editedImage) {
+        // Sometimes the analysis might be in the response
+        content = aiResponse.message || 'Analysis completed but format unexpected';
+      } else if (aiResponse.error) {
+        throw new Error(aiResponse.error);
+      } else {
+        throw new Error('Unexpected response format from analysis API');
+      }
+      
+      try {
+        // Parse the JSON response from Gemini
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+          const result = JSON.parse(jsonMatch[0]);
           
-          if (jsonMatch) {
-            const result = JSON.parse(jsonMatch[0]);
+          if (result.fields) {
+            setAnalysisResult({
+              success: true,
+              fields: result.fields,
+              stats: result.stats || {
+                highConfidence: Object.values(result.fields).filter(f => f.confidence > 0.8).length,
+                mediumConfidence: Object.values(result.fields).filter(f => f.confidence >= 0.6 && f.confidence <= 0.8).length,
+                lowConfidence: Object.values(result.fields).filter(f => f.confidence < 0.6).length
+              }
+            });
             
-            if (result.fields) {
-              setAnalysisResult({
-                success: true,
-                fields: result.fields,
-                stats: result.stats || {
-                  highConfidence: Object.values(result.fields).filter(f => f.confidence > 0.8).length,
-                  mediumConfidence: Object.values(result.fields).filter(f => f.confidence >= 0.6 && f.confidence <= 0.8).length,
-                  lowConfidence: Object.values(result.fields).filter(f => f.confidence < 0.6).length
-                }
-              });
-              
-              // Auto-select high and medium confidence fields
-              const highConfidenceFields = Object.entries(result.fields)
-                .filter(([_, fieldData]) => fieldData.confidence >= 0.7)
-                .map(([fieldKey, _]) => fieldKey);
-              
-              setSelectedFields(new Set(highConfidenceFields));
+            // Auto-select high and medium confidence fields
+            const highConfidenceFields = Object.entries(result.fields)
+              .filter(([_, fieldData]) => fieldData.confidence >= 0.7)
+              .map(([fieldKey, _]) => fieldKey);
+            
+            setSelectedFields(new Set(highConfidenceFields));
             } else {
               setError('AI response did not contain expected field data.');
             }
