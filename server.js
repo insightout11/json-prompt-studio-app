@@ -14,9 +14,11 @@ import aiHandler from './api/ai.js';
 import groqHandler from './api/groq.js';
 import openaiHandler from './api/openai.js';
 import editImageHandler from './api/edit-image.js';
-// Note: Auth handlers temporarily disabled due to missing dependencies
-// import sessionHandler from './api/auth/session.js';
-// import googleHandler, { initiateGoogleAuth } from './api/auth/google.js';
+// Import auth handlers
+import sessionHandler from './api/auth/session.js';
+import googleHandler, { initiateGoogleAuth } from './api/auth/google.js';
+import magicLinkHandler from './api/auth/magic-link.js';
+import callbackHandler from './api/auth/callback.js';
 
 // Load environment variables
 dotenv.config();
@@ -53,10 +55,13 @@ app.get('/api/edit-image', editImageHandler);
 app.post('/api/ai', aiHandler);
 app.get('/api/ai', aiHandler); // Allow GET for status check
 
-// Authentication API Routes (temporarily disabled)
-// app.get('/api/auth/session', sessionHandler);
-// app.get('/api/auth/google', initiateGoogleAuth);
-// app.get('/api/auth/google/callback', googleHandler);
+// Authentication API Routes
+app.get('/api/auth/session', sessionHandler);
+app.post('/api/auth/magic-link', magicLinkHandler);
+app.get('/api/auth/magic-link', magicLinkHandler);
+app.get('/api/auth/callback', callbackHandler);
+app.get('/api/auth/google', initiateGoogleAuth);
+app.get('/api/auth/google/callback', googleHandler);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -95,7 +100,7 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`API endpoints: /api/groq, /api/openai, /api/ai, /api/preview, /api/edit-image, /api/health`);
+  console.log(`API endpoints: /api/groq, /api/openai, /api/ai, /api/preview, /api/edit-image, /api/auth/*, /api/health`);
 });
 
 export default app;
