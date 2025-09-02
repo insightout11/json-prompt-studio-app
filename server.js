@@ -8,11 +8,8 @@ import { fileURLToPath } from 'url';
 // Import our available API handlers
 import previewHandler from './api/preview.js';
 import previewStatusHandler from './api/preview-status.js';
-import enhanceHandler from './api/enhance.js';
 import storyboardUseHandler from './api/storyboard/use.js';
-import aiHandler from './api/ai.js';
 import groqHandler from './api/groq.js';
-import openaiHandler from './api/openai.js';
 import editImageHandler from './api/edit-image.js';
 // Import auth handlers
 import sessionHandler from './api/auth/session.js';
@@ -37,23 +34,16 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes for AI services
 app.post('/api/groq', groqHandler);
 app.get('/api/groq', groqHandler);
-app.post('/api/openai', openaiHandler);
-app.get('/api/openai', openaiHandler);
 
 // Image Preview API Routes
 app.post('/api/preview', previewHandler);
 app.get('/api/preview', previewHandler); // Allow GET for status check
 app.get('/api/preview-status', previewStatusHandler);
-app.post('/api/enhance', enhanceHandler);
 app.post('/api/storyboard/use', storyboardUseHandler);
 
 // Image Editing API Routes
 app.post('/api/edit-image', editImageHandler);
 app.get('/api/edit-image', editImageHandler);
-
-// AI API Routes (consolidated Groq, OpenAI, Gemini)
-app.post('/api/ai', aiHandler);
-app.get('/api/ai', aiHandler); // Allow GET for status check
 
 // Authentication API Routes
 app.get('/api/auth/session', sessionHandler);
@@ -100,7 +90,7 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`API endpoints: /api/groq, /api/openai, /api/ai, /api/preview, /api/edit-image, /api/auth/*, /api/health`);
+  console.log(`API endpoints: /api/groq, /api/preview, /api/preview-status, /api/edit-image, /api/storyboard/use, /api/auth/*, /api/health`);
 });
 
 export default app;
