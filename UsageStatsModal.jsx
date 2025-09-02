@@ -263,6 +263,7 @@ const UsageStatsModal = ({ isOpen, onClose }) => {
         </div>
 
       </div>
+      </div>
     </Portal>
   );
 };
