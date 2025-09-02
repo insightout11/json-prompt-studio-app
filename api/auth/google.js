@@ -101,8 +101,8 @@ export default async function handler(req, res) {
     if (error) {
       console.error('Google OAuth error:', error);
       const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://json-prompt-studio-app.vercel.app'
-        : 'http://localhost:5188';
+        ? 'https://json-prompt-studio-app.vercel.app/app'
+        : 'http://localhost:5188/app';
       const redirectUrl = new URL(baseUrl);
       redirectUrl.searchParams.set('auth', 'error');
       redirectUrl.searchParams.set('error', 'google_auth_failed');
@@ -209,8 +209,8 @@ export default async function handler(req, res) {
 
     // Redirect back to app with success
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://json-prompt-studio-app.vercel.app'
-      : 'http://localhost:5188';
+      ? 'https://json-prompt-studio-app.vercel.app/app'
+      : 'http://localhost:5188/app';
     const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'success');
     redirectUrl.searchParams.set('method', 'google');
@@ -222,8 +222,8 @@ export default async function handler(req, res) {
     
     // Redirect to app with error
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://json-prompt-studio-app.vercel.app'
-      : 'http://localhost:5188';
+      ? 'https://json-prompt-studio-app.vercel.app/app'
+      : 'http://localhost:5188/app';
     const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'error');
     redirectUrl.searchParams.set('error', 'google_callback_failed');

@@ -61,7 +61,9 @@ async function sendMagicLinkEmail(email, token) {
       }
 
       const result = await response.json();
-      console.log(`Magic link email sent successfully to ${email}:`, result);
+      console.log(`✅ Magic link email sent successfully to ${email}:`, result);
+      console.log(`📧 Email should arrive from: JSON Prompt Studio <noreply@json-prompt-studio-app.vercel.app>`);
+      console.log(`📬 Check spam/junk folder if not in inbox`);
       return true;
     } else {
       // Fallback: log to console if no email service configured
@@ -108,13 +110,13 @@ export default async function handler(req, res) {
       const tokenData = magicTokens.get(token);
       
       if (!tokenData) {
-        return res.redirect('/?auth_error=' + encodeURIComponent('Invalid or expired link'));
+        return res.redirect('/app?auth_error=' + encodeURIComponent('Invalid or expired link'));
       }
 
       // Check if token is expired (15 minutes)
       if (Date.now() > tokenData.expiresAt) {
         magicTokens.delete(token);
-        return res.redirect('/?auth_error=' + encodeURIComponent('Link has expired'));
+        return res.redirect('/app?auth_error=' + encodeURIComponent('Link has expired'));
       }
 
       // Create or update user
@@ -134,11 +136,11 @@ export default async function handler(req, res) {
       res.setHeader('Set-Cookie', `session=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
 
       // Redirect to app
-      res.redirect('/?auth_success=true');
+      res.redirect('/app?auth_success=true');
 
     } catch (error) {
       console.error('Magic link validation error:', error);
-      res.redirect('/?auth_error=' + encodeURIComponent('Authentication failed'));
+      res.redirect('/app?auth_error=' + encodeURIComponent('Authentication failed'));
     }
     
     return;
