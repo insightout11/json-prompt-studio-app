@@ -124,17 +124,44 @@ const App = () => {
       // Clean up URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Refresh session to detect the new authentication
-      console.log('🔄 Refreshing session after OAuth success...');
-      setTimeout(() => {
-        refreshSession().then(() => {
-          console.log('✅ Session refresh completed');
-        });
-      }, 500);
+      console.log('🔄 Auth success detected, checking cookies...');
+      console.log('🍪 Document cookies:', document.cookie);
+      console.log('🍪 Session cookie found:', document.cookie.includes('session='));
       
-      // Show success message
+      // Show success message immediately
       const methodName = authMethod === 'google' ? 'Google' : 'email';
       showSuccess(`🎉 Successfully signed in with ${methodName}! You now have 10 premium generations.`, 6000);
+      
+      // Refresh session with multiple attempts and longer delays
+      console.log('🔄 Starting session refresh attempts...');
+      
+      const attemptRefresh = async (attemptNumber, maxAttempts = 3) => {
+        console.log(`🔄 Session refresh attempt ${attemptNumber}/${maxAttempts}`);
+        
+        try {
+          const result = await refreshSession();
+          console.log(`✅ Session refresh attempt ${attemptNumber} result:`, result);
+          
+          // If still not logged in after refresh, try again with longer delay
+          if (!isLoggedIn && attemptNumber < maxAttempts) {
+            console.log(`⏳ Still not logged in, retrying in ${1000 * attemptNumber}ms...`);
+            setTimeout(() => attemptRefresh(attemptNumber + 1, maxAttempts), 1000 * attemptNumber);
+          } else if (isLoggedIn) {
+            console.log('🎉 Successfully logged in after session refresh!');
+          } else {
+            console.warn('🚨 Failed to detect login after all refresh attempts');
+          }
+        } catch (error) {
+          console.error(`❌ Session refresh attempt ${attemptNumber} failed:`, error);
+          if (attemptNumber < maxAttempts) {
+            setTimeout(() => attemptRefresh(attemptNumber + 1, maxAttempts), 1000 * attemptNumber);
+          }
+        }
+      };
+      
+      // Start first attempt after 1 second to ensure cookie is set
+      setTimeout(() => attemptRefresh(1), 1000);
+      
     } else if (authError) {
       // Clean up URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -142,7 +169,7 @@ const App = () => {
       // Show error message
       showError(`Authentication failed: ${decodeURIComponent(authError)}`, 8000);
     }
-  }, [refreshSession, showSuccess, showError]);
+  }, [refreshSession, showSuccess, showError, isLoggedIn]);
   
   // Get subscription data including isPro status
   const { isPro, subscription, toggleProStatus, forceProStatus, resetUser, refreshUser } = subscriptionHook;

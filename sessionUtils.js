@@ -56,7 +56,12 @@ export class SessionManager {
   async checkSession() {
     const sessionId = getSessionId();
     
+    console.log('🔍 SessionManager.checkSession() called');
+    console.log('🍪 All cookies:', document.cookie);
+    console.log('🍪 Session ID found:', sessionId ? `${sessionId.substring(0, 20)}...` : 'NONE');
+    
     if (!sessionId) {
+      console.log('❌ No session ID found, setting user to null');
       this.currentUser = null;
       this.notify();
       return null;
@@ -65,20 +70,28 @@ export class SessionManager {
     // Fetch user data from API
     try {
       this.isLoading = true;
+      console.log('🌐 Making request to /api/auth/session...');
+      
       const response = await fetch('/api/auth/session', {
         credentials: 'include' // Include cookies
       });
 
+      console.log('🌐 Session API response:', response.status, response.statusText);
+
       if (response.ok) {
         const userData = await response.json();
+        console.log('✅ Session data received:', userData);
         this.currentUser = userData;
       } else {
+        console.log('❌ Session API failed:', response.status);
+        const errorText = await response.text();
+        console.log('❌ Session API error:', errorText);
         this.currentUser = null;
         // Clear invalid session cookies
         clearSession();
       }
     } catch (error) {
-      console.error('Session check failed:', error);
+      console.error('🚨 Session check failed:', error);
       this.currentUser = null;
     } finally {
       this.isLoading = false;
