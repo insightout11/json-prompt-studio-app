@@ -60,12 +60,9 @@ export class SessionManager {
     console.log('🍪 All cookies:', document.cookie);
     console.log('🍪 Session ID found:', sessionId ? `${sessionId.substring(0, 20)}...` : 'NONE');
     
-    if (!sessionId) {
-      console.log('❌ No session ID found, setting user to null');
-      this.currentUser = null;
-      this.notify();
-      return null;
-    }
+    // IMPORTANT: Even if JavaScript can't read the HttpOnly session cookie,
+    // we still need to try the API call because the browser will send the HttpOnly cookie to the server!
+    console.log('🔄 Attempting session API call (HttpOnly cookies sent automatically)...');
 
     // Fetch user data from API
     try {
