@@ -134,11 +134,17 @@ export default async function handler(req, res) {
         ? 'Magic link sent! Check the console/terminal for the link (development mode)'
         : 'Magic link sent! Check your email for the sign-in link';
         
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://json-prompt-studio-app.vercel.app'
+        : 'http://localhost:5188';
+      const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
+      
       res.json({
         success: true,
         message,
         email,
-        devMode: process.env.NODE_ENV !== 'production'
+        devMode: process.env.NODE_ENV !== 'production',
+        magicLink: process.env.NODE_ENV !== 'production' ? magicLink : undefined
       });
 
     } catch (error) {
