@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSession } from './useSession';
 import { clearSession } from './sessionUtils';
+import Portal from './Portal';
 
 const AccountSettingsModal = ({ isOpen, onClose }) => {
   const { user, refreshSession } = useSession();
@@ -236,7 +237,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
   );
 
   return (
-    <>
+    <Portal>
       <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-[9999]">
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto mx-4">
           
@@ -321,7 +322,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
-    </>
+    </Portal>
   );
 };
 
