@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from './useSession';
 import { clearSession } from './sessionUtils';
+import UsageStatsModal from './UsageStatsModal';
+import AccountSettingsModal from './AccountSettingsModal';
 
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showUsageStats, setShowUsageStats] = useState(false);
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const menuRef = useRef(null);
   const { user, getDisplayName, getUserUsage, refreshSession } = useSession();
   
@@ -22,6 +27,11 @@ const UserMenu = () => {
   }, []);
 
   const handleLogout = async () => {
+    setShowLogoutConfirm(true);
+    setIsOpen(false);
+  };
+
+  const confirmLogout = async () => {
     try {
       console.log('🔓 Logging out user...');
       
@@ -31,12 +41,9 @@ const UserMenu = () => {
       // Refresh session to update UI state
       await refreshSession();
       
-      setIsOpen(false);
+      setShowLogoutConfirm(false);
       
       console.log('✅ Successfully logged out');
-      
-      // Optional: Show success message or redirect
-      // Could dispatch a custom event here for notifications
       
     } catch (error) {
       console.error('❌ Logout error:', error);
@@ -117,32 +124,28 @@ const UserMenu = () => {
 
           {/* Menu Items */}
           <div className="p-2">
-            {/* Account Settings (future feature) */}
+            {/* Account Settings */}
             <button 
               className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-150 flex items-center space-x-2"
               onClick={() => {
-                // Future: Open account settings
+                setShowAccountSettings(true);
                 setIsOpen(false);
               }}
-              disabled
             >
               <span>⚙️</span>
               <span>Account Settings</span>
-              <span className="ml-auto text-xs text-gray-400">(Soon)</span>
             </button>
 
-            {/* Usage Stats (future feature) */}
+            {/* Usage Stats */}
             <button 
               className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-150 flex items-center space-x-2"
               onClick={() => {
-                // Future: Show detailed usage stats
+                setShowUsageStats(true);
                 setIsOpen(false);
               }}
-              disabled
             >
               <span>📊</span>
               <span>Usage Stats</span>
-              <span className="ml-auto text-xs text-gray-400">(Soon)</span>
             </button>
 
             <hr className="my-2 border-gray-200 dark:border-gray-600" />
@@ -158,6 +161,51 @@ const UserMenu = () => {
           </div>
         </div>
       )}
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <span className="text-2xl mr-3">🔓</span>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Sign Out Confirmation
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to sign out? You'll need to sign in again to access your account.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Usage Stats Modal */}
+      <UsageStatsModal
+        isOpen={showUsageStats}
+        onClose={() => setShowUsageStats(false)}
+      />
+
+      {/* Account Settings Modal */}
+      <AccountSettingsModal
+        isOpen={showAccountSettings}
+        onClose={() => setShowAccountSettings(false)}
+      />
     </div>
   );
 };
