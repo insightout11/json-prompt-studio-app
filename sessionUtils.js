@@ -72,9 +72,18 @@ export class SessionManager {
       this.isLoading = true;
       console.log('🌐 Making request to /api/auth/session...');
       
-      const response = await fetch('/api/auth/session', {
-        credentials: 'include' // Include cookies
-      });
+      let response;
+      try {
+        response = await fetch('/api/auth/session', {
+          credentials: 'include' // Include cookies
+        });
+        console.log('🌐 Fetch completed successfully');
+      } catch (fetchError) {
+        console.error('🚨 FETCH FAILED:', fetchError);
+        console.error('🚨 FETCH ERROR TYPE:', fetchError.constructor.name);
+        console.error('🚨 FETCH ERROR MESSAGE:', fetchError.message);
+        throw fetchError;
+      }
 
       console.log('🌐 Session API response:', response.status, response.statusText);
 
@@ -92,6 +101,9 @@ export class SessionManager {
       }
     } catch (error) {
       console.error('🚨 Session check failed:', error);
+      console.error('🚨 ERROR TYPE:', error.constructor.name);
+      console.error('🚨 ERROR MESSAGE:', error.message);
+      console.error('🚨 ERROR STACK:', error.stack);
       this.currentUser = null;
     } finally {
       this.isLoading = false;
