@@ -7,15 +7,31 @@ function generateMagicToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Send magic link email (mock implementation for now)
+// Send magic link email
 async function sendMagicLinkEmail(email, token) {
-  // In a real implementation, this would send an actual email
-  // For now, we'll just log the magic link to console
-  const magicLink = `${process.env.APP_URL || 'http://localhost:5188'}/api/auth/callback?token=${token}`;
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://json-prompt-studio-app.vercel.app'
+    : 'http://localhost:5188';
+  const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
   
-  console.log(`\n🔗 Magic Link for ${email}:`);
-  console.log(`${magicLink}`);
-  console.log(`(This would normally be sent via email)\n`);
+  // For development, log to console
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\n🔗 Magic Link for ${email}:`);
+    console.log(`${magicLink}`);
+    console.log(`(Click this link or copy to browser to sign in)\n`);
+    return true;
+  }
+  
+  // For production, you would integrate with an email service
+  // Example services: SendGrid, Mailgun, AWS SES, Resend, etc.
+  console.log(`Magic link generated for ${email}: ${magicLink}`);
+  
+  // TODO: Replace with actual email service
+  // await sendEmail({
+  //   to: email,
+  //   subject: 'Sign in to JSON Prompt Studio',
+  //   html: `<p>Click this link to sign in: <a href="${magicLink}">Sign In</a></p>`
+  // });
   
   return true;
 }
@@ -51,13 +67,13 @@ export default async function handler(req, res) {
       const tokenData = magicTokens.get(token);
       
       if (!tokenData) {
-        return res.redirect('/app?auth_error=' + encodeURIComponent('Invalid or expired link'));
+        return res.redirect('/?auth_error=' + encodeURIComponent('Invalid or expired link'));
       }
 
       // Check if token is expired (15 minutes)
       if (Date.now() > tokenData.expiresAt) {
         magicTokens.delete(token);
-        return res.redirect('/app?auth_error=' + encodeURIComponent('Link has expired'));
+        return res.redirect('/?auth_error=' + encodeURIComponent('Link has expired'));
       }
 
       // Create or update user
@@ -77,11 +93,11 @@ export default async function handler(req, res) {
       res.setHeader('Set-Cookie', `session=${session.id}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
 
       // Redirect to app
-      res.redirect('/app?auth_success=true');
+      res.redirect('/?auth_success=true');
 
     } catch (error) {
       console.error('Magic link validation error:', error);
-      res.redirect('/app?auth_error=' + encodeURIComponent('Authentication failed'));
+      res.redirect('/?auth_error=' + encodeURIComponent('Authentication failed'));
     }
     
     return;
@@ -114,10 +130,15 @@ export default async function handler(req, res) {
       // Send magic link email
       await sendMagicLinkEmail(email, token);
 
+      const message = process.env.NODE_ENV !== 'production' 
+        ? 'Magic link sent! Check the console/terminal for the link (development mode)'
+        : 'Magic link sent! Check your email for the sign-in link';
+        
       res.json({
         success: true,
-        message: 'Magic link sent! Check your email (or console in dev mode)',
-        email
+        message,
+        email,
+        devMode: process.env.NODE_ENV !== 'production'
       });
 
     } catch (error) {

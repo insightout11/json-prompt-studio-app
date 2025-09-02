@@ -8,10 +8,14 @@ let oauth2Client = null;
 
 function initGoogleOAuth() {
   if (!oauth2Client && process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const redirectUri = process.env.NODE_ENV === 'production' 
+      ? 'https://json-prompt-studio-app.vercel.app/api/auth/google'
+      : 'http://localhost:5188/api/auth/google';
+      
     oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `http://localhost:5188/api/auth/google/callback` // Will be dynamic in production
+      redirectUri
     );
   }
   return oauth2Client;
@@ -67,10 +71,28 @@ async function initiateGoogleAuth(req, res) {
   }
 }
 
-// Google OAuth callback handler
+// Main Google OAuth handler - handles both initiation and callback
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Check if this is a callback (has code parameter) or initiation
+  const { code } = req.query;
+  
+  if (!code) {
+    // This is an initiation request
+    return await initiateGoogleAuth(req, res);
   }
 
   try {
@@ -78,7 +100,10 @@ export default async function handler(req, res) {
 
     if (error) {
       console.error('Google OAuth error:', error);
-      const redirectUrl = new URL('http://localhost:5188/');
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://json-prompt-studio-app.vercel.app'
+        : 'http://localhost:5188';
+      const redirectUrl = new URL(baseUrl);
       redirectUrl.searchParams.set('auth', 'error');
       redirectUrl.searchParams.set('error', 'google_auth_failed');
       return res.redirect(302, redirectUrl.toString());
@@ -195,7 +220,10 @@ export default async function handler(req, res) {
     }
 
     // Redirect back to app with success
-    const redirectUrl = new URL('http://localhost:5188/');
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://json-prompt-studio-app.vercel.app'
+      : 'http://localhost:5188';
+    const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'success');
     redirectUrl.searchParams.set('method', 'google');
     
@@ -205,7 +233,10 @@ export default async function handler(req, res) {
     console.error('Google OAuth callback error:', error);
     
     // Redirect to app with error
-    const redirectUrl = new URL('http://localhost:5188/');
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://json-prompt-studio-app.vercel.app'
+      : 'http://localhost:5188';
+    const redirectUrl = new URL(baseUrl);
     redirectUrl.searchParams.set('auth', 'error');
     redirectUrl.searchParams.set('error', 'google_callback_failed');
     
