@@ -209,7 +209,8 @@ export default async function handler(req, res) {
     console.error('🚨 OAUTH DEBUG - Session token length:', sessionToken?.length || 'UNDEFINED');
     console.error('🚨 OAUTH DEBUG - isProduction:', isProduction);
     console.error('🚨 OAUTH DEBUG - cookieDomain:', JSON.stringify(cookieDomain));
-    console.error('🚨 OAUTH DEBUG - sessionCookie:', sessionCookie.substring(0, 100) + '...');
+    console.error('🚨 OAUTH DEBUG - sessionCookie full length:', sessionCookie.length);
+    console.error('🚨 OAUTH DEBUG - sessionCookie FULL:', sessionCookie);
     console.error('🚨 OAUTH DEBUG - upgradedCookie:', upgradedCookie);
     
     res.setHeader('Set-Cookie', [sessionCookie, upgradedCookie]);
