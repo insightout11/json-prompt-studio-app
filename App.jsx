@@ -31,6 +31,7 @@ import EditableJsonOutput from './EditableJsonOutput';
 import ConsistencyPanel from './ConsistencyPanel';
 import ConsistencyBadge from './ConsistencyBadge';
 import PreviewTray from './PreviewTray';
+import UserMenu from './UserMenu';
 
 const App = () => {
   const { 
@@ -934,9 +935,9 @@ const App = () => {
                 </div>
               </div>
 
-              {/* RIGHT SECTION - Signup, Consistency Badge & Cinematic Toggle */}
+              {/* RIGHT SECTION - Auth, Consistency Badge & Cinematic Toggle */}
               <div className="flex items-center justify-end flex-shrink-0 -mr-2 space-x-3">
-                {!isLoggedIn && (
+                {!isLoggedIn ? (
                   <button
                     onClick={() => setShowSignupModal(true)}
                     className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-xs font-semibold rounded-lg transition-all duration-200 flex items-center space-x-1.5 shadow-sm hover:shadow-md"
@@ -946,6 +947,8 @@ const App = () => {
                     <span className="hidden lg:inline">Sign Up Free</span>
                     <span className="lg:hidden">Sign Up</span>
                   </button>
+                ) : (
+                  <UserMenu />
                 )}
                 <ConsistencyBadge />
                 <CinematicModeToggle />
