@@ -293,6 +293,14 @@ pre.json {
   padding: 0.55rem 0.6rem; font-family: var(--mono); font-size: 0.8rem;
 }
 .builder-block select:focus { outline: 1px solid var(--amber); }
+.builder-custom {
+  width: 100%; margin-top: 0.45rem;
+  background: var(--bg-raise); color: var(--ink);
+  border: 1px dashed var(--line-bright); border-radius: 5px;
+  padding: 0.45rem 0.6rem; font-family: var(--mono); font-size: 0.75rem;
+}
+.builder-custom:focus { outline: 1px solid var(--amber); border-style: solid; }
+.builder-custom::placeholder { color: var(--ink-faint); }
 .builder-desc { margin-top: 0.4rem; min-height: 2.2em; font-size: 0.7rem; }
 .builder-actions { display: flex; gap: 0.6rem; margin: 1.2rem 0; }
 .copy-btn.ghost { background: transparent; color: var(--ink-dim); border: 1px solid var(--line-bright); }

@@ -48,9 +48,10 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
   <p class="kicker">{totalPresets} presets · no signup</p>
   <h1>Prompt builder</h1>
   <p class="lede dim" style="margin-top:0.8rem; max-width:62ch">
-    Pick a block from each column — or hit <b style="color:var(--amber)">randomize</b> —
-    and the JSON assembles itself, shaped for each model. Click any value in the
-    output to fine-tune it, then copy.
+    Pick a preset from each column, write your own, or mix both — your text overrides
+    the preset's description but keeps its cinematography details. Hit
+    <b style="color:var(--amber)">randomize</b> for a starting point, click any value
+    in the output to fine-tune, then copy.
   </p>
 
   <div class="builder-controls section">
@@ -67,6 +68,12 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
             </optgroup>
           ))}
         </select>
+        <input
+          type="text"
+          class="builder-custom"
+          data-custom={b.id}
+          placeholder={`…or write your own ${b.label.toLowerCase()}`}
+        />
         <p class="dim small builder-desc" data-desc={b.id}></p>
       </div>
     ))}
@@ -113,6 +120,17 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('#builder-output .pv-tab')];
     let activeModel = DEFAULT_MODEL;
 
+    // free-text per block lands on that block's primary field, overriding the
+    // preset's own description while keeping its detail fields
+    const CUSTOM_FIELD: Record<string, string> = {
+      character: 'characters',
+      scene: 'scene',
+      action: 'actions',
+      style: 'style',
+      audio: 'audio',
+    };
+    const customs = [...document.querySelectorAll<HTMLInputElement>('input[data-custom]')];
+
     // merge order = column order; later blocks override on key collisions
     function mergedFields() {
       const fields: Record<string, unknown> = {};
@@ -121,6 +139,10 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
         if (preset) Object.assign(fields, preset.fields);
         const desc = document.querySelector(`[data-desc="${sel.dataset.block}"]`);
         if (desc) desc.textContent = preset?.description ?? '';
+      }
+      for (const input of customs) {
+        const text = input.value.trim();
+        if (text) fields[CUSTOM_FIELD[input.dataset.custom!]] = text;
       }
       return fields;
     }
@@ -137,6 +159,10 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
       // persist selections in the URL for sharing
       const params = new URLSearchParams();
       for (const sel of selects) if (sel.value) params.set(sel.dataset.block!, sel.value);
+      for (const input of customs) {
+        const text = input.value.trim();
+        if (text) params.set(`c_${input.dataset.custom}`, text.slice(0, 200));
+      }
       params.set('model', activeModel);
       history.replaceState(null, '', params.size > 1 || selects.some(s => s.value) ? `?${params}` : location.pathname);
     }
@@ -151,6 +177,7 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     });
 
     selects.forEach((sel) => sel.addEventListener('change', render));
+    customs.forEach((input) => input.addEventListener('input', render));
 
     document.getElementById('randomize')!.addEventListener('click', () => {
       for (const sel of selects) {
@@ -162,6 +189,7 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
 
     document.getElementById('clear')!.addEventListener('click', () => {
       selects.forEach((sel) => (sel.value = ''));
+      customs.forEach((input) => (input.value = ''));
       render();
     });
 
@@ -178,6 +206,10 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     for (const sel of selects) {
       const v = params.get(sel.dataset.block!);
       if (v && data[sel.dataset.block!]?.some((p) => p.key === v)) sel.value = v;
+    }
+    for (const input of customs) {
+      const v = params.get(`c_${input.dataset.custom}`);
+      if (v) input.value = v;
     }
     const urlModel = params.get('model');
     if (urlModel && MODELS[urlModel]) {
