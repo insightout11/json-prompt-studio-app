@@ -275,6 +275,29 @@ pre.json {
   border-radius: 3px; padding: 0.05rem 0.35rem; font-size: 0.85em; color: var(--amber);
 }
 
+/* ---------- builder ---------- */
+
+.builder-controls {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-top: 2rem;
+}
+.builder-block label {
+  display: block; font-size: 0.75rem; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.4rem;
+}
+.builder-block select {
+  width: 100%;
+  background: var(--bg-panel); color: var(--ink);
+  border: 1px solid var(--line-bright); border-radius: 5px;
+  padding: 0.55rem 0.6rem; font-family: var(--mono); font-size: 0.8rem;
+}
+.builder-block select:focus { outline: 1px solid var(--amber); }
+.builder-desc { margin-top: 0.4rem; min-height: 2.2em; font-size: 0.7rem; }
+.builder-actions { display: flex; gap: 0.6rem; margin: 1.2rem 0; }
+.copy-btn.ghost { background: transparent; color: var(--ink-dim); border: 1px solid var(--line-bright); }
+.copy-btn.ghost:hover { color: var(--ink); border-color: var(--amber); }
+
 @media (max-width: 640px) {
   .hero { padding: 3rem 0 2rem; }
   .site-nav { gap: 0.8rem; font-size: 0.72rem; }

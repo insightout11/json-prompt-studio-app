@@ -1,0 +1,189 @@
+---
+import Base from '../../layouts/Base.astro';
+import { characterPresets } from '../../data/characterPresetsData.js';
+import { scenePresets } from '../../data/scenePresetsData.js';
+import { actionPresets } from '../../data/actionPresetsData.js';
+import { directorStyles } from '../../data/directorStylesData.js';
+import { audioPresets } from '../../data/audioPresetsData.js';
+import { MODEL_LIST } from '../../lib/models.js';
+
+// Compact payload for the client: name + category + fields per preset.
+function pack(presetObj) {
+  return Object.entries(presetObj)
+    .filter(([, p]) => p.fields && Object.keys(p.fields).length >= 2)
+    .map(([key, p]) => ({
+      key,
+      name: p.name,
+      category: p.category ?? 'general',
+      description: p.description ?? '',
+      fields: p.fields,
+    }));
+}
+
+const BLOCKS = [
+  { id: 'character', label: 'Character', icon: '👤', items: pack(characterPresets) },
+  { id: 'scene', label: 'Scene', icon: '📍', items: pack(scenePresets) },
+  { id: 'action', label: 'Action', icon: '🎬', items: pack(actionPresets) },
+  { id: 'style', label: 'Style', icon: '🎨', items: pack(directorStyles) },
+  { id: 'audio', label: 'Audio', icon: '🔊', items: pack(audioPresets) },
+];
+
+function categoriesOf(items) {
+  return [...new Set(items.map((i) => i.category))];
+}
+
+// </script>-safe serialization
+const payload = JSON.stringify(
+  Object.fromEntries(BLOCKS.map((b) => [b.id, b.items]))
+).replace(/</g, '\\u003c');
+
+const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
+---
+
+<Base
+  title="JSON Prompt Builder — mix characters, scenes, actions & styles for AI video"
+  description={`Free JSON prompt builder for Veo 3.1, Kling 3.0 and Seedance 2.0: combine ${totalPresets} presets into one structured video prompt, edit any value inline, copy per model.`}
+>
+  <nav class="crumbs"><a href="/">home</a> / builder</nav>
+  <p class="kicker">{totalPresets} presets · no signup</p>
+  <h1>Prompt builder</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:62ch">
+    Pick a block from each column — or hit <b style="color:var(--amber)">randomize</b> —
+    and the JSON assembles itself, shaped for each model. Click any value in the
+    output to fine-tune it, then copy.
+  </p>
+
+  <div class="builder-controls section">
+    {BLOCKS.map((b) => (
+      <div class="builder-block">
+        <label for={`pick-${b.id}`}>{b.icon} {b.label}</label>
+        <select id={`pick-${b.id}`} data-block={b.id}>
+          <option value="">— none —</option>
+          {categoriesOf(b.items).map((cat) => (
+            <optgroup label={cat}>
+              {b.items.filter((i) => i.category === cat).map((i) => (
+                <option value={i.key}>{i.name}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        <p class="dim small builder-desc" data-desc={b.id}></p>
+      </div>
+    ))}
+  </div>
+
+  <div class="builder-actions">
+    <button class="copy-btn" id="randomize">🎲 randomize</button>
+    <button class="copy-btn ghost" id="clear">clear</button>
+  </div>
+
+  <div class="prompt-viewer" id="builder-output" hidden>
+    <div class="pv-tabs" role="tablist">
+      {MODEL_LIST.map((m, i) => (
+        <button class="pv-tab" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-model={m.id}>
+          {m.name}
+        </button>
+      ))}
+    </div>
+    <div class="pv-panel active">
+      <div class="pv-bar">
+        <span id="model-meta"></span>
+        <button class="copy-btn" id="copy-built">copy JSON</button>
+      </div>
+      <pre class="json"><code id="built-json"></code></pre>
+    </div>
+  </div>
+  <p class="dim small" id="builder-empty">Select at least one block above to generate a prompt.</p>
+
+  <script define:vars={{ payload }}>
+    window.__BUILDER_DATA__ = JSON.parse(payload);
+  </script>
+
+  <script>
+    import { buildPrompt } from '../../lib/format.js';
+    import { highlightJson } from '../../lib/highlight.js';
+    import { MODELS, MODEL_LIST, DEFAULT_MODEL } from '../../lib/models.js';
+
+    const data = (window as any).__BUILDER_DATA__ as Record<string, any[]>;
+    const selects = [...document.querySelectorAll<HTMLSelectElement>('select[data-block]')];
+    const output = document.getElementById('builder-output')!;
+    const empty = document.getElementById('builder-empty')!;
+    const code = document.getElementById('built-json')!;
+    const meta = document.getElementById('model-meta')!;
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('#builder-output .pv-tab')];
+    let activeModel = DEFAULT_MODEL;
+
+    // merge order = column order; later blocks override on key collisions
+    function mergedFields() {
+      const fields: Record<string, unknown> = {};
+      for (const sel of selects) {
+        const preset = data[sel.dataset.block!]?.find((p) => p.key === sel.value);
+        if (preset) Object.assign(fields, preset.fields);
+        const desc = document.querySelector(`[data-desc="${sel.dataset.block}"]`);
+        if (desc) desc.textContent = preset?.description ?? '';
+      }
+      return fields;
+    }
+
+    function render() {
+      const fields = mergedFields();
+      const hasAny = Object.keys(fields).length > 0;
+      output.hidden = !hasAny;
+      empty.hidden = hasAny;
+      if (!hasAny) return;
+      const m = MODELS[activeModel];
+      meta.textContent = `${m.vendor} · max ${m.maxDuration}s · ${m.resolution} · audio ${m.audio ? 'native' : 'none'} · click any value to edit`;
+      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel), null, 2));
+      // persist selections in the URL for sharing
+      const params = new URLSearchParams();
+      for (const sel of selects) if (sel.value) params.set(sel.dataset.block!, sel.value);
+      params.set('model', activeModel);
+      history.replaceState(null, '', params.size > 1 || selects.some(s => s.value) ? `?${params}` : location.pathname);
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        activeModel = tab.dataset.model!;
+        render();
+      });
+    });
+
+    selects.forEach((sel) => sel.addEventListener('change', render));
+
+    document.getElementById('randomize')!.addEventListener('click', () => {
+      for (const sel of selects) {
+        const items = data[sel.dataset.block!] ?? [];
+        sel.value = items[Math.floor(Math.random() * items.length)]?.key ?? '';
+      }
+      render();
+    });
+
+    document.getElementById('clear')!.addEventListener('click', () => {
+      selects.forEach((sel) => (sel.value = ''));
+      render();
+    });
+
+    document.getElementById('copy-built')!.addEventListener('click', async (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      await navigator.clipboard.writeText(code.closest('pre')?.textContent ?? '');
+      btn.textContent = 'copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy JSON'; btn.classList.remove('copied'); }, 1600);
+    });
+
+    // restore state from URL
+    const params = new URLSearchParams(location.search);
+    for (const sel of selects) {
+      const v = params.get(sel.dataset.block!);
+      if (v && data[sel.dataset.block!]?.some((p) => p.key === v)) sel.value = v;
+    }
+    const urlModel = params.get('model');
+    if (urlModel && MODELS[urlModel]) {
+      activeModel = urlModel;
+      tabs.forEach((t) => t.setAttribute('aria-selected', t.dataset.model === urlModel ? 'true' : 'false'));
+    }
+    render();
+  </script>
+</Base>

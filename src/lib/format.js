@@ -115,9 +115,26 @@ const KEY_RENAME = {
   negative: 'negative_prompt',
 };
 
+// Legacy preset values embed `random(['a', 'b'])` placeholders that the old app
+// resolved at runtime. Resolve them deterministically (hash-picked) so static
+// pages are stable across builds and server/client output matches.
+function resolveDynamic(value) {
+  if (typeof value !== 'string' || !value.includes('random(')) return value;
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  return value.replace(/random\(\[([^\]]*)\]\)/g, (_, list) => {
+    const options = list
+      .split(',')
+      .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean);
+    return options.length ? options[hash % options.length] : '';
+  });
+}
+
 function groupFields(fields) {
   const groups = {};
-  for (const [key, value] of Object.entries(fields)) {
+  for (const [key, rawValue] of Object.entries(fields)) {
+    const value = resolveDynamic(rawValue);
     if (value === undefined || value === null || value === '') continue;
     const group = FIELD_GROUP[key] ?? 'style';
     const outKey = KEY_RENAME[key] ?? key;
