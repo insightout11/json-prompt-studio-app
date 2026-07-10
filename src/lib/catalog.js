@@ -5,6 +5,11 @@
 
 import { templates } from '../data/templates.js';
 import { viralTemplates } from '../data/ViralTemplates.js';
+import { characterPresets } from '../data/characterPresetsData.js';
+import { scenePresets } from '../data/scenePresetsData.js';
+import { actionPresets } from '../data/actionPresetsData.js';
+import { directorStyles } from '../data/directorStylesData.js';
+import { audioPresets } from '../data/audioPresetsData.js';
 
 export function slugify(str) {
   return String(str)
@@ -21,9 +26,59 @@ function titleFromKey(key) {
     .join(' ');
 }
 
+// ---------- preset collections → categories ----------
+// 342 rich presets from the legacy preset files become first-class prompt pages,
+// grouped as "<Type>: <Category>" (e.g. "Scenes: Urban", "Action: Chase").
+
+const PRESET_SOURCES = [
+  { data: characterPresets, type: 'Characters', slugPrefix: 'characters', icon: '👤' },
+  { data: scenePresets, type: 'Scenes', slugPrefix: 'scenes', icon: '📍' },
+  { data: actionPresets, type: 'Action', slugPrefix: 'action', icon: '🎬' },
+  { data: directorStyles, type: 'Styles', slugPrefix: 'styles', icon: '🎨' },
+  { data: audioPresets, type: 'Audio', slugPrefix: 'audio', icon: '🔊' },
+];
+
+function presetCategories() {
+  const out = [];
+  for (const src of PRESET_SOURCES) {
+    const byCat = {};
+    for (const [key, p] of Object.entries(src.data)) {
+      if (!p.fields || Object.keys(p.fields).length < 4) continue;
+      (byCat[p.category ?? 'general'] ??= []).push({ key, ...p });
+    }
+    for (const [cat, items] of Object.entries(byCat)) {
+      const catSlug = `${src.slugPrefix}-${slugify(cat)}`;
+      const catName = `${src.type}: ${titleFromKey(cat.replace(/-/g, '_'))}`;
+      const seen = new Set();
+      out.push({
+        slug: catSlug,
+        name: catName,
+        icon: src.icon,
+        description: `${items.length} ${titleFromKey(cat.replace(/-/g, '_')).toLowerCase()} ${src.type.toLowerCase()} presets — drop into any template or use standalone.`,
+        templates: items.map((p) => {
+          let slug = slugify(p.id ?? p.name);
+          while (seen.has(slug)) slug = `${slug}-x`;
+          seen.add(slug);
+          return {
+            slug,
+            categorySlug: catSlug,
+            categoryName: catName,
+            name: p.name,
+            description: p.description ?? '',
+            useCase: p.useCase ?? '',
+            tags: p.tags ?? [],
+            fields: p.fields,
+          };
+        }),
+      });
+    }
+  }
+  return out;
+}
+
 // ---------- standard templates ----------
 
-export const categories = Object.entries(templates).map(([key, cat]) => {
+const templateCategories = Object.entries(templates).map(([key, cat]) => {
   const catSlug = slugify(key);
   const seen = new Set();
   const items = Object.entries(cat.levels ?? {}).map(([level, tpl]) => {
@@ -48,6 +103,8 @@ export const categories = Object.entries(templates).map(([key, cat]) => {
     templates: items,
   };
 });
+
+export const categories = [...templateCategories, ...presetCategories()];
 
 export const allTemplates = categories.flatMap((c) => c.templates);
 

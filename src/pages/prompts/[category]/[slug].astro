@@ -46,9 +46,20 @@ const breadcrumbLd = JSON.stringify({
   <p class="kicker">{cat.name}</p>
   <h1>{tpl.name}</h1>
   <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
-    {tpl.description}. Switch tabs to get this prompt shaped for your model, then copy
-    and paste it directly as your video prompt.
+    {tpl.description}.
+    {tpl.useCase && ` Best for: ${tpl.useCase}.`}
   </p>
+  {tpl.tags?.length > 0 && (
+    <p style="margin-top:0.7rem">
+      {tpl.tags.map((t) => <span class="badge">{t}</span>)}
+    </p>
+  )}
+
+  <ol class="dim small" style="margin:1.4rem 0 0 1.2rem; max-width:60ch">
+    <li><b style="color:var(--ink)">Pick your model's tab</b> — the JSON re-shapes itself to that model's block order and limits.</li>
+    <li><b style="color:var(--ink)">Click any green value to edit it in place</b> — swap the subject, setting, or style for your own.</li>
+    <li><b style="color:var(--ink)">Copy and paste</b> the JSON as your prompt in the tool — links below.</li>
+  </ol>
 
   <PromptViewer fields={tpl.fields} name={tpl.name} />
 

@@ -11,11 +11,12 @@ export function highlightJson(jsonString) {
     (match, str, _esc, colon, bool) => {
       if (str) {
         if (colon) return `<span class="j-key">${str}</span>${colon}`;
-        if (/\{\{[a-z0-9_]+\}\}/i.test(str)) return `<span class="j-var">${str}</span>`;
-        return `<span class="j-str">${str}</span>`;
+        const edit = 'contenteditable="true" spellcheck="false"';
+        if (/\{\{[a-z0-9_]+\}\}/i.test(str)) return `<span class="j-var" ${edit}>${str}</span>`;
+        return `<span class="j-str" ${edit}>${str}</span>`;
       }
       if (bool) return `<span class="j-bool">${bool}</span>`;
-      return `<span class="j-num">${match}</span>`;
+      return `<span class="j-num" contenteditable="true" spellcheck="false">${match}</span>`;
     }
   );
 }

@@ -31,14 +31,17 @@ const related = viralItems.filter((x) => x.category === v.category && x.slug !==
   <PromptViewer fields={v.fields} name={v.name} />
 
   {v.variables.length > 0 && (
-    <section class="section">
+    <section class="section" id="variables">
       <h2>Fill in the variables</h2>
+      <p class="dim small">
+        Type here (or click a suggestion) and every model tab above updates live.
+      </p>
       {v.variables.map((va) => (
         <div class="var-block">
           <span class="var-name">{`{{${va.key}}}`}</span> — {va.label}
-          <p class="dim small" style="margin-top:0.2rem">e.g. "{va.placeholder}"</p>
+          <input type="text" data-var-input={va.key} placeholder={va.placeholder} />
           {va.suggestions.length > 0 && (
-            <div class="sugg">
+            <div class="sugg" data-var-sugg={va.key}>
               {va.suggestions.map((s) => <span>{s}</span>)}
             </div>
           )}
@@ -46,6 +49,34 @@ const related = viralItems.filter((x) => x.category === v.category && x.slug !==
       ))}
     </section>
   )}
+
+  <script>
+    // Live-fill {{variables}} across every model tab.
+    // Each highlighted {{var}} span gets tagged with its key on load, so
+    // replacement survives repeated edits.
+    document.querySelectorAll('.prompt-viewer .j-var').forEach((span) => {
+      const m = span.textContent?.match(/\{\{([a-z0-9_]+)\}\}/i);
+      if (m) span.setAttribute('data-var', m[1]);
+    });
+    const fill = (key, value) => {
+      document.querySelectorAll(`.j-var[data-var="${key}"]`).forEach((span) => {
+        span.textContent = `"${value || `{{${key}}}`}"`;
+      });
+    };
+    document.querySelectorAll('[data-var-input]').forEach((input) => {
+      input.addEventListener('input', () => fill(input.dataset.varInput, input.value.trim()));
+    });
+    document.querySelectorAll('[data-var-sugg]').forEach((sugg) => {
+      sugg.querySelectorAll('span').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const key = sugg.dataset.varSugg;
+          const input = document.querySelector(`[data-var-input="${key}"]`);
+          input.value = chip.textContent;
+          fill(key, chip.textContent);
+        });
+      });
+    });
+  </script>
 
   <RunBox />
 
