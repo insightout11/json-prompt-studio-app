@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import PromptViewer from '../../components/PromptViewer.astro';
+import RunBox from '../../components/RunBox.astro';
+import { viralItems } from '../../lib/catalog.js';
+
+export function getStaticPaths() {
+  return viralItems.map((v) => ({ params: { slug: v.slug }, props: { v } }));
+}
+
+const { v } = Astro.props;
+const related = viralItems.filter((x) => x.category === v.category && x.slug !== v.slug).slice(0, 4);
+---
+
+<Base
+  title={`${v.name} — Viral ${v.categoryName} JSON Prompt for AI Video`}
+  description={`"${v.tagline}" — ${v.description}. Fill-in-the-blank JSON prompt formatted for Veo 3.1, Kling 3.0 and Seedance 2.0.`}
+  type="article"
+>
+  <nav class="crumbs">
+    <a href="/">home</a> / <a href="/viral/">viral formats</a> / {v.name.toLowerCase()}
+  </nav>
+
+  <p class="kicker">{v.categoryName} · "{v.tagline}"</p>
+  <h1>{v.name}</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    {v.description}. Replace the <span class="j-var">{'{{highlighted}}'}</span> variables
+    below with your own twist — suggestions included — then copy the JSON for your model.
+  </p>
+
+  <PromptViewer fields={v.fields} name={v.name} />
+
+  {v.variables.length > 0 && (
+    <section class="section" id="variables">
+      <h2>Fill in the variables</h2>
+      <p class="dim small">
+        Type here (or click a suggestion) and every model tab above updates live.
+      </p>
+      {v.variables.map((va) => (
+        <div class="var-block">
+          <span class="var-name">{`{{${va.key}}}`}</span> — {va.label}
+          <input type="text" data-var-input={va.key} placeholder={va.placeholder} />
+          {va.suggestions.length > 0 && (
+            <div class="sugg" data-var-sugg={va.key}>
+              {va.suggestions.map((s) => <span>{s}</span>)}
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+  )}
+
+  <script>
+    // Live-fill {{variables}} across every model tab.
+    // Each highlighted {{var}} span gets tagged with its key on load, so
+    // replacement survives repeated edits.
+    document.querySelectorAll('.prompt-viewer .j-var').forEach((span) => {
+      const m = span.textContent?.match(/\{\{([a-z0-9_]+)\}\}/i);
+      if (m) span.setAttribute('data-var', m[1]);
+    });
+    const fill = (key, value) => {
+      document.querySelectorAll(`.j-var[data-var="${key}"]`).forEach((span) => {
+        span.textContent = `"${value || `{{${key}}}`}"`;
+      });
+    };
+    document.querySelectorAll('[data-var-input]').forEach((input) => {
+      input.addEventListener('input', () => fill(input.dataset.varInput, input.value.trim()));
+    });
+    document.querySelectorAll('[data-var-sugg]').forEach((sugg) => {
+      sugg.querySelectorAll('span').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const key = sugg.dataset.varSugg;
+          const input = document.querySelector(`[data-var-input="${key}"]`);
+          input.value = chip.textContent;
+          fill(key, chip.textContent);
+        });
+      });
+    });
+  </script>
+
+  <RunBox />
+
+  {related.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <h2>More {v.categoryName.toLowerCase()}</h2>
+        <a href="/viral/">all formats →</a>
+      </div>
+      <div class="grid">
+        {related.map((t) => (
+          <a class="card" href={`/viral/${t.slug}/`}>
+            <h3>{t.name}</h3>
+            <p>{t.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

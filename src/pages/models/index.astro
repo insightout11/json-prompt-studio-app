@@ -1,0 +1,41 @@
+---
+import Base from '../../layouts/Base.astro';
+import { MODEL_LIST } from '../../lib/models.js';
+---
+
+<Base
+  title="AI Video Model Guides — JSON Prompting for Veo 3.1, Kling 3.0, Seedance 2.0, Wan & Runway"
+  description="How to JSON-prompt every major AI video model in 2026: capabilities, limits, block order, and where to run each one."
+>
+  <nav class="crumbs"><a href="/">home</a> / model guides</nav>
+  <p class="kicker">updated july 2026</p>
+  <h1>Model guides</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    Every model parses structured prompts differently. These guides cover what each
+    one rewards, what it caps, and how our templates adapt the JSON per model.
+  </p>
+
+  <div class="grid section" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+    {MODEL_LIST.map((m) => (
+      <a class="card" href={`/models/${m.id}/`}>
+        <h3>{m.name} <span class="dim small">· {m.vendor}</span></h3>
+        <p>{m.tagline}</p>
+        <p style="margin-top:0.5rem">
+          <span class={`badge ${m.audio ? 'on' : 'off'}`}>audio</span>
+          <span class={`badge ${m.multiShot ? 'on' : 'off'}`}>multi-shot</span>
+          <span class="badge">{m.maxDuration}s max</span>
+        </p>
+      </a>
+    ))}
+  </div>
+
+  <section class="section prose">
+    <h2>Where's Sora?</h2>
+    <p>
+      OpenAI discontinued the Sora app on April 26, 2026, and the API shuts down
+      September 24, 2026. If you're migrating Sora prompts,
+      <a href="/sora-alternatives/">start here</a> — structured JSON prompts move
+      between models almost unchanged.
+    </p>
+  </section>
+</Base>

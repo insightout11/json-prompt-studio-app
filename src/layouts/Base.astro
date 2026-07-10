@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+
+const {
+  title,
+  description = 'Copy-paste JSON prompt templates for Veo 3.1, Kling 3.0, Seedance 2.0 and more — structured prompts that produce consistent AI video.',
+  type = 'website',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="JSON Prompt Studio" />
+    <meta name="twitter:card" content="summary" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,550;9..144,650&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="site-head">
+      <div class="wrap">
+        <a href="/" class="brand">{'{'} <b>json</b>promptstudio {'}'}</a>
+        <nav class="site-nav">
+          <a href="/builder/">Builder</a>
+          <a href="/prompts/">Templates</a>
+          <a href="/viral/">Viral formats</a>
+          <a href="/models/">Model guides</a>
+          <a href="/sora-alternatives/">Sora alternatives</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <p>
+          JSON Prompt Studio — structured prompt templates for AI video generation.
+          Model facts current as of July 2026.
+        </p>
+        <p style="margin-top:0.5rem">
+          <a href="/prompts/">All templates</a> · <a href="/models/">Model guides</a> ·
+          <a href="/sora-alternatives/">Sora migration</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

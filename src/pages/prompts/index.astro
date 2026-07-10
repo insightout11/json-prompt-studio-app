@@ -1,0 +1,103 @@
+---
+import Base from '../../layouts/Base.astro';
+import { categories, allAddOns, allTemplates } from '../../lib/catalog.js';
+
+const nonEmpty = categories.filter((c) => c.templates.length > 0 || (c.addOns ?? []).length > 0);
+const searchIndex = JSON.stringify([
+  ...allTemplates.map((t) => ({
+    name: t.name,
+    description: t.description,
+    category: t.categoryName,
+    tags: t.tags ?? [],
+    href: `/prompts/${t.categorySlug}/${t.slug}/`,
+    type: 'prompt',
+  })),
+  ...allAddOns.map((t) => ({
+    name: t.name,
+    description: t.description,
+    category: t.categoryName,
+    tags: t.tags ?? [],
+    href: `/prompts/${t.categorySlug}/`,
+    type: 'add-on',
+  })),
+]).replace(/</g, '\\u003c');
+---
+
+<Base
+  title={`JSON Prompt Templates for AI Video — ${allTemplates.length} templates in ${nonEmpty.length} categories`}
+  description={`Browse ${allTemplates.length} copy-paste JSON prompt templates for Veo 3.1, Kling 3.0, Seedance 2.0, Wan and Runway, organized by genre, director style and use case.`}
+>
+  <nav class="crumbs"><a href="/">home</a> / templates</nav>
+  <p class="kicker">template library</p>
+  <h1>JSON prompt templates</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    Every template is a structured JSON prompt, auto-formatted for each major video
+    model. Categories run from cinematic genres to specific director styles.
+  </p>
+
+  <div class="section search-box">
+    <label for="template-search">Search prompts</label>
+    <input id="template-search" type="search" placeholder="camera move, product, horror, Veo, dialogue..." />
+    <div class="grid" id="search-results" hidden></div>
+  </div>
+
+  <div class="grid section">
+    {nonEmpty.map((c) => (
+      <a class="card" href={`/prompts/${c.slug}/`}>
+        <span class="icon">{c.icon}</span>
+        <h3>{c.name}</h3>
+        <p>{c.description}</p>
+        <span class="count">
+          {c.templates.length} prompts{(c.addOns ?? []).length ? ` · ${c.addOns.length} add-ons` : ''}
+        </span>
+      </a>
+    ))}
+  </div>
+
+  <script define:vars={{ searchIndex }}>
+    window.__TEMPLATE_SEARCH__ = JSON.parse(searchIndex);
+  </script>
+  <script>
+    const input = document.getElementById('template-search');
+    const results = document.getElementById('search-results');
+    const index = window.__TEMPLATE_SEARCH__ ?? [];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderResults(query) {
+      const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+      if (terms.length === 0) {
+        results.hidden = true;
+        results.innerHTML = '';
+        return;
+      }
+      const matches = index
+        .map((item) => {
+          const haystack = [item.name, item.description, item.category, ...(item.tags ?? [])].join(' ').toLowerCase();
+          const score = terms.reduce((n, term) => n + (haystack.includes(term) ? 1 : 0), 0);
+          return { item, score };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score || a.item.name.localeCompare(b.item.name))
+        .slice(0, 24);
+      results.hidden = false;
+      results.innerHTML = matches.length
+        ? matches.map(({ item }) => `
+          <a class="card" href="${escapeHtml(item.href)}">
+            <h3>${escapeHtml(item.name)}</h3>
+            <p>${escapeHtml(item.description || item.category)}</p>
+            <span class="count">${escapeHtml(item.type)} · ${escapeHtml(item.category)}</span>
+          </a>
+        `).join('')
+        : '<p class="dim small">No matching prompts yet.</p>';
+    }
+
+    input?.addEventListener('input', () => renderResults(input.value));
+  </script>
+</Base>

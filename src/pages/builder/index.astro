@@ -1,0 +1,285 @@
+---
+import Base from '../../layouts/Base.astro';
+import { characterPresets } from '../../data/characterPresetsData.js';
+import { scenePresets } from '../../data/scenePresetsData.js';
+import { actionPresets } from '../../data/actionPresetsData.js';
+import { directorStyles } from '../../data/directorStylesData.js';
+import { audioPresets } from '../../data/audioPresetsData.js';
+import { MODEL_LIST } from '../../lib/models.js';
+
+// Compact payload for the client: name + category + fields per preset.
+function pack(presetObj) {
+  return Object.entries(presetObj)
+    .filter(([, p]) => p.fields && Object.keys(p.fields).length >= 2)
+    .map(([key, p]) => ({
+      key,
+      name: p.name,
+      category: p.category ?? 'general',
+      description: p.description ?? '',
+      fields: p.fields,
+    }));
+}
+
+const BLOCKS = [
+  { id: 'character', label: 'Character', icon: '👤', items: pack(characterPresets) },
+  { id: 'scene', label: 'Scene', icon: '📍', items: pack(scenePresets) },
+  { id: 'action', label: 'Action', icon: '🎬', items: pack(actionPresets) },
+  { id: 'style', label: 'Style', icon: '🎨', items: pack(directorStyles) },
+  { id: 'audio', label: 'Audio', icon: '🔊', items: pack(audioPresets) },
+];
+
+function categoriesOf(items) {
+  return [...new Set(items.map((i) => i.category))];
+}
+
+// </script>-safe serialization
+const payload = JSON.stringify(
+  Object.fromEntries(BLOCKS.map((b) => [b.id, b.items]))
+).replace(/</g, '\\u003c');
+
+const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
+---
+
+<Base
+  title="JSON Prompt Builder — mix characters, scenes, actions & styles for AI video"
+  description={`Free JSON prompt builder for Veo 3.1, Kling 3.0 and Seedance 2.0: combine ${totalPresets} presets into one structured video prompt, edit any value inline, copy per model.`}
+>
+  <nav class="crumbs"><a href="/">home</a> / builder</nav>
+  <p class="kicker">{totalPresets} presets · no signup</p>
+  <h1>Prompt builder</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:62ch">
+    Pick a preset from each column, write your own, or mix both — your text overrides
+    the preset's description but keeps its cinematography details. Hit
+    <b style="color:var(--amber)">randomize</b> for a starting point, click any value
+    in the output to fine-tune, then copy.
+  </p>
+
+  <div class="builder-controls section">
+    {BLOCKS.map((b) => (
+      <div class="builder-block">
+        <label for={`pick-${b.id}`}>{b.icon} {b.label}</label>
+        <select id={`pick-${b.id}`} data-block={b.id}>
+          <option value="">— none —</option>
+          {categoriesOf(b.items).map((cat) => (
+            <optgroup label={cat}>
+              {b.items.filter((i) => i.category === cat).map((i) => (
+                <option value={i.key}>{i.name}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        <input
+          type="text"
+          class="builder-custom"
+          data-custom={b.id}
+          placeholder={`…or write your own ${b.label.toLowerCase()}`}
+        />
+        <p class="dim small builder-desc" data-desc={b.id}></p>
+      </div>
+    ))}
+  </div>
+
+  <div class="builder-actions">
+    <button class="copy-btn" id="randomize">🎲 randomize</button>
+    <button class="copy-btn ghost" id="clear">clear</button>
+  </div>
+
+  <div class="prompt-viewer" id="builder-output" hidden>
+    <div class="pv-tabs" role="tablist">
+      {MODEL_LIST.map((m, i) => (
+        <button class="pv-tab" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-model={m.id}>
+          {m.name}
+        </button>
+      ))}
+    </div>
+    <div class="pv-panel active">
+      <div class="pv-bar">
+        <span id="model-meta"></span>
+        <span class="pv-actions">
+          <button class="copy-btn ghost" id="builder-style-toggle" hidden>descriptive style</button>
+          <button class="copy-btn" id="copy-built">copy JSON</button>
+        </span>
+      </div>
+      <pre class="json"><code id="built-json"></code></pre>
+      <p class="json-warning small" id="builder-json-warning"></p>
+    </div>
+  </div>
+  <p class="dim small" id="builder-notes"></p>
+  <p class="dim small" id="builder-empty">Select at least one block above to generate a prompt.</p>
+
+  <script define:vars={{ payload }}>
+    window.__BUILDER_DATA__ = JSON.parse(payload);
+  </script>
+
+  <script>
+    import { FIELD_GROUP, buildPrompt, hasDescriptiveStyleVariant } from '../../lib/format.js';
+    import { highlightJson } from '../../lib/highlight.js';
+    import { MODELS, MODEL_LIST, DEFAULT_MODEL, modelSpecLine } from '../../lib/models.js';
+
+    const data = (window as any).__BUILDER_DATA__ as Record<string, any[]>;
+    const selects = [...document.querySelectorAll<HTMLSelectElement>('select[data-block]')];
+    const output = document.getElementById('builder-output')!;
+    const empty = document.getElementById('builder-empty')!;
+    const code = document.getElementById('built-json')!;
+    const builtPre = code.closest('pre')!;
+    const jsonWarning = document.getElementById('builder-json-warning')!;
+    const builderNotes = document.getElementById('builder-notes')!;
+    const meta = document.getElementById('model-meta')!;
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('#builder-output .pv-tab')];
+    const styleToggle = document.getElementById('builder-style-toggle') as HTMLButtonElement;
+    let activeModel = DEFAULT_MODEL;
+    let styleMode: 'named' | 'descriptive' = 'named';
+
+    // free-text per block lands on that block's primary field, overriding the
+    // preset's own description while keeping its detail fields
+    const CUSTOM_FIELD: Record<string, string> = {
+      character: 'characters',
+      scene: 'scene',
+      action: 'actions',
+      style: 'style',
+      audio: 'audio',
+    };
+    const customs = [...document.querySelectorAll<HTMLInputElement>('input[data-custom]')];
+
+    function validateOutput() {
+      try {
+        JSON.parse(builtPre.textContent ?? '');
+        builtPre.classList.remove('json-invalid');
+        jsonWarning.textContent = '';
+        return true;
+      } catch {
+        builtPre.classList.add('json-invalid');
+        jsonWarning.textContent = 'Invalid JSON. Fix the highlighted block before copying.';
+        return false;
+      }
+    }
+
+    // merge order = column order; later blocks override on key collisions
+    function mergedFields() {
+      const fields: Record<string, unknown> = {};
+      const owners: Record<string, string> = {};
+      const collisions: string[] = [];
+      for (const sel of selects) {
+        const preset = data[sel.dataset.block!]?.find((p) => p.key === sel.value);
+        if (preset) {
+          for (const [key, value] of Object.entries(preset.fields)) {
+            if (key in fields) collisions.push(`${key}: ${owners[key]} → ${sel.dataset.block}`);
+            fields[key] = value;
+            owners[key] = sel.dataset.block!;
+          }
+        }
+        const desc = document.querySelector(`[data-desc="${sel.dataset.block}"]`);
+        if (desc) desc.textContent = preset?.description ?? '';
+      }
+      for (const input of customs) {
+        const text = input.value.trim();
+        if (text) {
+          const key = CUSTOM_FIELD[input.dataset.custom!];
+          if (key in fields) collisions.push(`${key}: ${owners[key]} → custom ${input.dataset.custom}`);
+          fields[key] = text;
+          owners[key] = `custom ${input.dataset.custom}`;
+        }
+      }
+      return { fields, collisions };
+    }
+
+    function render() {
+      const { fields, collisions } = mergedFields();
+      const hasAny = Object.keys(fields).length > 0;
+      output.hidden = !hasAny;
+      empty.hidden = hasAny;
+      if (!hasAny) {
+        builderNotes.textContent = '';
+        return;
+      }
+      const m = MODELS[activeModel];
+      meta.textContent = `${modelSpecLine(m)} · click any value to edit`;
+      const hasStyleVariant = hasDescriptiveStyleVariant(fields);
+      styleToggle.hidden = !hasStyleVariant;
+      if (!hasStyleVariant) styleMode = 'named';
+      styleToggle.textContent = styleMode === 'descriptive' ? 'named style' : 'descriptive style';
+      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel, { styleMode }), null, 2));
+      validateOutput();
+      const notes = [];
+      if (!m.audio && Object.keys(fields).some((key) => FIELD_GROUP[key] === 'audio')) {
+        notes.push(`${m.name} renders silent output, so audio fields are dropped from this model's JSON.`);
+      }
+      if (collisions.length > 0) {
+        notes.push(`Field overrides: ${collisions.slice(0, 4).join('; ')}${collisions.length > 4 ? '; …' : ''}.`);
+      }
+      builderNotes.textContent = notes.join(' ');
+      // persist selections in the URL for sharing
+      const params = new URLSearchParams();
+      for (const sel of selects) if (sel.value) params.set(sel.dataset.block!, sel.value);
+      for (const input of customs) {
+        const text = input.value.trim();
+        if (text) params.set(`c_${input.dataset.custom}`, text.slice(0, 200));
+      }
+      params.set('model', activeModel);
+      if (styleMode === 'descriptive') params.set('style', 'descriptive');
+      history.replaceState(null, '', params.size > 1 || selects.some(s => s.value) ? `?${params}` : location.pathname);
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        activeModel = tab.dataset.model!;
+        render();
+      });
+    });
+
+    selects.forEach((sel) => sel.addEventListener('change', render));
+    customs.forEach((input) => input.addEventListener('input', render));
+    styleToggle.addEventListener('click', () => {
+      styleMode = styleMode === 'descriptive' ? 'named' : 'descriptive';
+      render();
+    });
+
+    document.getElementById('randomize')!.addEventListener('click', () => {
+      for (const sel of selects) {
+        const items = data[sel.dataset.block!] ?? [];
+        sel.value = items[Math.floor(Math.random() * items.length)]?.key ?? '';
+      }
+      render();
+    });
+
+    document.getElementById('clear')!.addEventListener('click', () => {
+      selects.forEach((sel) => (sel.value = ''));
+      customs.forEach((input) => (input.value = ''));
+      render();
+    });
+
+    document.getElementById('copy-built')!.addEventListener('click', async (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      if (!validateOutput()) return;
+      await navigator.clipboard.writeText(builtPre.textContent ?? '');
+      btn.textContent = 'copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy JSON'; btn.classList.remove('copied'); }, 1600);
+    });
+
+    code.addEventListener('blur', (event) => {
+      const target = event.target as HTMLElement;
+      if (target?.hasAttribute?.('contenteditable')) validateOutput();
+    }, true);
+
+    // restore state from URL
+    const params = new URLSearchParams(location.search);
+    for (const sel of selects) {
+      const v = params.get(sel.dataset.block!);
+      if (v && data[sel.dataset.block!]?.some((p) => p.key === v)) sel.value = v;
+    }
+    for (const input of customs) {
+      const v = params.get(`c_${input.dataset.custom}`);
+      if (v) input.value = v;
+    }
+    const urlModel = params.get('model');
+    if (urlModel && MODELS[urlModel]) {
+      activeModel = urlModel;
+      tabs.forEach((t) => t.setAttribute('aria-selected', t.dataset.model === urlModel ? 'true' : 'false'));
+    }
+    if (params.get('style') === 'descriptive') styleMode = 'descriptive';
+    render();
+  </script>
+</Base>

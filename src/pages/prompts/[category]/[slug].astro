@@ -1,0 +1,98 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PromptViewer from '../../../components/PromptViewer.astro';
+import RunBox from '../../../components/RunBox.astro';
+import { categories } from '../../../lib/catalog.js';
+import { buildPrompt, GROUP_DOCS } from '../../../lib/format.js';
+import { DEFAULT_MODEL } from '../../../lib/models.js';
+
+export function getStaticPaths() {
+  return categories.flatMap((cat) =>
+    cat.templates.map((t) => ({
+      params: { category: cat.slug, slug: t.slug },
+      props: { cat, tpl: t },
+    }))
+  );
+}
+
+const { cat, tpl } = Astro.props;
+
+const groupsPresent = Object.keys(buildPrompt(tpl.fields, DEFAULT_MODEL));
+const related = cat.templates.filter((t) => t.slug !== tpl.slug).slice(0, 4);
+
+const breadcrumbLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Templates', item: new URL('/prompts/', Astro.site) },
+    { '@type': 'ListItem', position: 2, name: cat.name, item: new URL(`/prompts/${cat.slug}/`, Astro.site) },
+    { '@type': 'ListItem', position: 3, name: tpl.name },
+  ],
+});
+---
+
+<Base
+  title={`${tpl.name} — ${cat.name} JSON Prompt for Veo 3.1, Kling 3.0 & Seedance`}
+  description={`Copy-paste JSON prompt: ${tpl.description}. Formatted for Veo 3.1, Kling 3.0, Seedance 2.0, Wan and Runway Gen-4.5.`}
+  type="article"
+>
+  <script type="application/ld+json" set:html={breadcrumbLd} slot="head" />
+
+  <nav class="crumbs">
+    <a href="/">home</a> / <a href="/prompts/">templates</a> /
+    <a href={`/prompts/${cat.slug}/`}>{cat.name.toLowerCase()}</a> / {tpl.name.toLowerCase()}
+  </nav>
+
+  <p class="kicker">{cat.name}</p>
+  <h1>{tpl.name}</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    {tpl.description}.
+    {tpl.useCase && ` Best for: ${tpl.useCase}.`}
+  </p>
+  {tpl.tags?.length > 0 && (
+    <p style="margin-top:0.7rem">
+      {tpl.tags.map((t) => <span class="badge">{t}</span>)}
+    </p>
+  )}
+
+  <ol class="dim small" style="margin:1.4rem 0 0 1.2rem; max-width:60ch">
+    <li><b style="color:var(--ink)">Pick your model's tab</b> — the JSON re-shapes itself to that model's block order and limits.</li>
+    <li><b style="color:var(--ink)">Click any green value to edit it in place</b> — swap the subject, setting, or style for your own.</li>
+    <li><b style="color:var(--ink)">Copy and paste</b> the JSON as your prompt in the tool — links below.</li>
+  </ol>
+
+  <PromptViewer fields={tpl.fields} name={tpl.name} />
+
+  <RunBox />
+
+  <section class="section">
+    <h2>What each block does</h2>
+    <div class="table-scroll">
+      <table class="field-docs">
+        <thead><tr><th>Block</th><th>Purpose</th></tr></thead>
+        <tbody>
+          {groupsPresent.map((g) => (
+            <tr><td>{g}</td><td>{GROUP_DOCS[g]}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <h2>More {cat.name.toLowerCase()} prompts</h2>
+        <a href={`/prompts/${cat.slug}/`}>all →</a>
+      </div>
+      <div class="grid">
+        {related.map((t) => (
+          <a class="card" href={`/prompts/${cat.slug}/${t.slug}/`}>
+            <h3>{t.name}</h3>
+            <p>{t.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import PromptViewer from '../components/PromptViewer.astro';
+import { categories, allTemplates, viralItems } from '../lib/catalog.js';
+import { MODEL_LIST } from '../lib/models.js';
+
+const featured = categories
+  .filter((c) => c.templates.length > 0 || (c.addOns ?? []).length > 0)
+  .slice(0, 12);
+const demo = allTemplates.find((t) => t.slug === 'young-woman-walking') ?? allTemplates[0];
+---
+
+<Base title="JSON Prompt Studio — copy-paste JSON prompts for Veo 3.1, Kling 3.0 & Seedance 2.0">
+  <section class="hero">
+    <p class="kicker">structured prompts for AI video</p>
+    <h1>Stop guessing. <em>Direct</em> your AI video with JSON.</h1>
+    <p class="lede">
+      {allTemplates.length}+ tested JSON prompt templates, formatted for every major
+      video model — Veo 3.1, Kling 3.0, Seedance 2.0, Wan and Runway. Pick a template,
+      switch to your model's tab, copy, paste, render.
+    </p>
+    <div class="run-links" style="margin-top:1.6rem">
+      <a href="/builder/" style="border-color:var(--amber); color:var(--amber)">🎲 Open the prompt builder →</a>
+      <a href="/prompts/">Browse templates</a>
+    </div>
+    <div class="hero-stats">
+      <div><b>{allTemplates.length + viralItems.length}</b> templates</div>
+      <div><b>{categories.length}</b> categories</div>
+      <div><b>{MODEL_LIST.length}</b> models supported</div>
+      <div><b>$0</b> no signup, no paywall</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="kicker">try one</p>
+    <h2>One template, every model</h2>
+    <p class="dim small">
+      The same shot, automatically re-ordered and adjusted for each model's prompting
+      doctrine — Seedance wants camera first, Veo wants scene first, Wan drops audio.
+    </p>
+    <PromptViewer fields={demo.fields} name={demo.name} />
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Template library</h2>
+      <a href="/prompts/">all {categories.length} categories →</a>
+    </div>
+    <div class="grid">
+      {featured.map((c) => (
+        <a class="card" href={`/prompts/${c.slug}/`}>
+          <span class="icon">{c.icon}</span>
+          <h3>{c.name}</h3>
+          <p>{c.description}</p>
+          <span class="count">{c.templates.length} templates</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Viral video formats</h2>
+      <a href="/viral/">all formats →</a>
+    </div>
+    <div class="grid">
+      {viralItems.slice(0, 8).map((v) => (
+        <a class="card" href={`/viral/${v.slug}/`}>
+          <h3>{v.name}</h3>
+          <p>{v.description}</p>
+          <span class="count">{v.categoryName}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Model guides</h2>
+      <a href="/models/">all guides →</a>
+    </div>
+    <div class="grid">
+      {MODEL_LIST.map((m) => (
+        <a class="card" href={`/models/${m.id}/`}>
+          <h3>{m.name}</h3>
+          <p>{m.tagline}</p>
+          <span class="count">{m.vendor}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>
