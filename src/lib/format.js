@@ -4,7 +4,7 @@
 import { MODELS } from './models.js';
 
 // raw field key → semantic group
-const FIELD_GROUP = {
+export const FIELD_GROUP = {
   characters: 'subject',
   character_type: 'subject',
   age_range: 'subject',
@@ -49,9 +49,11 @@ const FIELD_GROUP = {
   lens_type: 'camera',
   depth_of_field: 'camera',
   speed: 'camera',
+  transition: 'camera',
 
   lighting_type: 'lighting',
   light_quality: 'lighting',
+  lighting_direction: 'lighting',
   shadows: 'lighting',
 
   style: 'style',
@@ -68,6 +70,7 @@ const FIELD_GROUP = {
   audio: 'audio',
   music_style: 'audio',
   audio_mood: 'audio',
+  sound_design: 'audio',
   sound_effects: 'audio',
   background_audio: 'audio',
   environment_audio: 'audio',
@@ -76,16 +79,23 @@ const FIELD_GROUP = {
 
   aspect_ratio: 'technical',
   seed: 'technical',
+  frame_rate: 'technical',
   fps: 'technical',
   duration_s: 'technical',
   creativity: 'technical',
   negative: 'technical',
   lock_identity: 'technical',
   lock_style: 'technical',
+  technical_setup: 'technical',
+
+  robot_style: 'subject',
+  scale: 'subject',
+  object_type: 'subject',
+  glow: 'lighting',
 };
 
 // raw key → key used inside the output JSON
-const KEY_RENAME = {
+export const KEY_RENAME = {
   characters: 'description',
   character_type: 'type',
   actions: 'description',
@@ -105,15 +115,114 @@ const KEY_RENAME = {
   camera_move: 'movement',
   camera_lens_mm: 'lens_mm',
   camera_speed: 'movement_speed',
+  transition: 'transition',
   lighting_type: 'type',
   light_quality: 'quality',
+  lighting_direction: 'direction',
   style: 'aesthetic',
   stylized_style: 'aesthetic',
   music_style: 'music',
   audio: 'description',
+  sound_design: 'design',
+  frame_rate: 'fps',
   duration_s: 'duration_seconds',
   negative: 'negative_prompt',
+  technical_setup: 'setup',
 };
+
+export const KNOWN_FIELD_KEYS = new Set(Object.keys(FIELD_GROUP));
+
+export function unknownFieldKeysFrom(items) {
+  const unknown = new Map();
+  for (const item of items) {
+    for (const key of Object.keys(item.fields ?? {})) {
+      if (!KNOWN_FIELD_KEYS.has(key)) {
+        unknown.set(key, (unknown.get(key) ?? 0) + 1);
+      }
+    }
+  }
+  return [...unknown.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+export function assertKnownFieldKeys(items, sourceName = 'prompt data') {
+  const unknown = unknownFieldKeysFrom(items);
+  if (unknown.length === 0) return;
+  const list = unknown.map(([key, count]) => `${key} (${count})`).join(', ');
+  throw new Error(`Unmapped prompt field keys in ${sourceName}: ${list}`);
+}
+
+export function groupsForFields(fields) {
+  return new Set(
+    Object.keys(fields ?? {})
+      .filter((key) => KNOWN_FIELD_KEYS.has(key))
+      .map((key) => FIELD_GROUP[key])
+  );
+}
+
+export function isFullPrompt(fields) {
+  const keys = Object.keys(fields ?? {});
+  if (keys.length < 4) return false;
+  const groups = groupsForFields(fields);
+  return ['subject', 'action', 'scene'].some((group) => groups.has(group));
+}
+
+const DESCRIPTIVE_STYLE_MAP = [
+  ['Christopher Nolan', 'large-format practical-thriller cinematography, grounded spectacle, temporal tension, hard contrast'],
+  ['Wes Anderson', 'symmetrical planimetric framing, pastel palette, centered staging, meticulous production design'],
+  ['Steven Spielberg', 'warm backlight, motivated camera movement, wide-eyed reaction shots, classical adventure blocking'],
+  ['Quentin Tarantino', 'high-tension dialogue staging, retro genre texture, bold color contrast, slow-burn close-ups'],
+  ['Hayao Miyazaki', 'hand-painted storybook animation, gentle naturalism, whimsical motion, soft environmental detail'],
+  ['Studio Ghibli', 'hand-painted storybook animation, gentle naturalism, whimsical motion, soft environmental detail'],
+  ['Zack Snyder', 'high-contrast heroic tableaux, stylized slow motion, dramatic rim light, graphic composition'],
+  ['David Fincher', 'controlled cool-toned precision, low-key lighting, exact camera placement, procedural tension'],
+  ['Greta Gerwig', 'bright contemporary warmth, expressive ensemble staging, playful color, emotional naturalism'],
+  ['Guillermo del Toro', 'gothic fairytale texture, ornate practical sets, amber-blue contrast, creature-feature detail'],
+  ['Stanley Kubrick', 'one-point perspective, controlled symmetry, slow deliberate camera moves, clinical tension'],
+  ['Denis Villeneuve', 'monumental scale, atmospheric minimalism, stark silhouettes, slow contemplative movement'],
+  ['Jordan Peele', 'social-thriller unease, clean suburban realism, controlled reveals, uncomfortable negative space'],
+  ['Rian Johnson', 'sleek mystery staging, crisp blocking, puzzle-box composition, colorful genre polish'],
+  ['Edgar Wright', 'kinetic montage, rhythmic camera moves, precise visual comedy, punchy transitions'],
+  ['Bong Joon-ho', 'class-conscious realism, tonal contrast, layered ensemble blocking, dark comic tension'],
+  ['Chloé Zhao', 'natural-light intimacy, handheld lyricism, golden-hour landscapes, quiet observational realism'],
+  ['Barry Jenkins', 'lush intimate close-ups, saturated color, tender natural light, poetic realism'],
+  ['Lulu Wang', 'restrained family realism, soft cultural detail, composed interiors, bittersweet warmth'],
+  ['Martin Scorsese', 'kinetic street-level realism, restless camera movement, saturated practical light, ensemble tension'],
+  ['Ridley Scott', 'smoky atmospheric production design, hard shafts of light, industrial scale, tactile sci-fi realism'],
+  ['Paul Thomas Anderson', 'American ensemble naturalism, elegant long takes, textured period detail, restless character blocking'],
+  ['Coen Brothers', 'dry comic framing, precise regional texture, offbeat noir composition, deadpan tension'],
+  ['Alfonso Cuarón', 'immersive long takes, naturalistic handheld motion, environmental realism, elegant spatial choreography'],
+  ['Disney', 'classic family animation polish, expressive character acting, musical storybook staging'],
+  ['Pixar', 'polished 3D family animation, expressive character acting, soft tactile materials, emotional clarity'],
+  ['The Simpsons', 'flat-color adult sitcom animation, suburban satire, simple bold silhouettes'],
+  ['South Park', 'satirical cutout animation, flat paper-like shapes, deliberately crude motion'],
+  ['Family Guy', 'flat adult sitcom animation, broad comedic staging, clean TV-cartoon outlines'],
+  ['Cartoon Network', 'bold 2D television animation, elastic poses, simplified shapes, energetic timing'],
+  ['Nickelodeon', "bright 90s children's animation energy, exaggerated shapes, messy comic texture"],
+];
+
+function descriptiveStyleValue(value) {
+  if (typeof value !== 'string') return value;
+  let out = value;
+  for (const [name, replacement] of DESCRIPTIVE_STYLE_MAP) {
+    out = out.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), replacement);
+  }
+  return out;
+}
+
+export function hasDescriptiveStyleVariant(fields) {
+  return Object.entries(fields ?? {}).some(
+    ([key, value]) => FIELD_GROUP[key] === 'style' && descriptiveStyleValue(value) !== value
+  );
+}
+
+export function descriptiveStyleFields(fields) {
+  return Object.fromEntries(
+    Object.entries(fields ?? {}).map(([key, value]) => [
+      key,
+      FIELD_GROUP[key] === 'style' ? descriptiveStyleValue(value) : value,
+    ])
+  );
+}
 
 // Legacy preset values embed `random(['a', 'b'])` placeholders that the old app
 // resolved at runtime. Resolve them deterministically (hash-picked) so static
@@ -162,9 +271,10 @@ function collapse(groupObj) {
  * @param {string} modelId key in MODELS
  * @returns {object} ordered, model-adjusted prompt object
  */
-export function buildPrompt(fields, modelId) {
+export function buildPrompt(fields, modelId, options = {}) {
   const model = MODELS[modelId];
-  const groups = groupFields(fields);
+  const inputFields = options.styleMode === 'descriptive' ? descriptiveStyleFields(fields) : fields;
+  const groups = groupFields(inputFields);
 
   // model adjustments
   if (!model.audio) delete groups.audio;
@@ -185,8 +295,8 @@ export function buildPrompt(fields, modelId) {
   return out;
 }
 
-export function promptJson(fields, modelId) {
-  return JSON.stringify(buildPrompt(fields, modelId), null, 2);
+export function promptJson(fields, modelId, options = {}) {
+  return JSON.stringify(buildPrompt(fields, modelId, options), null, 2);
 }
 
 // Plain-language explanation of what each top-level block does, for the on-page field guide.

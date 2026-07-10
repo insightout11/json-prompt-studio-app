@@ -95,11 +95,16 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     <div class="pv-panel active">
       <div class="pv-bar">
         <span id="model-meta"></span>
-        <button class="copy-btn" id="copy-built">copy JSON</button>
+        <span class="pv-actions">
+          <button class="copy-btn ghost" id="builder-style-toggle" hidden>descriptive style</button>
+          <button class="copy-btn" id="copy-built">copy JSON</button>
+        </span>
       </div>
       <pre class="json"><code id="built-json"></code></pre>
+      <p class="json-warning small" id="builder-json-warning"></p>
     </div>
   </div>
+  <p class="dim small" id="builder-notes"></p>
   <p class="dim small" id="builder-empty">Select at least one block above to generate a prompt.</p>
 
   <script define:vars={{ payload }}>
@@ -107,18 +112,23 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
   </script>
 
   <script>
-    import { buildPrompt } from '../../lib/format.js';
+    import { FIELD_GROUP, buildPrompt, hasDescriptiveStyleVariant } from '../../lib/format.js';
     import { highlightJson } from '../../lib/highlight.js';
-    import { MODELS, MODEL_LIST, DEFAULT_MODEL } from '../../lib/models.js';
+    import { MODELS, MODEL_LIST, DEFAULT_MODEL, modelSpecLine } from '../../lib/models.js';
 
     const data = (window as any).__BUILDER_DATA__ as Record<string, any[]>;
     const selects = [...document.querySelectorAll<HTMLSelectElement>('select[data-block]')];
     const output = document.getElementById('builder-output')!;
     const empty = document.getElementById('builder-empty')!;
     const code = document.getElementById('built-json')!;
+    const builtPre = code.closest('pre')!;
+    const jsonWarning = document.getElementById('builder-json-warning')!;
+    const builderNotes = document.getElementById('builder-notes')!;
     const meta = document.getElementById('model-meta')!;
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('#builder-output .pv-tab')];
+    const styleToggle = document.getElementById('builder-style-toggle') as HTMLButtonElement;
     let activeModel = DEFAULT_MODEL;
+    let styleMode: 'named' | 'descriptive' = 'named';
 
     // free-text per block lands on that block's primary field, overriding the
     // preset's own description while keeping its detail fields
@@ -131,31 +141,73 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     };
     const customs = [...document.querySelectorAll<HTMLInputElement>('input[data-custom]')];
 
+    function validateOutput() {
+      try {
+        JSON.parse(builtPre.textContent ?? '');
+        builtPre.classList.remove('json-invalid');
+        jsonWarning.textContent = '';
+        return true;
+      } catch {
+        builtPre.classList.add('json-invalid');
+        jsonWarning.textContent = 'Invalid JSON. Fix the highlighted block before copying.';
+        return false;
+      }
+    }
+
     // merge order = column order; later blocks override on key collisions
     function mergedFields() {
       const fields: Record<string, unknown> = {};
+      const owners: Record<string, string> = {};
+      const collisions: string[] = [];
       for (const sel of selects) {
         const preset = data[sel.dataset.block!]?.find((p) => p.key === sel.value);
-        if (preset) Object.assign(fields, preset.fields);
+        if (preset) {
+          for (const [key, value] of Object.entries(preset.fields)) {
+            if (key in fields) collisions.push(`${key}: ${owners[key]} → ${sel.dataset.block}`);
+            fields[key] = value;
+            owners[key] = sel.dataset.block!;
+          }
+        }
         const desc = document.querySelector(`[data-desc="${sel.dataset.block}"]`);
         if (desc) desc.textContent = preset?.description ?? '';
       }
       for (const input of customs) {
         const text = input.value.trim();
-        if (text) fields[CUSTOM_FIELD[input.dataset.custom!]] = text;
+        if (text) {
+          const key = CUSTOM_FIELD[input.dataset.custom!];
+          if (key in fields) collisions.push(`${key}: ${owners[key]} → custom ${input.dataset.custom}`);
+          fields[key] = text;
+          owners[key] = `custom ${input.dataset.custom}`;
+        }
       }
-      return fields;
+      return { fields, collisions };
     }
 
     function render() {
-      const fields = mergedFields();
+      const { fields, collisions } = mergedFields();
       const hasAny = Object.keys(fields).length > 0;
       output.hidden = !hasAny;
       empty.hidden = hasAny;
-      if (!hasAny) return;
+      if (!hasAny) {
+        builderNotes.textContent = '';
+        return;
+      }
       const m = MODELS[activeModel];
-      meta.textContent = `${m.vendor} · max ${m.maxDuration}s · ${m.resolution} · audio ${m.audio ? 'native' : 'none'} · click any value to edit`;
-      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel), null, 2));
+      meta.textContent = `${modelSpecLine(m)} · click any value to edit`;
+      const hasStyleVariant = hasDescriptiveStyleVariant(fields);
+      styleToggle.hidden = !hasStyleVariant;
+      if (!hasStyleVariant) styleMode = 'named';
+      styleToggle.textContent = styleMode === 'descriptive' ? 'named style' : 'descriptive style';
+      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel, { styleMode }), null, 2));
+      validateOutput();
+      const notes = [];
+      if (!m.audio && Object.keys(fields).some((key) => FIELD_GROUP[key] === 'audio')) {
+        notes.push(`${m.name} renders silent output, so audio fields are dropped from this model's JSON.`);
+      }
+      if (collisions.length > 0) {
+        notes.push(`Field overrides: ${collisions.slice(0, 4).join('; ')}${collisions.length > 4 ? '; …' : ''}.`);
+      }
+      builderNotes.textContent = notes.join(' ');
       // persist selections in the URL for sharing
       const params = new URLSearchParams();
       for (const sel of selects) if (sel.value) params.set(sel.dataset.block!, sel.value);
@@ -164,6 +216,7 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
         if (text) params.set(`c_${input.dataset.custom}`, text.slice(0, 200));
       }
       params.set('model', activeModel);
+      if (styleMode === 'descriptive') params.set('style', 'descriptive');
       history.replaceState(null, '', params.size > 1 || selects.some(s => s.value) ? `?${params}` : location.pathname);
     }
 
@@ -178,6 +231,10 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
 
     selects.forEach((sel) => sel.addEventListener('change', render));
     customs.forEach((input) => input.addEventListener('input', render));
+    styleToggle.addEventListener('click', () => {
+      styleMode = styleMode === 'descriptive' ? 'named' : 'descriptive';
+      render();
+    });
 
     document.getElementById('randomize')!.addEventListener('click', () => {
       for (const sel of selects) {
@@ -195,11 +252,17 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
 
     document.getElementById('copy-built')!.addEventListener('click', async (e) => {
       const btn = e.currentTarget as HTMLButtonElement;
-      await navigator.clipboard.writeText(code.closest('pre')?.textContent ?? '');
+      if (!validateOutput()) return;
+      await navigator.clipboard.writeText(builtPre.textContent ?? '');
       btn.textContent = 'copied ✓';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'copy JSON'; btn.classList.remove('copied'); }, 1600);
     });
+
+    code.addEventListener('blur', (event) => {
+      const target = event.target as HTMLElement;
+      if (target?.hasAttribute?.('contenteditable')) validateOutput();
+    }, true);
 
     // restore state from URL
     const params = new URLSearchParams(location.search);
@@ -216,6 +279,7 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
       activeModel = urlModel;
       tabs.forEach((t) => t.setAttribute('aria-selected', t.dataset.model === urlModel ? 'true' : 'false'));
     }
+    if (params.get('style') === 'descriptive') styleMode = 'descriptive';
     render();
   </script>
 </Base>

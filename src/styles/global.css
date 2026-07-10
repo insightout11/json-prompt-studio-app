@@ -159,6 +159,7 @@ h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
   padding: 0.5rem 1rem; font-size: 0.7rem; color: var(--ink-faint);
   border-bottom: 1px dashed var(--line);
 }
+.pv-actions { display: inline-flex; align-items: center; gap: 0.5rem; margin-left: 0.8rem; }
 .copy-btn {
   font-family: var(--mono); font-size: 0.72rem;
   color: var(--bg); background: var(--amber);
@@ -172,6 +173,15 @@ pre.json {
   padding: 1.1rem 1.2rem; overflow-x: auto;
   font-size: 0.8rem; line-height: 1.6;
   font-family: var(--mono);
+}
+.json-invalid {
+  outline: 1px solid var(--red);
+  background: rgba(247, 118, 142, 0.06);
+}
+.json-warning {
+  color: var(--red);
+  min-height: 1.4em;
+  padding: 0.35rem 1rem 0;
 }
 .j-key { color: var(--amber); }
 .j-str { color: var(--green); }
@@ -305,6 +315,19 @@ pre.json {
 .builder-actions { display: flex; gap: 0.6rem; margin: 1.2rem 0; }
 .copy-btn.ghost { background: transparent; color: var(--ink-dim); border: 1px solid var(--line-bright); }
 .copy-btn.ghost:hover { color: var(--ink); border-color: var(--amber); }
+
+.search-box label {
+  display: block; font-size: 0.75rem; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.4rem;
+}
+.search-box input {
+  width: 100%;
+  background: var(--bg-panel); color: var(--ink);
+  border: 1px solid var(--line-bright); border-radius: 5px;
+  padding: 0.7rem 0.8rem; font-family: var(--mono); font-size: 0.85rem;
+}
+.search-box input:focus { outline: 1px solid var(--amber); }
+#search-results { margin-top: 1rem; }
 
 @media (max-width: 640px) {
   .hero { padding: 3rem 0 2rem; }

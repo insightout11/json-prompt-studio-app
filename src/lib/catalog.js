@@ -10,6 +10,7 @@ import { scenePresets } from '../data/scenePresetsData.js';
 import { actionPresets } from '../data/actionPresetsData.js';
 import { directorStyles } from '../data/directorStylesData.js';
 import { audioPresets } from '../data/audioPresetsData.js';
+import { assertKnownFieldKeys, isFullPrompt } from './format.js';
 
 export function slugify(str) {
   return String(str)
@@ -37,6 +38,29 @@ const PRESET_SOURCES = [
   { data: directorStyles, type: 'Styles', slugPrefix: 'styles', icon: '🎨' },
   { data: audioPresets, type: 'Audio', slugPrefix: 'audio', icon: '🔊' },
 ];
+
+function sourceItems(data) {
+  return Object.values(data).filter((item) => item.fields);
+}
+
+const standardTemplateItems = Object.values(templates).flatMap((cat) =>
+  Object.values(cat.levels ?? {}).filter((item) => item.fields)
+);
+
+assertKnownFieldKeys(
+  [
+    ...standardTemplateItems,
+    ...sourceItems(characterPresets),
+    ...sourceItems(scenePresets),
+    ...sourceItems(actionPresets),
+    ...sourceItems(directorStyles),
+    ...sourceItems(audioPresets),
+    ...Object.values(viralTemplates)
+      .filter((item) => item.fixed_fields)
+      .map((item) => ({ fields: item.fixed_fields })),
+  ],
+  'catalog data'
+);
 
 function presetCategories() {
   const out = [];
@@ -81,7 +105,7 @@ function presetCategories() {
 const templateCategories = Object.entries(templates).map(([key, cat]) => {
   const catSlug = slugify(key);
   const seen = new Set();
-  const items = Object.entries(cat.levels ?? {}).map(([level, tpl]) => {
+  const allItems = Object.entries(cat.levels ?? {}).map(([level, tpl]) => {
     let slug = slugify(tpl.name);
     while (seen.has(slug)) slug = `${slug}-${level}`;
     seen.add(slug);
@@ -95,18 +119,22 @@ const templateCategories = Object.entries(templates).map(([key, cat]) => {
       fields: tpl.fields ?? {},
     };
   });
+  const items = allItems.filter((item) => isFullPrompt(item.fields));
+  const addOns = allItems.filter((item) => !isFullPrompt(item.fields));
   return {
     slug: catSlug,
     name: cat.name ?? titleFromKey(key),
     icon: cat.icon ?? '🎬',
     description: cat.description ?? '',
     templates: items,
+    addOns,
   };
 });
 
 export const categories = [...templateCategories, ...presetCategories()];
 
 export const allTemplates = categories.flatMap((c) => c.templates);
+export const allAddOns = categories.flatMap((c) => c.addOns ?? []);
 
 export function getCategory(slug) {
   return categories.find((c) => c.slug === slug);

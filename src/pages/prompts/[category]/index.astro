@@ -1,14 +1,18 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import { categories } from '../../../lib/catalog.js';
+import { DEFAULT_MODEL } from '../../../lib/models.js';
+import { promptJson } from '../../../lib/format.js';
+import { highlightJson } from '../../../lib/highlight.js';
 
 export function getStaticPaths() {
   return categories
-    .filter((c) => c.templates.length > 0)
+    .filter((c) => c.templates.length > 0 || (c.addOns ?? []).length > 0)
     .map((c) => ({ params: { category: c.slug }, props: { cat: c } }));
 }
 
 const { cat } = Astro.props;
+const addOns = cat.addOns ?? [];
 ---
 
 <Base
@@ -18,7 +22,7 @@ const { cat } = Astro.props;
   <nav class="crumbs">
     <a href="/">home</a> / <a href="/prompts/">templates</a> / {cat.name.toLowerCase()}
   </nav>
-  <p class="kicker">{cat.templates.length} templates</p>
+  <p class="kicker">{cat.templates.length} full prompts{addOns.length ? ` · ${addOns.length} add-ons` : ''}</p>
   <h1>{cat.icon} {cat.name} JSON prompts</h1>
   <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">{cat.description}</p>
 
@@ -31,4 +35,46 @@ const { cat } = Astro.props;
       </a>
     ))}
   </div>
+
+  {addOns.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <h2>Add-on blocks</h2>
+      </div>
+      <p class="dim small" style="max-width:64ch">
+        These fragments are useful style, camera, audio, or technical blocks, but
+        they are not full standalone prompts. Copy one into a stronger subject,
+        scene, or action prompt.
+      </p>
+      <div class="grid" style="margin-top:1rem">
+        {addOns.map((t) => (
+          <article class="card addon-card">
+            <h3>{t.name}</h3>
+            <p>{t.description}</p>
+            <details>
+              <summary>view JSON</summary>
+              <pre class="json"><code set:html={highlightJson(promptJson(t.fields, DEFAULT_MODEL))} /></pre>
+            </details>
+            <button class="copy-btn addon-copy" type="button">copy block</button>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <script>
+    document.querySelectorAll('.addon-card').forEach((card) => {
+      const btn = card.querySelector('.addon-copy');
+      btn?.addEventListener('click', async () => {
+        const pre = card.querySelector('pre.json');
+        await navigator.clipboard.writeText(pre?.textContent ?? '');
+        btn.textContent = 'copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'copy block';
+          btn.classList.remove('copied');
+        }, 1600);
+      });
+    });
+  </script>
 </Base>

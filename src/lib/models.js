@@ -8,7 +8,19 @@ export const MODELS = {
     vendor: 'Google',
     tagline: 'Best all-around cinematic quality with native synchronized audio',
     maxDuration: 8,
-    resolution: '1080p (4K upscale)',
+    resolution: '720p / 1080p / 4K',
+    specs: {
+      durations: '8s',
+      resolution: '720p, 1080p, or 4K',
+      fps: '24fps',
+      audio: 'native',
+      inputs: 'text, image, first/last keyframes, references',
+    },
+    lastVerified: '2026-07-10',
+    sources: [
+      { label: 'Google AI for Developers: Veo 3.1', href: 'https://ai.google.dev/gemini-api/docs/veo' },
+      { label: 'Google Cloud: Veo 3.1', href: 'https://cloud.google.com/vertex-ai/generative-ai/docs/video/generate-videos' },
+    ],
     audio: true,
     multiShot: false,
     access: ['Gemini app', 'Flow', 'Vertex AI API', 'fal.ai'],
@@ -27,7 +39,20 @@ export const MODELS = {
     vendor: 'Kuaishou',
     tagline: 'Multi-shot native, 4K/60fps, up to 15s — the best value per clip',
     maxDuration: 15,
-    resolution: '4K / 60fps',
+    resolution: '1080p / native 4K modes',
+    specs: {
+      durations: 'provider-dependent, commonly up to 15s',
+      resolution: '1080p HD; native 4K modes advertised by Kling',
+      fps: 'provider-dependent',
+      audio: 'native sound generation',
+      inputs: 'text, image, audio, video, motion control',
+    },
+    lastVerified: '2026-07-10',
+    sources: [
+      { label: 'Kling official homepage', href: 'https://kling.ai/' },
+      { label: 'Kling 3 product page', href: 'https://kling3.io/' },
+      { label: 'Higgsfield Kling 3.0 access notes', href: 'https://higgsfield.ai/kling-3.0' },
+    ],
     audio: true,
     multiShot: true,
     access: ['Kling app', 'Higgsfield', 'fal.ai', 'Pollo AI'],
@@ -46,7 +71,20 @@ export const MODELS = {
     vendor: 'ByteDance',
     tagline: 'Top of the Artificial Analysis leaderboard; strongest image-to-video',
     maxDuration: 12,
-    resolution: '2K native',
+    resolution: '720p / 1080p / hosted 4K tiers',
+    specs: {
+      durations: 'provider-dependent',
+      resolution: '720p/1080p; some hosts expose 4K tiers',
+      fps: 'provider-dependent',
+      audio: 'native synchronized audio on supported hosts',
+      inputs: 'text, image, video, audio references',
+    },
+    lastVerified: '2026-07-10',
+    sources: [
+      { label: 'Cloudflare Workers AI: Seedance 2.0', href: 'https://developers.cloudflare.com/ai/models/bytedance/seedance-2.0/' },
+      { label: 'Runway API pricing: Seedance 2 tiers', href: 'https://docs.dev.runwayml.com/guides/pricing/' },
+      { label: 'Artificial Analysis video leaderboard', href: 'https://artificialanalysis.ai/video/leaderboard/text-to-video' },
+    ],
     audio: true,
     multiShot: true,
     access: ['Dreamina', 'Higgsfield', 'fal.ai', 'WaveSpeed'],
@@ -65,7 +103,19 @@ export const MODELS = {
     vendor: 'Alibaba',
     tagline: 'The open-weights option — self-host free, or use Wan 2.6 via API',
     maxDuration: 10,
-    resolution: '1080p',
+    resolution: '720p @ 24fps open weights',
+    specs: {
+      durations: 'workflow-dependent',
+      resolution: '720p open-weights TI2V',
+      fps: '24fps',
+      audio: 'none in base text/image-to-video pipeline',
+      inputs: 'text-to-video and image-to-video',
+    },
+    lastVerified: '2026-07-10',
+    sources: [
+      { label: 'Wan-Video/Wan2.2 GitHub', href: 'https://github.com/Wan-Video/Wan2.2' },
+      { label: 'Wan-Video/Wan2.1 GitHub', href: 'https://github.com/Wan-Video/Wan2.1' },
+    ],
     audio: false,
     multiShot: false,
     access: ['ComfyUI (open weights)', 'HuggingFace', 'Higgsfield (2.6)', 'WaveSpeed (2.6)'],
@@ -84,7 +134,19 @@ export const MODELS = {
     vendor: 'Runway',
     tagline: 'The pro pick for granular control: camera, motion brush, references',
     maxDuration: 10,
-    resolution: '1080p',
+    resolution: '720p',
+    specs: {
+      durations: '2-10s',
+      resolution: '720p; aspect-ratio-specific pixel sizes',
+      fps: '24fps or 25fps',
+      audio: 'none in video generation',
+      inputs: 'text-to-video and image-to-video',
+    },
+    lastVerified: '2026-07-10',
+    sources: [
+      { label: 'Runway: Creating with Gen-4.5', href: 'https://help.runwayml.com/hc/en-us/articles/46974685288467-Creating-with-Gen-4-5' },
+      { label: 'Runway API changelog: Gen-4.5', href: 'https://docs.dev.runwayml.com/api-details/api_changelog/' },
+    ],
     audio: false,
     multiShot: false,
     access: ['Runway web app', 'Runway API'],
@@ -101,6 +163,19 @@ export const MODELS = {
 
 export const MODEL_LIST = Object.values(MODELS);
 export const DEFAULT_MODEL = 'veo-3-1';
+
+export function modelSpecLine(model) {
+  const specs = model.specs ?? {};
+  return [
+    model.vendor,
+    specs.durations ? `duration ${specs.durations}` : `max ${model.maxDuration}s`,
+    specs.resolution ?? model.resolution,
+    specs.audio ? `audio ${specs.audio}` : `audio ${model.audio ? 'native' : 'none'}`,
+    model.lastVerified ? `verified ${model.lastVerified}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
 
 // Sora is retired but still searched for heavily — kept for the migration page only.
 export const SORA_STATUS = {

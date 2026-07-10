@@ -30,11 +30,21 @@ const others = MODEL_LIST.filter((m) => m.id !== model.id);
   <h1>{model.name} JSON prompting guide</h1>
 
   <div class="spec-row">
-    <div><b>Max duration</b>{model.maxDuration}s</div>
-    <div><b>Resolution</b>{model.resolution}</div>
-    <div><b>Audio</b>{model.audio ? 'native' : 'none — add in post'}</div>
+    <div><b>Duration</b>{model.specs?.durations ?? `${model.maxDuration}s max`}</div>
+    <div><b>Resolution</b>{model.specs?.resolution ?? model.resolution}</div>
+    <div><b>FPS</b>{model.specs?.fps ?? 'varies'}</div>
+    <div><b>Audio</b>{model.specs?.audio ?? (model.audio ? 'native' : 'none — add in post')}</div>
     <div><b>Multi-shot</b>{model.multiShot ? 'yes' : 'single shot'}</div>
   </div>
+  <p class="dim small">
+    Last verified {model.lastVerified}. Sources:
+    {model.sources?.map((source, i) => (
+      <>
+        {i > 0 ? ', ' : ' '}
+        <a href={source.href} target="_blank" rel="noopener">{source.label}</a>
+      </>
+    ))}
+  </p>
   <p>
     {model.strengths.map((s) => <span class="badge on">{s}</span>)}
   </p>

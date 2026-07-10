@@ -4,7 +4,9 @@ import PromptViewer from '../components/PromptViewer.astro';
 import { categories, allTemplates, viralItems } from '../lib/catalog.js';
 import { MODEL_LIST } from '../lib/models.js';
 
-const featured = categories.filter((c) => c.templates.length > 0).slice(0, 12);
+const featured = categories
+  .filter((c) => c.templates.length > 0 || (c.addOns ?? []).length > 0)
+  .slice(0, 12);
 const demo = allTemplates.find((t) => t.slug === 'young-woman-walking') ?? allTemplates[0];
 ---
 
