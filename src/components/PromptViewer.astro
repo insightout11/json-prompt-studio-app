@@ -1,0 +1,63 @@
+---
+// Tabbed, copyable JSON prompt — one tab per model, all variants server-rendered
+// (good for SEO), tiny inline script for tab switching + clipboard.
+import { MODEL_LIST } from '../lib/models.js';
+import { promptJson } from '../lib/format.js';
+import { highlightJson } from '../lib/highlight.js';
+
+const { fields, name } = Astro.props;
+
+const variants = MODEL_LIST.map((m) => {
+  const json = promptJson(fields, m.id);
+  return { model: m, json, html: highlightJson(json) };
+});
+const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class="prompt-viewer" id={uid} data-name={name}>
+  <div class="pv-tabs" role="tablist">
+    {variants.map((v, i) => (
+      <button class="pv-tab" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-panel={`${uid}-${v.model.id}`}>
+        {v.model.name}
+      </button>
+    ))}
+  </div>
+  {variants.map((v, i) => (
+    <div class:list={['pv-panel', { active: i === 0 }]} id={`${uid}-${v.model.id}`} role="tabpanel">
+      <div class="pv-bar">
+        <span>{v.model.vendor} · max {v.model.maxDuration}s · {v.model.resolution} · audio {v.model.audio ? 'native' : 'none'}</span>
+        <button class="copy-btn" data-json={v.json}>copy JSON</button>
+      </div>
+      <pre class="json"><code set:html={v.html} /></pre>
+      <ul class="notes" style="padding: 0 1.2rem 1rem;">
+        {v.model.notes.slice(0, 2).map((n) => <li>{n}</li>)}
+      </ul>
+    </div>
+  ))}
+</div>
+
+<script>
+  // Tab switching + clipboard for every viewer on the page.
+  document.querySelectorAll('.prompt-viewer').forEach((viewer) => {
+    const tabs = viewer.querySelectorAll('.pv-tab');
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        viewer.querySelectorAll('.pv-panel').forEach((p) => p.classList.remove('active'));
+        viewer.querySelector(`#${CSS.escape(tab.dataset.panel)}`)?.classList.add('active');
+      });
+    });
+    viewer.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(btn.dataset.json ?? '');
+        btn.textContent = 'copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'copy JSON';
+          btn.classList.remove('copied');
+        }, 1600);
+      });
+    });
+  });
+</script>

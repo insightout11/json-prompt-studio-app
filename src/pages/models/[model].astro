@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import PromptViewer from '../../components/PromptViewer.astro';
+import { MODEL_LIST, MODELS } from '../../lib/models.js';
+import { GUIDES } from '../../lib/guides.js';
+import { allTemplates } from '../../lib/catalog.js';
+import { linksForModel } from '../../lib/links.js';
+
+export function getStaticPaths() {
+  return MODEL_LIST.map((m) => ({ params: { model: m.id }, props: { model: m } }));
+}
+
+const { model } = Astro.props;
+const guide = GUIDES[model.id];
+const demo = allTemplates.find((t) => t.slug === 'young-woman-walking') ?? allTemplates[0];
+const links = linksForModel(model.id);
+const others = MODEL_LIST.filter((m) => m.id !== model.id);
+---
+
+<Base
+  title={`${model.name} JSON Prompting Guide (2026) — structure, limits, examples`}
+  description={`How to write JSON prompts for ${model.name}: ${model.tagline}. Block order, duration limits, audio support, and copy-paste examples.`}
+  type="article"
+>
+  <nav class="crumbs">
+    <a href="/">home</a> / <a href="/models/">models</a> / {model.name.toLowerCase()}
+  </nav>
+
+  <p class="kicker">{model.vendor} · updated july 2026</p>
+  <h1>{model.name} JSON prompting guide</h1>
+
+  <div class="spec-row">
+    <div><b>Max duration</b>{model.maxDuration}s</div>
+    <div><b>Resolution</b>{model.resolution}</div>
+    <div><b>Audio</b>{model.audio ? 'native' : 'none — add in post'}</div>
+    <div><b>Multi-shot</b>{model.multiShot ? 'yes' : 'single shot'}</div>
+  </div>
+  <p>
+    {model.strengths.map((s) => <span class="badge on">{s}</span>)}
+  </p>
+
+  <article class="prose section">
+    <p>{guide.intro}</p>
+    {guide.sections.map((s) => (
+      <>
+        <h2>{s.h}</h2>
+        <p>{s.p}</p>
+      </>
+    ))}
+
+    <h2>Prompting rules for {model.name}</h2>
+    <ul class="notes">
+      {model.notes.map((n) => <li>{n}</li>)}
+    </ul>
+  </article>
+
+  <section class="section">
+    <h2>Example template, {model.name}-shaped</h2>
+    <p class="dim small">The {model.name} tab shows this site's block order for the model. Browse <a href="/prompts/">all {allTemplates.length} templates</a>.</p>
+    <PromptViewer fields={demo.fields} name={demo.name} />
+  </section>
+
+  <div class="run-box">
+    <h3>Run {model.name}</h3>
+    <div class="run-links">
+      {links.map((l) => (
+        <a href={l.href} target="_blank" rel="noopener sponsored">{l.label} ↗</a>
+      ))}
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-head"><h2>Other model guides</h2></div>
+    <div class="grid">
+      {others.map((m) => (
+        <a class="card" href={`/models/${m.id}/`}>
+          <h3>{m.name}</h3>
+          <p>{m.tagline}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

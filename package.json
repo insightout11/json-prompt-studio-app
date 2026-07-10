@@ -1,51 +1,16 @@
 {
-  "name": "ai-video-prompt-generator",
-  "version": "1.0.0",
+  "name": "json-prompt-studio",
+  "version": "2.0.0",
   "type": "module",
-  "description": "A React web app for creating JSON-formatted AI video generation prompts",
-  "main": "index.js",
+  "description": "JSON prompt template library for AI video models — Veo 3.1, Kling 3.0, Seedance 2.0, Wan, Runway",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "node server.js",
-    "dev:full": "concurrently \"npm run dev\" \"npm run start\"",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0 --ignore-pattern node_modules --ignore-pattern dist"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "express": "^4.21.2",
-    "googleapis": "^159.0.0",
-    "react": "^18.2.0",
-    "react-colorful": "^5.6.1",
-    "react-dom": "^18.2.0",
-    "stripe": "^14.21.0",
-    "zustand": "^4.4.1"
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^5.1.1"
   },
-  "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "concurrently": "^9.2.0",
-    "eslint": "^8.45.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
-  },
-  "keywords": [
-    "react",
-    "ai",
-    "video",
-    "prompt",
-    "generator",
-    "json"
-  ],
-  "author": "",
   "license": "MIT"
 }

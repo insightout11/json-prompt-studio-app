@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import { MODEL_LIST, SORA_STATUS } from '../lib/models.js';
+
+const faqLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is Sora discontinued?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Yes. OpenAI discontinued the Sora web and mobile apps on ${SORA_STATUS.appDiscontinued}, and the Sora API shuts down on ${SORA_STATUS.apiDiscontinued}. OpenAI has announced no successor video product.`,
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the best Sora alternative in 2026?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Veo 3.1 for overall cinematic quality and native audio, Kling 3.0 for multi-shot and value, Seedance 2.0 for leaderboard-top quality and image-to-video, Wan 2.2 for a free open-source option, and Runway Gen-4.5 for professional control.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do my Sora JSON prompts work on other models?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Mostly yes. Structured JSON prompts transfer between models with small adjustments: block order, duration caps, and audio support differ per model. Our templates render a correctly-shaped variant per model automatically.',
+      },
+    },
+  ],
+});
+---
+
+<Base
+  title="Sora Is Gone — Best Alternatives & How to Migrate Your JSON Prompts (2026)"
+  description={`OpenAI shut down Sora (app: ${SORA_STATUS.appDiscontinued}, API: ${SORA_STATUS.apiDiscontinued}). Here's where to move, and how to convert your Sora JSON prompts to Veo 3.1, Kling 3.0 or Seedance 2.0.`}
+  type="article"
+>
+  <script type="application/ld+json" set:html={faqLd} slot="head" />
+
+  <nav class="crumbs"><a href="/">home</a> / sora alternatives</nav>
+  <p class="kicker">migration guide · july 2026</p>
+  <h1>Sora is gone. Your prompts aren't.</h1>
+
+  <article class="prose section" style="margin-top:1.5rem">
+    <p>
+      OpenAI discontinued the Sora app on <strong>{SORA_STATUS.appDiscontinued}</strong>.
+      The API follows on <strong>{SORA_STATUS.apiDiscontinued}</strong>, and OpenAI has
+      announced no successor. If you built a workflow — or a prompt library — around
+      Sora, the good news is that structured prompts are portable: the same JSON that
+      directed Sora directs its replacements, with small per-model adjustments.
+    </p>
+
+    <h2>Where to go, by use case</h2>
+    <ul>
+      <li><strong>You want the best default quality:</strong> <a href="/models/veo-3-1/">Veo 3.1</a> — closest to Sora's "it just looks right" behavior, plus native audio Sora never had. Free daily generations in Gemini.</li>
+      <li><strong>You made multi-scene social clips:</strong> <a href="/models/kling-3-0/">Kling 3.0</a> — native multi-shot up to 15 seconds, lip-sync included, cheapest per usable clip.</li>
+      <li><strong>You chained shots for longer stories:</strong> <a href="/models/seedance-2-0/">Seedance 2.0</a> — leaderboard-top quality and the strongest image-to-video for character continuity.</li>
+      <li><strong>You want free and local:</strong> <a href="/models/wan-2-2/">Wan 2.2</a> — open weights, runs on a 24GB GPU, no quotas.</li>
+      <li><strong>You do client work:</strong> <a href="/models/runway-gen-4-5/">Runway Gen-4.5</a> — the control surface professionals actually use.</li>
+    </ul>
+
+    <h2>Converting Sora prompts</h2>
+    <p>
+      Three things change when you move a Sora-era JSON prompt:
+    </p>
+    <ol>
+      <li><strong>Block order.</strong> Sora tolerated any structure; Seedance wants camera first, Veo rewards scene-first. Every template on this site renders the right order per model tab.</li>
+      <li><strong>Duration.</strong> Sora's longer clips don't port — Veo caps at 8s, Kling at 15s. Split scenes into shots and chain with a shared seed and identical style block.</li>
+      <li><strong>Audio.</strong> Sora was silent; Veo 3.1, Kling 3.0 and Seedance 2.0 render audio natively. Add an audio block — it's the biggest upgrade you'll notice.</li>
+    </ol>
+
+    <p>
+      The fastest path: find the closest template in our
+      <a href="/prompts/">library of 150+ JSON prompts</a>, switch to your new model's
+      tab, and transplant your subject and action lines into it.
+    </p>
+  </article>
+
+  <section class="section">
+    <div class="section-head"><h2>Model guides</h2></div>
+    <div class="grid">
+      {MODEL_LIST.map((m) => (
+        <a class="card" href={`/models/${m.id}/`}>
+          <h3>{m.name}</h3>
+          <p>{m.tagline}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+</Base>

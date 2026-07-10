@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import { viralCategories, viralItems } from '../../lib/catalog.js';
+---
+
+<Base
+  title={`Viral AI Video JSON Prompts — ${viralItems.length} proven formats (fake podcasts, ASMR, street interviews)`}
+  description="JSON prompt templates for the viral AI video formats: fake podcast clips, street interviews, ASMR cutting, out-of-place comedy. Fill in the variables, copy, render on Veo 3.1 or Kling 3.0."
+>
+  <nav class="crumbs"><a href="/">home</a> / viral formats</nav>
+  <p class="kicker">fill-in-the-blank formats</p>
+  <h1>Viral video JSON prompts</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    The formats that actually go viral — fake podcasts, street interviews, ASMR,
+    out-of-place comedy. Each template locks the cinematography and leaves the
+    <span class="j-var">{'{{variables}}'}</span> for your twist.
+  </p>
+
+  {viralCategories.map((vc) => (
+    <section class="section">
+      <h2>{vc.name}</h2>
+      <div class="grid" style="margin-top:1rem">
+        {vc.items.map((v) => (
+          <a class="card" href={`/viral/${v.slug}/`}>
+            <h3>{v.name}</h3>
+            <p>{v.description}</p>
+            <span class="count">{v.variables.length} variables</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+</Base>

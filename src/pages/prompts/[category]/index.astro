@@ -1,0 +1,34 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { categories } from '../../../lib/catalog.js';
+
+export function getStaticPaths() {
+  return categories
+    .filter((c) => c.templates.length > 0)
+    .map((c) => ({ params: { category: c.slug }, props: { cat: c } }));
+}
+
+const { cat } = Astro.props;
+---
+
+<Base
+  title={`${cat.name} JSON Prompts for AI Video — Veo 3.1, Kling 3.0, Seedance`}
+  description={`${cat.templates.length} ${cat.name.toLowerCase()} JSON prompt templates for AI video generation. ${cat.description}`}
+>
+  <nav class="crumbs">
+    <a href="/">home</a> / <a href="/prompts/">templates</a> / {cat.name.toLowerCase()}
+  </nav>
+  <p class="kicker">{cat.templates.length} templates</p>
+  <h1>{cat.icon} {cat.name} JSON prompts</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">{cat.description}</p>
+
+  <div class="grid section">
+    {cat.templates.map((t) => (
+      <a class="card" href={`/prompts/${cat.slug}/${t.slug}/`}>
+        <h3>{t.name}</h3>
+        <p>{t.description}</p>
+        <span class="count">{Object.keys(t.fields).length} fields</span>
+      </a>
+    ))}
+  </div>
+</Base>

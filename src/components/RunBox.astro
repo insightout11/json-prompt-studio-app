@@ -1,0 +1,16 @@
+---
+import { RUN_LINKS } from '../lib/links.js';
+---
+
+<div class="run-box">
+  <h3>Run this prompt</h3>
+  <p class="dim small">
+    Copy the JSON above, then paste it as your prompt in any of these tools.
+    Veo 3.1 is free to try inside Gemini (daily limit applies).
+  </p>
+  <div class="run-links">
+    {RUN_LINKS.map((l) => (
+      <a href={l.href} target="_blank" rel="noopener sponsored">{l.label} ↗</a>
+    ))}
+  </div>
+</div>

@@ -1,0 +1,68 @@
+---
+import Base from '../../layouts/Base.astro';
+import PromptViewer from '../../components/PromptViewer.astro';
+import RunBox from '../../components/RunBox.astro';
+import { viralItems } from '../../lib/catalog.js';
+
+export function getStaticPaths() {
+  return viralItems.map((v) => ({ params: { slug: v.slug }, props: { v } }));
+}
+
+const { v } = Astro.props;
+const related = viralItems.filter((x) => x.category === v.category && x.slug !== v.slug).slice(0, 4);
+---
+
+<Base
+  title={`${v.name} — Viral ${v.categoryName} JSON Prompt for AI Video`}
+  description={`"${v.tagline}" — ${v.description}. Fill-in-the-blank JSON prompt formatted for Veo 3.1, Kling 3.0 and Seedance 2.0.`}
+  type="article"
+>
+  <nav class="crumbs">
+    <a href="/">home</a> / <a href="/viral/">viral formats</a> / {v.name.toLowerCase()}
+  </nav>
+
+  <p class="kicker">{v.categoryName} · "{v.tagline}"</p>
+  <h1>{v.name}</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    {v.description}. Replace the <span class="j-var">{'{{highlighted}}'}</span> variables
+    below with your own twist — suggestions included — then copy the JSON for your model.
+  </p>
+
+  <PromptViewer fields={v.fields} name={v.name} />
+
+  {v.variables.length > 0 && (
+    <section class="section">
+      <h2>Fill in the variables</h2>
+      {v.variables.map((va) => (
+        <div class="var-block">
+          <span class="var-name">{`{{${va.key}}}`}</span> — {va.label}
+          <p class="dim small" style="margin-top:0.2rem">e.g. "{va.placeholder}"</p>
+          {va.suggestions.length > 0 && (
+            <div class="sugg">
+              {va.suggestions.map((s) => <span>{s}</span>)}
+            </div>
+          )}
+        </div>
+      ))}
+    </section>
+  )}
+
+  <RunBox />
+
+  {related.length > 0 && (
+    <section class="section">
+      <div class="section-head">
+        <h2>More {v.categoryName.toLowerCase()}</h2>
+        <a href="/viral/">all formats →</a>
+      </div>
+      <div class="grid">
+        {related.map((t) => (
+          <a class="card" href={`/viral/${t.slug}/`}>
+            <h3>{t.name}</h3>
+            <p>{t.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

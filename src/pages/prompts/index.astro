@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { categories, allTemplates } from '../../lib/catalog.js';
+
+const nonEmpty = categories.filter((c) => c.templates.length > 0);
+---
+
+<Base
+  title={`JSON Prompt Templates for AI Video — ${allTemplates.length} templates in ${nonEmpty.length} categories`}
+  description={`Browse ${allTemplates.length} copy-paste JSON prompt templates for Veo 3.1, Kling 3.0, Seedance 2.0, Wan and Runway, organized by genre, director style and use case.`}
+>
+  <nav class="crumbs"><a href="/">home</a> / templates</nav>
+  <p class="kicker">template library</p>
+  <h1>JSON prompt templates</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:60ch">
+    Every template is a structured JSON prompt, auto-formatted for each major video
+    model. Categories run from cinematic genres to specific director styles.
+  </p>
+
+  <div class="grid section">
+    {nonEmpty.map((c) => (
+      <a class="card" href={`/prompts/${c.slug}/`}>
+        <span class="icon">{c.icon}</span>
+        <h3>{c.name}</h3>
+        <p>{c.description}</p>
+        <span class="count">{c.templates.length} templates</span>
+      </a>
+    ))}
+  </div>
+</Base>
