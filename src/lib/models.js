@@ -11,7 +11,7 @@ export const MODELS = {
     maxDuration: 8,
     resolution: '720p / 1080p / 4K',
     specs: {
-      durations: '8s',
+      durations: '4s, 6s, or 8s (8s required for 1080p, 4K, or reference images)',
       resolution: '720p, 1080p, or 4K',
       fps: '24fps',
       audio: 'native',
@@ -30,7 +30,7 @@ export const MODELS = {
     notes: [
       'Veo 3.1 follows structured prompts unusually well: lock camera, lighting and audio as separate JSON fields.',
       'Native audio: describe dialogue, ambient sound and music directly in the audio field.',
-      'Gemini API documentation describes Veo 3.1 as generating 8-second videos; use separate clips for longer pieces.',
+      'Durations are 4, 6 or 8 seconds — but 1080p, 4K and reference images all require 8s, and extensions render at 720p only.',
       'Use reference images for products, people or style frames where visual consistency matters.',
     ],
     fieldOrder: ['references', 'brand', 'scene', 'subject', 'action', 'camera', 'lighting', 'style', 'audio', 'technical', 'production_notes'],
