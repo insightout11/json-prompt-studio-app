@@ -48,15 +48,19 @@ lock style/lighting/framing, vary the product and hook.
       style-frame, with per-model handling notes) and `brand` block (colors as hex,
       logo handling, brand tone). Honest on-page caveat: models approximate hex,
       can't render exact logos — use reference image or post overlay.
-- [ ] **Flagship ad/UGC tier:** 30–50 NEW templates on full production schema —
-      product hero, UGC testimonial, unboxing, before/after, app demo, food/bev,
-      fashion, real estate, founder-to-camera, problem-agitate-solve. Values sourced
-      from official prompt guides (cite) + established ad craft. This REPLACES the
-      old "retrofit 50 film flagships" task.
+- [ ] **Flagship ad/UGC tier:** 12–20 NEW templates on full production schema —
+      quality bar: "better than what the user would have written themselves."
+      Formats: product hero, UGC testimonial, unboxing, before/after, app demo,
+      food/bev, fashion, real estate, founder-to-camera, problem-agitate-solve.
+      Technical values sourced at model level in models.js (sources[] + dates);
+      per-template comments only where a specific official recommendation is used.
+      Expand toward 30–50 ONLY after the first set feels strong. This REPLACES
+      the old "retrofit 50 film flagships" task.
 - [ ] **Depth levels:** Compact / Production / Advanced output modes (same formatter,
       field-inclusion policy). Production = default.
-- [ ] **Brand kit in builder:** 6th column, localStorage persistence, feeds palette/
-      style/logo-reference fields.
+- [ ] **Brand kit in builder:** localStorage persistence, feeds palette/style/
+      logo-reference fields. UI form (column vs panel vs drawer) decided against
+      the actual layout, not prescribed here.
 - [ ] **/convert/:** template-anchored conversion — free text matched client-side to
       nearest flagship (keyword/tag scoring), user's subject/action slotted in.
       Honest framing: "your idea in a proven structure." NO deterministic NLP parsing
