@@ -160,6 +160,15 @@ h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
   border-bottom: 1px dashed var(--line);
 }
 .pv-actions { display: inline-flex; align-items: center; gap: 0.5rem; margin-left: 0.8rem; }
+.depth-select {
+  background: var(--bg-raise);
+  color: var(--ink);
+  border: 1px solid var(--line-bright);
+  border-radius: 4px;
+  padding: 0.32rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
 .copy-btn {
   font-family: var(--mono); font-size: 0.72rem;
   color: var(--bg); background: var(--amber);
@@ -302,6 +311,45 @@ pre.json {
   border: 1px solid var(--line-bright); border-radius: 5px;
   padding: 0.55rem 0.6rem; font-family: var(--mono); font-size: 0.8rem;
 }
+.brand-kit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+.brand-kit-grid label,
+.converter label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.brand-kit-grid input,
+.converter textarea {
+  width: 100%;
+  margin-top: 0.45rem;
+  background: var(--bg-panel);
+  color: var(--ink);
+  border: 1px solid var(--line-bright);
+  border-radius: 5px;
+  padding: 0.62rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+.converter textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+.brand-kit-grid input:focus,
+.converter textarea:focus {
+  outline: 1px solid var(--amber);
+}
+.use-case-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
 .builder-block select:focus { outline: 1px solid var(--amber); }
 .builder-custom {
   width: 100%; margin-top: 0.45rem;
@@ -331,5 +379,8 @@ pre.json {
 
 @media (max-width: 640px) {
   .hero { padding: 3rem 0 2rem; }
-  .site-nav { gap: 0.8rem; font-size: 0.72rem; }
+  .site-head .wrap { height: auto; min-height: 3.4rem; padding-top: 0.7rem; padding-bottom: 0.7rem; flex-wrap: wrap; }
+  .site-nav { gap: 0.8rem; font-size: 0.72rem; flex-wrap: wrap; margin-left: 0; }
+  .pv-bar { align-items: flex-start; gap: 0.7rem; flex-direction: column; }
+  .pv-actions { margin-left: 0; flex-wrap: wrap; }
 }

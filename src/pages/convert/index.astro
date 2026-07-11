@@ -1,0 +1,233 @@
+---
+import Base from '../../layouts/Base.astro';
+import { adTemplateItems, allTemplates } from '../../lib/catalog.js';
+import { DEFAULT_DEPTH, DEPTH_LEVELS } from '../../lib/format.js';
+import { MODEL_LIST } from '../../lib/models.js';
+
+const searchItems = [
+  ...adTemplateItems.map((t) => ({ ...t, weight: 4 })),
+  ...allTemplates.filter((t) => !t.isAdTemplate).map((t) => ({ ...t, weight: 1 })),
+];
+
+const payload = JSON.stringify(searchItems.map((t) => ({
+  name: t.name,
+  description: t.description,
+  useCase: t.useCase ?? '',
+  tags: t.tags ?? [],
+  format: t.format ?? '',
+  categoryName: t.categoryName,
+  categorySlug: t.categorySlug,
+  slug: t.slug,
+  weight: t.weight,
+  fields: t.fields,
+}))).replace(/</g, '\\u003c');
+---
+
+<Base
+  title="Convert an ad idea to model-aware JSON prompts - JSON Prompt Studio"
+  description="Describe an ad, product or UGC scene once and convert it into model-aware JSON prompts using proven static templates. No signup, no LLM calls."
+>
+  <nav class="crumbs"><a href="/">home</a> / convert</nav>
+  <p class="kicker">your idea in a proven structure</p>
+  <h1>Convert one ad idea into model-ready JSON</h1>
+  <p class="lede dim" style="margin-top:0.8rem; max-width:68ch">
+    This is template-anchored conversion: your text is matched to the closest
+    flagship structure, then slotted into the subject and action fields. It does
+    not pretend to understand arbitrary text like an LLM.
+  </p>
+
+  <section class="section converter">
+    <label for="idea-input">Describe the ad or scene</label>
+    <textarea id="idea-input" rows="5" placeholder="Example: a founder holding a small wearable sleep tracker in a warm kitchen, explaining how it helped them wake up with more energy"></textarea>
+    <div class="builder-actions">
+      <button class="copy-btn" id="convert-btn" type="button">convert</button>
+      <button class="copy-btn ghost" id="convert-clear" type="button">clear</button>
+    </div>
+    <p class="dim small">
+      Tip: include the product, setting, action and ad type. Words like unboxing,
+      founder, app demo, before/after, food, fashion and real estate help the
+      matcher choose the right structure.
+    </p>
+  </section>
+
+  <section class="section" id="match-section" hidden>
+    <div class="section-head">
+      <div>
+        <p class="kicker">matched structure</p>
+        <h2 id="match-name"></h2>
+      </div>
+      <a id="match-link" href="#">open template -></a>
+    </div>
+    <p class="dim small" id="match-desc" style="max-width:68ch"></p>
+    <p id="match-tags" style="margin-top:0.7rem"></p>
+
+    <div class="prompt-viewer" id="convert-output">
+      <div class="pv-tabs" role="tablist">
+        {MODEL_LIST.map((m, i) => (
+          <button class="pv-tab" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-model={m.id}>
+            {m.name}
+          </button>
+        ))}
+      </div>
+      <div class="pv-panel active">
+        <div class="pv-bar">
+          <span id="convert-meta"></span>
+          <span class="pv-actions">
+            <select id="convert-depth" class="depth-select" aria-label="Prompt depth">
+              {Object.entries(DEPTH_LEVELS).map(([key, value]) => (
+                <option value={key} selected={key === DEFAULT_DEPTH}>{value.label}</option>
+              ))}
+            </select>
+            <button class="copy-btn" id="copy-converted" type="button">copy JSON</button>
+          </span>
+        </div>
+        <pre class="json"><code id="converted-json"></code></pre>
+        <p class="json-warning small" id="convert-warning"></p>
+      </div>
+    </div>
+    <p class="dim small" id="convert-notes"></p>
+  </section>
+
+  <script define:vars={{ payload }}>
+    window.__CONVERT_INDEX__ = JSON.parse(payload);
+  </script>
+
+  <script>
+    import { FIELD_GROUP, buildPrompt } from '../../lib/format.js';
+    import { highlightJson } from '../../lib/highlight.js';
+    import { DEFAULT_MODEL, MODELS, modelSpecLine } from '../../lib/models.js';
+
+    const index = (window as any).__CONVERT_INDEX__ as any[];
+    const input = document.getElementById('idea-input') as HTMLTextAreaElement;
+    const section = document.getElementById('match-section')!;
+    const matchName = document.getElementById('match-name')!;
+    const matchDesc = document.getElementById('match-desc')!;
+    const matchTags = document.getElementById('match-tags')!;
+    const matchLink = document.getElementById('match-link') as HTMLAnchorElement;
+    const code = document.getElementById('converted-json')!;
+    const pre = code.closest('pre')!;
+    const meta = document.getElementById('convert-meta')!;
+    const warning = document.getElementById('convert-warning')!;
+    const notes = document.getElementById('convert-notes')!;
+    const depthSelect = document.getElementById('convert-depth') as HTMLSelectElement;
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('#convert-output .pv-tab')];
+    let activeModel = DEFAULT_MODEL;
+    let activeMatch: any = null;
+
+    function terms(value: string) {
+      return value.toLowerCase().match(/[a-z0-9]+/g)?.filter((t) => t.length > 2) ?? [];
+    }
+
+    function scoreItem(query: string, item: any) {
+      const q = terms(query);
+      const haystack = [
+        item.name,
+        item.description,
+        item.useCase,
+        item.format,
+        item.categoryName,
+        ...(item.tags ?? []),
+      ].join(' ').toLowerCase();
+      let score = 0;
+      for (const term of q) {
+        if (haystack.includes(term)) score += 1;
+        if ((item.tags ?? []).join(' ').toLowerCase().includes(term)) score += 2;
+        if (String(item.format ?? '').toLowerCase().includes(term)) score += 3;
+      }
+      return score * (item.weight ?? 1);
+    }
+
+    function bestMatch(query: string) {
+      return index
+        .map((item) => ({ item, score: scoreItem(query, item) }))
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score || (b.item.weight ?? 1) - (a.item.weight ?? 1))[0]?.item
+        ?? index[0];
+    }
+
+    function convertedFields(item: any, idea: string) {
+      const fields = { ...item.fields };
+      fields.characters = idea;
+      fields.actions = `Adapt the matched ${item.format || item.categoryName} structure to this idea: ${idea}. Preserve the original beat structure: ${item.fields.actions ?? item.description}`;
+      fields.reference_notes = `${fields.reference_notes ? `${fields.reference_notes} ` : ''}If the product, person, app screen, logo, or exact packaging matters, provide a real reference image instead of relying on text alone.`;
+      return fields;
+    }
+
+    function validateOutput() {
+      try {
+        JSON.parse(pre.textContent ?? '');
+        pre.classList.remove('json-invalid');
+        warning.textContent = '';
+        return true;
+      } catch {
+        pre.classList.add('json-invalid');
+        warning.textContent = 'Invalid JSON. Fix the highlighted block before copying.';
+        return false;
+      }
+    }
+
+    function render() {
+      const idea = input.value.trim();
+      if (!idea || !activeMatch) return;
+      const fields = convertedFields(activeMatch, idea);
+      const model = MODELS[activeModel];
+      meta.textContent = `${modelSpecLine(model)} - click any value to edit`;
+      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel, { depth: depthSelect.value }), null, 2));
+      const modelNotes = [];
+      if (!model.audio && Object.keys(fields).some((key) => FIELD_GROUP[key] === 'audio')) {
+        modelNotes.push(`${model.name} renders silent output, so audio fields are dropped.`);
+      }
+      if (Object.keys(fields).some((key) => FIELD_GROUP[key] === 'brand')) {
+        modelNotes.push('Brand colors are approximate; use post overlays for exact logos, claims and UI.');
+      }
+      notes.textContent = modelNotes.join(' ');
+      validateOutput();
+    }
+
+    function convert() {
+      const idea = input.value.trim();
+      if (!idea) return;
+      activeMatch = bestMatch(idea);
+      section.hidden = false;
+      matchName.textContent = activeMatch.name;
+      matchDesc.textContent = `${activeMatch.description} Matched because it is a ${activeMatch.format || activeMatch.categoryName} structure.`;
+      matchLink.href = `/prompts/${activeMatch.categorySlug}/${activeMatch.slug}/`;
+      matchTags.innerHTML = (activeMatch.tags ?? [])
+        .slice(0, 8)
+        .map((tag) => `<span class="badge">${String(tag).replace(/</g, '&lt;')}</span>`)
+        .join('');
+      render();
+    }
+
+    document.getElementById('convert-btn')!.addEventListener('click', convert);
+    input.addEventListener('input', () => {
+      if (activeMatch) convert();
+    });
+    depthSelect.addEventListener('change', render);
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+        activeModel = tab.dataset.model!;
+        render();
+      });
+    });
+    document.getElementById('convert-clear')!.addEventListener('click', () => {
+      input.value = '';
+      activeMatch = null;
+      section.hidden = true;
+    });
+    document.getElementById('copy-converted')!.addEventListener('click', async (event) => {
+      if (!validateOutput()) return;
+      const btn = event.currentTarget as HTMLButtonElement;
+      await navigator.clipboard.writeText(pre.textContent ?? '');
+      btn.textContent = 'copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy JSON'; btn.classList.remove('copied'); }, 1600);
+    });
+    code.addEventListener('blur', (event) => {
+      const target = event.target as HTMLElement;
+      if (target?.hasAttribute?.('contenteditable')) validateOutput();
+    }, true);
+  </script>
+</Base>
