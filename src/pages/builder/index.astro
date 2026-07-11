@@ -6,6 +6,7 @@ import { actionPresets } from '../../data/actionPresetsData.js';
 import { directorStyles } from '../../data/directorStylesData.js';
 import { audioPresets } from '../../data/audioPresetsData.js';
 import { MODEL_LIST } from '../../lib/models.js';
+import { DEFAULT_DEPTH, DEPTH_LEVELS } from '../../lib/format.js';
 
 // Compact payload for the client: name + category + fields per preset.
 function pack(presetObj) {
@@ -84,6 +85,32 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     <button class="copy-btn ghost" id="clear">clear</button>
   </div>
 
+  <section class="section brand-kit">
+    <div class="section-head">
+      <h2>Brand kit</h2>
+      <span class="dim small">saved in this browser</span>
+    </div>
+    <p class="dim small" style="max-width:68ch">
+      Brand fields guide color, tone and logo placement. Models approximate hex
+      colors and cannot render exact logos; use a reference image or post overlay
+      for exact marks, claims and UI.
+    </p>
+    <div class="brand-kit-grid">
+      <label>
+        Hex colors
+        <input id="brand-colors" type="text" placeholder="#111827, #FFB454, #FFFFFF" />
+      </label>
+      <label>
+        Logo note
+        <input id="brand-logo" type="text" placeholder="leave lower third clean for logo overlay" />
+      </label>
+      <label>
+        Brand tone
+        <input id="brand-tone" type="text" placeholder="premium, useful, direct" />
+      </label>
+    </div>
+  </section>
+
   <div class="prompt-viewer" id="builder-output" hidden>
     <div class="pv-tabs" role="tablist">
       {MODEL_LIST.map((m, i) => (
@@ -96,6 +123,11 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
       <div class="pv-bar">
         <span id="model-meta"></span>
         <span class="pv-actions">
+          <select id="builder-depth" class="depth-select" aria-label="Prompt depth">
+            {Object.entries(DEPTH_LEVELS).map(([key, value]) => (
+              <option value={key} selected={key === DEFAULT_DEPTH}>{value.label}</option>
+            ))}
+          </select>
           <button class="copy-btn ghost" id="builder-style-toggle" hidden>descriptive style</button>
           <button class="copy-btn" id="copy-built">copy JSON</button>
         </span>
@@ -127,6 +159,12 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
     const meta = document.getElementById('model-meta')!;
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('#builder-output .pv-tab')];
     const styleToggle = document.getElementById('builder-style-toggle') as HTMLButtonElement;
+    const depthSelect = document.getElementById('builder-depth') as HTMLSelectElement;
+    const brandInputs = {
+      colors: document.getElementById('brand-colors') as HTMLInputElement,
+      logo: document.getElementById('brand-logo') as HTMLInputElement,
+      tone: document.getElementById('brand-tone') as HTMLInputElement,
+    };
     let activeModel = DEFAULT_MODEL;
     let styleMode: 'named' | 'descriptive' = 'named';
 
@@ -180,6 +218,9 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
           owners[key] = `custom ${input.dataset.custom}`;
         }
       }
+      if (brandInputs.colors.value.trim()) fields.brand_colors = brandInputs.colors.value.trim();
+      if (brandInputs.logo.value.trim()) fields.brand_logo = brandInputs.logo.value.trim();
+      if (brandInputs.tone.value.trim()) fields.brand_tone = brandInputs.tone.value.trim();
       return { fields, collisions };
     }
 
@@ -198,11 +239,14 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
       styleToggle.hidden = !hasStyleVariant;
       if (!hasStyleVariant) styleMode = 'named';
       styleToggle.textContent = styleMode === 'descriptive' ? 'named style' : 'descriptive style';
-      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel, { styleMode }), null, 2));
+      code.innerHTML = highlightJson(JSON.stringify(buildPrompt(fields, activeModel, { styleMode, depth: depthSelect.value }), null, 2));
       validateOutput();
       const notes = [];
       if (!m.audio && Object.keys(fields).some((key) => FIELD_GROUP[key] === 'audio')) {
         notes.push(`${m.name} renders silent output, so audio fields are dropped from this model's JSON.`);
+      }
+      if (Object.keys(fields).some((key) => FIELD_GROUP[key] === 'brand')) {
+        notes.push('Brand colors are approximate; use post overlays for exact logos, claims and UI.');
       }
       if (collisions.length > 0) {
         notes.push(`Field overrides: ${collisions.slice(0, 4).join('; ')}${collisions.length > 4 ? '; …' : ''}.`);
@@ -217,6 +261,11 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
       }
       params.set('model', activeModel);
       if (styleMode === 'descriptive') params.set('style', 'descriptive');
+      localStorage.setItem('jps-brand-kit', JSON.stringify({
+        colors: brandInputs.colors.value,
+        logo: brandInputs.logo.value,
+        tone: brandInputs.tone.value,
+      }));
       history.replaceState(null, '', params.size > 1 || selects.some(s => s.value) ? `?${params}` : location.pathname);
     }
 
@@ -231,6 +280,8 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
 
     selects.forEach((sel) => sel.addEventListener('change', render));
     customs.forEach((input) => input.addEventListener('input', render));
+    depthSelect.addEventListener('change', render);
+    Object.values(brandInputs).forEach((input) => input.addEventListener('input', render));
     styleToggle.addEventListener('click', () => {
       styleMode = styleMode === 'descriptive' ? 'named' : 'descriptive';
       render();
@@ -266,6 +317,12 @@ const totalPresets = BLOCKS.reduce((n, b) => n + b.items.length, 0);
 
     // restore state from URL
     const params = new URLSearchParams(location.search);
+    try {
+      const saved = JSON.parse(localStorage.getItem('jps-brand-kit') || '{}');
+      if (saved.colors) brandInputs.colors.value = saved.colors;
+      if (saved.logo) brandInputs.logo.value = saved.logo;
+      if (saved.tone) brandInputs.tone.value = saved.tone;
+    } catch {}
     for (const sel of selects) {
       const v = params.get(sel.dataset.block!);
       if (v && data[sel.dataset.block!]?.some((p) => p.key === v)) sel.value = v;

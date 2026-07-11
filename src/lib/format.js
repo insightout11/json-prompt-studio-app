@@ -88,6 +88,18 @@ export const FIELD_GROUP = {
   lock_style: 'technical',
   technical_setup: 'technical',
 
+  reference_product: 'references',
+  reference_character_face: 'references',
+  reference_style_frame: 'references',
+  reference_notes: 'references',
+  model_reference_handling: 'references',
+
+  brand_colors: 'brand',
+  brand_logo: 'brand',
+  brand_tone: 'brand',
+  brand_typography: 'brand',
+  brand_guardrails: 'brand',
+
   robot_style: 'subject',
   scale: 'subject',
   object_type: 'subject',
@@ -128,6 +140,16 @@ export const KEY_RENAME = {
   duration_s: 'duration_seconds',
   negative: 'negative_prompt',
   technical_setup: 'setup',
+  reference_product: 'product_image',
+  reference_character_face: 'character_face',
+  reference_style_frame: 'style_frame',
+  reference_notes: 'notes',
+  model_reference_handling: 'model_handling',
+  brand_colors: 'hex_colors',
+  brand_logo: 'logo_handling',
+  brand_tone: 'tone',
+  brand_typography: 'typography',
+  brand_guardrails: 'guardrails',
 };
 
 export const KNOWN_FIELD_KEYS = new Set(Object.keys(FIELD_GROUP));
@@ -265,6 +287,62 @@ function collapse(groupObj) {
   return groupObj;
 }
 
+export const DEPTH_LEVELS = {
+  compact: {
+    label: 'Compact',
+    groups: ['subject', 'action', 'scene', 'camera', 'lighting', 'style', 'technical'],
+    keys: {
+      subject: ['description', 'type', 'object_type'],
+      action: ['description', 'dialogue'],
+      scene: ['location', 'description', 'mood'],
+      camera: ['angle', 'distance', 'movement'],
+      lighting: ['type', 'quality', 'direction'],
+      style: ['aesthetic', 'palette'],
+      technical: ['aspect_ratio', 'duration_seconds', 'negative_prompt'],
+    },
+  },
+  production: {
+    label: 'Production',
+    groups: ['references', 'brand', 'subject', 'action', 'scene', 'camera', 'lighting', 'style', 'audio', 'technical'],
+  },
+  advanced: {
+    label: 'Advanced',
+    groups: ['references', 'brand', 'subject', 'action', 'scene', 'camera', 'lighting', 'style', 'audio', 'technical'],
+  },
+};
+
+export const DEFAULT_DEPTH = 'production';
+
+function depthConfig(depth) {
+  return DEPTH_LEVELS[depth] ?? DEPTH_LEVELS[DEFAULT_DEPTH];
+}
+
+function applyDepth(groups, depth) {
+  const config = depthConfig(depth);
+  const next = {};
+  for (const group of config.groups) {
+    if (!groups[group]) continue;
+    const value = groups[group];
+    if (!config.keys?.[group]) {
+      next[group] = value;
+      continue;
+    }
+    const filtered = {};
+    for (const key of config.keys[group]) {
+      if (key in value) filtered[key] = value[key];
+    }
+    if (Object.keys(filtered).length > 0) next[group] = filtered;
+  }
+  if (depth === 'advanced') {
+    next.production_notes = {
+      prompt_level: 'advanced',
+      operator_checklist:
+        'Confirm reference inputs, brand/logo handling, duration, audio support, and aspect ratio inside the target model before rendering.',
+    };
+  }
+  return next;
+}
+
 /**
  * Build the JSON prompt object for a given model.
  * @param {object} fields  raw template fields
@@ -274,13 +352,17 @@ function collapse(groupObj) {
 export function buildPrompt(fields, modelId, options = {}) {
   const model = MODELS[modelId];
   const inputFields = options.styleMode === 'descriptive' ? descriptiveStyleFields(fields) : fields;
-  const groups = groupFields(inputFields);
+  let groups = groupFields(inputFields);
 
   // model adjustments
   if (!model.audio) delete groups.audio;
   if (groups.technical?.duration_seconds > model.maxDuration) {
     groups.technical.duration_seconds = model.maxDuration;
   }
+  if (groups.references && model.referenceNotes) {
+    groups.references.model_handling ??= model.referenceNotes;
+  }
+  groups = applyDepth(groups, options.depth ?? DEFAULT_DEPTH);
 
   const out = {};
   for (const group of model.fieldOrder) {
@@ -307,6 +389,9 @@ export const GROUP_DOCS = {
   camera: 'Shot framing and movement. One movement per clip reads best on every current model.',
   lighting: 'Light source, quality and shadow behavior. The single highest-leverage block for realism.',
   style: 'Aesthetic direction: film stock, color palette, references, tone.',
+  references: 'Optional image inputs: product, character face, or style frame. Use these where the model supports references; otherwise treat them as setup notes.',
+  brand: 'Brand constraints: colors, logo handling and voice. Models approximate hex colors and cannot render exact logos reliably; use a reference image or add exact logos in post.',
   audio: 'Dialogue, ambient sound and music. Only Veo 3.1, Kling 3.0 and Seedance 2.0 render audio natively.',
   technical: 'Render settings: aspect ratio, duration, fps, seed for reproducibility, negative prompt.',
+  production_notes: 'Advanced operator checklist for settings the generator may expose outside the prompt box.',
 };
