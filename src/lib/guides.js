@@ -1,90 +1,90 @@
-// Editorial guide content per model — the long-form half of /models/[id]/ pages.
-// Written July 2026; revise when models version-bump.
+// Editorial guide content per model for /models/[id]/ pages.
+// Keep factual claims aligned with src/lib/models.js.
 
 export const GUIDES = {
   'veo-3-1': {
     intro:
-      "Veo 3.1 is Google's flagship video model and, as of mid-2026, the best all-around choice for cinematic output. Its default look sits closer to high-end stock footage than any competitor, it handles fabric, hair and water physics convincingly, and it is the model where JSON prompting pays off most: give it separate blocks for scene, camera, lighting and audio and it respects each one independently.",
+      "Veo 3.1 is Google's flagship video model and one of the strongest all-around choices for cinematic output. Its default look sits close to high-end stock footage, it handles fabric, hair and water physics convincingly, and it is the model where structured prompting pays off most: separate scene, camera, lighting and audio into distinct blocks.",
     sections: [
       {
         h: 'How to prompt Veo 3.1 with JSON',
-        p: "Paste the JSON directly as your text prompt — no wrapper text needed. Veo parses the structure and treats each block as a constraint. The highest-leverage blocks are lighting (Veo's realism comes alive with a named light source and quality) and audio, which is rendered natively and synchronized: dialogue in quotes, ambient sound described plainly, music by genre and intensity. Keep clips to one camera movement; Veo will invent cuts if you stack movements, and they are rarely the cuts you wanted.",
+        p: "Paste the JSON directly as your text prompt. Veo treats each block as a constraint. The highest-leverage blocks are lighting, where a named light source and quality affect realism, and audio, which is rendered natively and synchronized. Keep clips to one camera movement; stacked moves often produce unintended cuts.",
       },
       {
         h: 'Where to run it',
-        p: 'Free tier: the Gemini app includes Veo generations with a daily cap — enough to test templates before committing. For serious volume use Flow (Google\'s filmmaking UI, best for chaining 8-second clips into scenes with a shared seed) or the Vertex AI / fal.ai APIs for programmatic work.',
+        p: 'Free tier: the Gemini app includes Veo generations with a daily cap, enough to test templates before committing. For serious volume use Flow or the Vertex AI / fal.ai APIs. Treat 8-second clips as the safest production default because 1080p, 4K and reference-image workflows require 8 seconds.',
       },
       {
         h: 'Limits to design around',
-        p: 'The 8-second cap is the big one: write templates as single shots, not scenes, and chain them in Flow with a locked seed and an identical style block for continuity. Veo also refuses recognizable public figures and copyrighted characters — write archetypes instead ("a late-night host in his 60s", not a name).',
+        p: 'Veo durations are 4, 6 or 8 seconds, with 8 seconds required for 1080p, 4K and reference images. Write templates as single shots, not scenes, and chain shots with a locked style block for continuity. Veo also refuses recognizable public figures and copyrighted characters; write archetypes instead ("a late-night host in his 60s", not a name).',
       },
     ],
   },
   'kling-3-0': {
     intro:
-      "Kling 3.0 is the value-per-clip leader and the only mainstream model with genuinely native multi-shot generation: describe a three-shot sequence in one prompt and it renders the cuts. Clips run up to 15 seconds at up to 4K/60fps, with multilingual lip-sync that makes it the default for talking-head and dialogue formats.",
+      'Kling 3.0 is strongest when you treat the prompt like a directed scene: subject, movement, scene, camera language and lighting. Its official guides emphasize native audio-visual output, element references and multi-shot storyboarding; exact duration and resolution caps vary by mode, so keep this site conservative where the public docs are not explicit.',
     sections: [
       {
         h: 'How to prompt Kling 3.0 with JSON',
-        p: 'Kling was built on a scene-aware architecture — it reasons about subjects, spatial relationships and camera position, so write the action block like a director\'s shot note rather than a keyword list. For multi-shot, structure the action as "Shot 1: … Shot 2: … Shot 3: …" and keep the style block identical across shots; Kling holds character identity across the cuts surprisingly well.',
+        p: "Kling prompt guidance is scene-aware: write the action block like a director's shot note rather than a keyword list. For multi-shot work, structure the action as concise shot beats and keep the style block identical across beats.",
       },
       {
-        h: 'Turbo vs. standard',
-        p: 'Kling 3.0 Turbo renders the same prompts faster and cheaper at slightly lower fidelity. Iterate on Turbo, do the final render on standard. Both accept identical JSON.',
+        h: 'Where references help',
+        p: 'Use element references when the product, outfit, character or scene must stay stable across movement. If a brand object matters, a real reference image is more reliable than text alone.',
       },
       {
         h: 'Where to run it',
-        p: "The official Kling app has the full feature set including Motion Control. Higgsfield and fal.ai both host Kling 3.0 alongside Seedance and Wan, which is convenient for cross-model testing — your prompts here cross-work with Seedance 2.0 with little translation.",
+        p: 'The official Kling app has the full feature set. Some third-party hosts expose Kling alongside Seedance and Wan, which is useful for cross-model testing, but public specs can vary by host and mode.',
       },
     ],
   },
   'seedance-2-0': {
     intro:
-      "ByteDance's Seedance 2.0 sits at the top of the Artificial Analysis leaderboard and is the strongest image-to-video model available: give it a reference frame plus a structured prompt and it produces the most character-consistent sequences of any current model. It is also the most doctrine-driven prompter on this list — block order genuinely matters.",
+      "ByteDance's Seedance 2.0 is a strong multimodal video model with image, video and audio reference workflows exposed through hosted APIs. Give it a reference frame plus a structured prompt when character, product or brand consistency matters. It is also one of the more doctrine-driven prompters on this list: block order genuinely matters.",
     sections: [
       {
         h: 'How to prompt Seedance 2.0 with JSON',
-        p: 'Seedance responds best to a strict block order: CAMERA → SUBJECT → ACTION → ENVIRONMENT → LIGHTING → STYLE, which is exactly how our templates order the JSON on the Seedance tab. Keep the camera block to a shot type plus a single movement — stacked movements visibly degrade output. Six tight blocks beat twelve loose ones.',
+        p: 'Seedance responds best to a strict block order: CAMERA -> SUBJECT -> ACTION -> ENVIRONMENT -> LIGHTING -> STYLE, which is how this site orders the JSON on the Seedance tab. Keep the camera block to a shot type plus a single movement; stacked movements visibly degrade output.',
       },
       {
-        h: 'Image-to-video is the superpower',
-        p: 'For character-driven content, generate a strong keyframe first (any image model), then feed it to Seedance with your JSON as the motion direction. This is currently the most reliable character-consistency workflow in AI video, and it is how most long-form AI content is actually being chained in 2026.',
+        h: 'References are the superpower',
+        p: 'For character-driven or product-driven content, pair the JSON with a strong reference frame. The text should describe the motion and scene behavior; the reference should carry identity, product shape or brand look.',
       },
       {
         h: 'Where to run it',
-        p: 'Dreamina (ByteDance\'s own app) has first-party access; Higgsfield, fal.ai and WaveSpeed host it via API. Prompts written for Kling 3.0 generally run here unchanged, so test on whichever is cheaper for you that week.',
+        p: 'Dreamina is ByteDance-owned, and several hosted APIs expose Seedance 2 workflows. Check the host before rendering because duration, resolution, audio and reference support can vary by integration.',
       },
     ],
   },
   'wan-2-2': {
     intro:
-      'Wan is the open-source path. Wan 2.2 is the latest version with genuinely downloadable weights — a Mixture-of-Experts video model that runs on a single 24GB GPU — while "Wan 2.5/2.6/2.7" are closed, hosted-API versions on commercial platforms. If you want unlimited free generation and full control, Wan 2.2 in ComfyUI is the only real answer in 2026.',
+      'Wan is the open-weights path. Wan 2.2 has downloadable weights and a practical text/image-to-video workflow, while later hosted Wan variants on commercial platforms may expose extra controls. If you want local generation and full control, Wan 2.2 in ComfyUI is the relevant baseline.',
     sections: [
       {
         h: 'How to prompt Wan with JSON',
-        p: 'Keep it leaner than Veo or Kling: lead with subject and action, keep the strongest three style modifiers, and drop the audio block entirely — open-weights Wan renders silent video. Our Wan tab trims the JSON accordingly. Structured prompts still outperform prose here, but Wan rewards brevity more than the hosted models do.',
+        p: 'Keep it leaner than Veo or Kling: lead with subject and action, keep the strongest three style modifiers, and drop the audio block entirely for open-weights Wan. The Wan tab trims the JSON accordingly.',
       },
       {
         h: 'Open weights vs. hosted Wan',
-        p: 'Hosted Wan 2.6 (Higgsfield, WaveSpeed) adds multi-shot, audio sync and reference-based character consistency — the fuller JSON from other tabs works there. Self-hosted 2.2 trades those features for zero marginal cost and no content-policy gatekeeping, which is why it dominates certain workflows.',
+        p: 'Hosted Wan variants may add controls that the open-weights 2.2 baseline does not have. Use this site as a conservative text/image-to-video prompt shape, then adapt to the host controls available.',
       },
       {
         h: 'Setup',
-        p: 'Grab the weights from the official Wan-Video GitHub or the Wan-AI HuggingFace org and run through ComfyUI. Budget an afternoon for setup and expect slower iteration than any hosted model — the trade is cost, not convenience.',
+        p: 'Grab the weights from the official Wan-Video GitHub or the Wan-AI HuggingFace org and run through ComfyUI. Budget an afternoon for setup and expect slower iteration than hosted models.',
       },
     ],
   },
   'runway-gen-4-5': {
     intro:
-      "Runway Gen-4.5 is the professional's pick — not because raw output beats Veo or Seedance, but because no other tool gives you the same control surface: explicit camera controls, motion brush for directing movement within the frame, and reference-driven character consistency that production teams can actually rely on.",
+      "Runway Gen-4.5 is a production-control choice: clear text prompts, image-to-video workflows, camera controls and reference-driven consistency. Use this site's JSON as a shot sheet for the Runway controls as much as a text prompt.",
     sections: [
       {
         h: 'How to use JSON prompts with Runway',
-        p: "Runway rewards short text prompts plus heavy use of its UI controls, so use our JSON differently here: the camera block is your settings checklist for Runway's camera controls, the subject block doubles as your reference-image tagging description, and the action block becomes the short text prompt. Think of the JSON as a shot sheet, not a paste-and-go prompt.",
+        p: "Runway rewards short text prompts plus heavy use of its UI controls. The camera block is your settings checklist, the subject block doubles as your reference-image tagging description, and the action block becomes the short text prompt.",
       },
       {
         h: 'Where it wins',
-        p: 'Anything requiring take-to-take consistency: brand work, multi-shot narratives with the same cast, and iterating a single shot until the motion is exactly right. No audio — plan sound in post, which production workflows do anyway.',
+        p: 'Anything requiring take-to-take consistency: brand work, multi-shot narratives with the same cast, and iterating a single shot until the motion is right. No native video audio; plan sound in post.',
       },
     ],
   },
