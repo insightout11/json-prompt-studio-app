@@ -1,18 +1,28 @@
 ---
-// Tabbed, copyable JSON prompt — one tab per model, all variants server-rendered
-// (good for SEO), tiny inline script for tab switching + clipboard.
+// Tabbed, copyable JSON prompt: one tab per model, with depth and style variants
+// server-rendered for SEO and client-side switching kept small.
 import { MODEL_LIST, modelSpecLine } from '../lib/models.js';
-import { hasDescriptiveStyleVariant, promptJson } from '../lib/format.js';
+import { DEFAULT_DEPTH, DEPTH_LEVELS, hasDescriptiveStyleVariant, promptJson } from '../lib/format.js';
 import { highlightJson } from '../lib/highlight.js';
 
 const { fields, name } = Astro.props;
 const hasDescriptiveVariant = hasDescriptiveStyleVariant(fields);
 
-const variants = MODEL_LIST.map((m) => {
-  const json = promptJson(fields, m.id);
-  const descriptiveJson = hasDescriptiveVariant ? promptJson(fields, m.id, { styleMode: 'descriptive' }) : '';
-  return { model: m, html: highlightJson(json), descriptiveHtml: highlightJson(descriptiveJson) };
-});
+const variants = MODEL_LIST.map((model) => ({
+  model,
+  depths: Object.keys(DEPTH_LEVELS).map((depth) => {
+    const named = promptJson(fields, model.id, { depth });
+    const descriptive = hasDescriptiveVariant
+      ? promptJson(fields, model.id, { depth, styleMode: 'descriptive' })
+      : '';
+    return {
+      depth,
+      namedHtml: highlightJson(named),
+      descriptiveHtml: highlightJson(descriptive),
+    };
+  }),
+}));
+
 const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
@@ -25,18 +35,37 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
     ))}
   </div>
   {variants.map((v, i) => (
-    <div class:list={['pv-panel', { active: i === 0 }]} id={`${uid}-${v.model.id}`} role="tabpanel">
+    <div class:list={['pv-panel', { active: i === 0 }]} id={`${uid}-${v.model.id}`} role="tabpanel" data-style-mode="named">
       <div class="pv-bar">
-        <span>{modelSpecLine(v.model)} · <b class="edit-hint">click any value to edit</b></span>
+        <span>{modelSpecLine(v.model)} - <b class="edit-hint">click any value to edit</b></span>
         <span class="pv-actions">
+          <select class="depth-select" aria-label="Prompt depth">
+            {Object.entries(DEPTH_LEVELS).map(([key, value]) => (
+              <option value={key} selected={key === DEFAULT_DEPTH}>{value.label}</option>
+            ))}
+          </select>
           {hasDescriptiveVariant && <button class="copy-btn ghost style-toggle" type="button">descriptive style</button>}
-          <button class="copy-btn">copy JSON</button>
+          <button class="copy-btn" type="button">copy JSON</button>
         </span>
       </div>
-      <pre class="json pv-code pv-code-named active"><code set:html={v.html} /></pre>
-      {hasDescriptiveVariant && (
-        <pre class="json pv-code pv-code-descriptive" hidden><code set:html={v.descriptiveHtml} /></pre>
-      )}
+      {v.depths.map((d) => (
+        <>
+          <pre
+            class:list={['json', 'pv-code', { active: d.depth === DEFAULT_DEPTH }]}
+            data-depth={d.depth}
+            data-style="named"
+            hidden={d.depth !== DEFAULT_DEPTH}
+          ><code set:html={d.namedHtml} /></pre>
+          {hasDescriptiveVariant && (
+            <pre
+              class="json pv-code"
+              data-depth={d.depth}
+              data-style="descriptive"
+              hidden
+            ><code set:html={d.descriptiveHtml} /></pre>
+          )}
+        </>
+      ))}
       <ul class="notes" style="padding: 0 1.2rem 1rem;">
         {v.model.notes.slice(0, 2).map((n) => <li>{n}</li>)}
       </ul>
@@ -45,11 +74,11 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
 </div>
 
 <script>
-  // Tab switching + clipboard for every viewer on the page.
   document.querySelectorAll('.prompt-viewer').forEach((viewer) => {
     function activePre(panel) {
       return panel?.querySelector('.pv-code.active');
     }
+
     function warning(panel) {
       let el = panel?.querySelector('.json-warning');
       if (!el && panel) {
@@ -59,6 +88,17 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
       }
       return el;
     }
+
+    function showPre(panel) {
+      const depth = panel?.querySelector('.depth-select')?.value || 'production';
+      const style = panel?.dataset.styleMode || 'named';
+      panel?.querySelectorAll('.pv-code').forEach((pre) => {
+        const active = pre.dataset.depth === depth && pre.dataset.style === style;
+        pre.classList.toggle('active', active);
+        pre.toggleAttribute('hidden', !active);
+      });
+    }
+
     function validatePanel(panel) {
       const pre = activePre(panel);
       const warn = warning(panel);
@@ -67,12 +107,13 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
         pre?.classList.remove('json-invalid');
         if (warn) warn.textContent = '';
         return true;
-      } catch (error) {
+      } catch {
         pre?.classList.add('json-invalid');
         if (warn) warn.textContent = 'Invalid JSON. Fix the highlighted block before copying.';
         return false;
       }
     }
+
     const tabs = viewer.querySelectorAll('.pv-tab');
     tabs.forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -82,15 +123,15 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
         viewer.querySelector(`#${CSS.escape(tab.dataset.panel)}`)?.classList.add('active');
       });
     });
+
     viewer.querySelectorAll('.copy-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
         if (btn.classList.contains('style-toggle')) return;
-        // copy from the DOM so inline edits are included
         const panel = btn.closest('.pv-panel');
         if (!validatePanel(panel)) return;
         const pre = activePre(panel);
         await navigator.clipboard.writeText(pre?.textContent ?? '');
-        btn.textContent = 'copied ✓';
+        btn.textContent = 'copied';
         btn.classList.add('copied');
         setTimeout(() => {
           btn.textContent = 'copy JSON';
@@ -98,20 +139,26 @@ const uid = `pv-${Math.random().toString(36).slice(2, 8)}`;
         }, 1600);
       });
     });
+
     viewer.querySelectorAll('.style-toggle').forEach((btn) => {
       btn.addEventListener('click', () => {
         const panel = btn.closest('.pv-panel');
-        const named = panel?.querySelector('.pv-code-named');
-        const descriptive = panel?.querySelector('.pv-code-descriptive');
-        const isDescriptive = !descriptive?.hasAttribute('hidden');
-        named?.classList.toggle('active', isDescriptive);
-        descriptive?.classList.toggle('active', !isDescriptive);
-        if (named) named.toggleAttribute('hidden', !isDescriptive);
-        if (descriptive) descriptive.toggleAttribute('hidden', isDescriptive);
+        const isDescriptive = panel?.dataset.styleMode === 'descriptive';
+        if (panel) panel.dataset.styleMode = isDescriptive ? 'named' : 'descriptive';
         btn.textContent = isDescriptive ? 'descriptive style' : 'named style';
+        showPre(panel);
         validatePanel(panel);
       });
     });
+
+    viewer.querySelectorAll('.depth-select').forEach((select) => {
+      select.addEventListener('change', () => {
+        const panel = select.closest('.pv-panel');
+        showPre(panel);
+        validatePanel(panel);
+      });
+    });
+
     viewer.addEventListener('blur', (event) => {
       const target = event.target;
       if (target?.hasAttribute?.('contenteditable')) {
