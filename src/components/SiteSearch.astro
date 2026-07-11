@@ -1,0 +1,83 @@
+---
+// Client-side site search. Index is fetched lazily on first focus.
+---
+
+<div class="site-search" id="site-search">
+  <input
+    type="search"
+    id="search-input"
+    placeholder="search prompts…"
+    autocomplete="off"
+    aria-label="Search templates, guides and tools"
+  />
+  <div class="search-results" id="search-results" hidden></div>
+</div>
+
+<script>
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const results = document.getElementById('search-results')!;
+  const wrap = document.getElementById('site-search')!;
+  let index: { t: string; d: string; g: string; u: string; k: string }[] | null = null;
+  let loading = false;
+
+  async function ensureIndex() {
+    if (index || loading) return;
+    loading = true;
+    try {
+      index = await (await fetch('/search-index.json')).json();
+    } finally {
+      loading = false;
+    }
+  }
+
+  function score(entry: { t: string; d: string; g: string }, terms: string[]) {
+    const title = entry.t.toLowerCase();
+    const rest = `${entry.d} ${entry.g}`.toLowerCase();
+    let s = 0;
+    for (const term of terms) {
+      if (title.includes(term)) s += title.startsWith(term) ? 5 : 3;
+      else if (rest.includes(term)) s += 1;
+      else return 0; // every term must match somewhere
+    }
+    return s;
+  }
+
+  function render(query: string) {
+    if (!index) return;
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) {
+      results.hidden = true;
+      return;
+    }
+    const hits = index
+      .map((e) => ({ e, s: score(e, terms) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 8);
+    results.innerHTML = hits.length
+      ? hits
+          .map(
+            ({ e }) =>
+              `<a href="${e.u}"><b>${e.t}</b> <span class="k">${e.k}</span><br><span class="d">${e.d.slice(0, 90)}</span></a>`
+          )
+          .join('')
+      : '<p class="d" style="padding:0.6rem 0.9rem">No matches. Try the <a href="/convert/">converter</a>.</p>';
+    results.hidden = false;
+  }
+
+  input.addEventListener('focus', ensureIndex);
+  input.addEventListener('input', async () => {
+    await ensureIndex();
+    render(input.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target as Node)) results.hidden = true;
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') results.hidden = true;
+    if (e.key === 'Enter') {
+      const first = results.querySelector('a');
+      if (first) location.href = (first as HTMLAnchorElement).href;
+    }
+  });
+</script>

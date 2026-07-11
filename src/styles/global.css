@@ -294,6 +294,51 @@ pre.json {
   border-radius: 3px; padding: 0.05rem 0.35rem; font-size: 0.85em; color: var(--amber);
 }
 
+/* ---------- site search ---------- */
+
+.site-search { position: relative; margin-left: 0.8rem; }
+.site-search input {
+  width: 150px;
+  background: var(--bg-panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 99px;
+  padding: 0.3rem 0.85rem; font-family: var(--mono); font-size: 0.72rem;
+  transition: width 0.15s, border-color 0.15s;
+}
+.site-search input:focus { width: 220px; outline: none; border-color: var(--amber); }
+.search-results {
+  position: absolute; right: 0; top: 2.2rem; z-index: 100;
+  width: min(340px, 90vw); max-height: 60vh; overflow-y: auto;
+  background: var(--bg-raise); border: 1px solid var(--line-bright);
+  border-radius: 8px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.search-results a {
+  display: block; padding: 0.6rem 0.9rem; font-size: 0.78rem;
+  color: var(--ink); border-bottom: 1px dashed var(--line);
+}
+.search-results a:hover { background: var(--bg-panel); text-decoration: none; }
+.search-results a b { color: var(--amber); font-weight: 600; }
+.search-results .k {
+  font-size: 0.62rem; border: 1px solid var(--line-bright); border-radius: 99px;
+  padding: 0 0.45rem; color: var(--ink-faint); margin-left: 0.3rem;
+}
+.search-results .d { color: var(--ink-dim); font-size: 0.7rem; }
+
+/* ---------- use-case nav ---------- */
+
+.usecase-nav h2 { margin-bottom: 1rem; }
+.usecase-groups { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.usecase-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.usecase-chips a {
+  border: 1px solid var(--line-bright); border-radius: 99px;
+  padding: 0.4rem 1rem; font-size: 0.78rem; color: var(--ink);
+  background: var(--bg-raise);
+}
+.usecase-chips a:hover { border-color: var(--amber); color: var(--amber); text-decoration: none; }
+
+@media (max-width: 720px) {
+  .site-search { display: none; }
+}
+
 /* ---------- builder ---------- */
 
 .builder-controls {

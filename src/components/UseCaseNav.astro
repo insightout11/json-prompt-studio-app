@@ -1,0 +1,34 @@
+---
+// "What are you making?" — use-case-first entry points.
+// Ad formats deep-link into /ads/ anchors; broader intents route to sections.
+import { adTemplateItems } from '../lib/catalog.js';
+
+const formats = [...new Set(adTemplateItems.map((t) => t.format).filter(Boolean))];
+const anchor = (f) => `/ads/#${f.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
+
+const broad = [
+  { label: 'A viral video', href: '/viral/', hint: 'proven formats with fill-in variables' },
+  { label: 'A film-style scene', href: '/prompts/', hint: 'genres and director styles' },
+  { label: 'Something from scratch', href: '/builder/', hint: 'mix presets + your brand kit' },
+  { label: 'Not sure — I have an idea', href: '/convert/', hint: 'describe it, get a structure' },
+];
+---
+
+<section class="section usecase-nav" aria-label="What are you making?">
+  <p class="kicker">start here</p>
+  <h2>What are you making?</h2>
+  <div class="usecase-groups">
+    <div>
+      <p class="small dim" style="margin-bottom:0.5rem">An ad or UGC video</p>
+      <div class="usecase-chips">
+        {formats.map((f) => <a href={anchor(f)}>{f}</a>)}
+      </div>
+    </div>
+    <div>
+      <p class="small dim" style="margin-bottom:0.5rem">Something else</p>
+      <div class="usecase-chips">
+        {broad.map((b) => <a href={b.href} title={b.hint}>{b.label}</a>)}
+      </div>
+    </div>
+  </div>
+</section>

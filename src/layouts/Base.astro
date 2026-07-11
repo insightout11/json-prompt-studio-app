@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import SiteSearch from '../components/SiteSearch.astro';
 
 const {
   title,
@@ -46,6 +47,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <a href="/prompts/">Templates</a>
           <a href="/models/">Model guides</a>
         </nav>
+        <SiteSearch />
       </div>
     </header>
 

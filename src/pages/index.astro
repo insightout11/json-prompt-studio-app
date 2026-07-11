@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PromptViewer from '../components/PromptViewer.astro';
+import UseCaseNav from '../components/UseCaseNav.astro';
 import { adTemplateItems, categories, allTemplates, viralItems } from '../lib/catalog.js';
 import { MODEL_LIST } from '../lib/models.js';
 
@@ -33,6 +34,8 @@ const adFeatured = adTemplateItems.slice(0, 6);
       <div><b>$0</b> no signup, no paywall</div>
     </div>
   </section>
+
+  <UseCaseNav />
 
   <section class="section">
     <div class="section-head">

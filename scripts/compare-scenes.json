@@ -1,0 +1,9 @@
+{
+  "_comment": "Pilot scenes for the model-comparison gallery. Each entry references a flagship template by catalog address. Start small (3-5 scenes) per PLAN.md.",
+  "scenes": [
+    { "id": "product-hero", "category": "ads", "slug": "product-hero-reflection" },
+    { "id": "ugc-testimonial", "category": "ads", "slug": "ugc-testimonial-bathroom-mirror" },
+    { "id": "unboxing", "category": "ads", "slug": "unboxing-hook-tabletop" }
+  ],
+  "models": ["veo-3-1", "kling-3-0", "seedance-2-0", "wan-2-2"]
+}
