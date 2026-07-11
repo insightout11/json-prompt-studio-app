@@ -10,6 +10,7 @@ import { scenePresets } from '../data/scenePresetsData.js';
 import { actionPresets } from '../data/actionPresetsData.js';
 import { directorStyles } from '../data/directorStylesData.js';
 import { audioPresets } from '../data/audioPresetsData.js';
+import { adTemplates, adTemplateCategory } from '../data/adTemplates.js';
 import { assertKnownFieldKeys, isFullPrompt } from './format.js';
 
 export function slugify(str) {
@@ -58,9 +59,28 @@ assertKnownFieldKeys(
     ...Object.values(viralTemplates)
       .filter((item) => item.fixed_fields)
       .map((item) => ({ fields: item.fixed_fields })),
+    ...Object.values(adTemplates),
   ],
   'catalog data'
 );
+
+const adCategory = {
+  ...adTemplateCategory,
+  templates: Object.entries(adTemplates).map(([key, tpl]) => ({
+    slug: slugify(key),
+    categorySlug: adTemplateCategory.slug,
+    categoryName: adTemplateCategory.name,
+    name: tpl.name,
+    description: tpl.description,
+    useCase: tpl.useCase ?? '',
+    tags: tpl.tags ?? [],
+    format: tpl.format ?? '',
+    priority: tpl.priority ?? 0,
+    fields: tpl.fields,
+    isAdTemplate: true,
+  })),
+  addOns: [],
+};
 
 function presetCategories() {
   const out = [];
@@ -131,10 +151,11 @@ const templateCategories = Object.entries(templates).map(([key, cat]) => {
   };
 });
 
-export const categories = [...templateCategories, ...presetCategories()];
+export const categories = [adCategory, ...templateCategories, ...presetCategories()];
 
 export const allTemplates = categories.flatMap((c) => c.templates);
 export const allAddOns = categories.flatMap((c) => c.addOns ?? []);
+export const adTemplateItems = adCategory.templates;
 
 export function getCategory(slug) {
   return categories.find((c) => c.slug === slug);
